@@ -1,3 +1,4 @@
+// タイピングアニメーション付きのセリフ表示ボックス。クリックで即時表示完了する
 import { useEffect, useRef, useState } from 'react'
 import { cn } from '../../utils/cn'
 
@@ -8,6 +9,7 @@ interface DialogBoxProps {
   onComplete?: () => void
 }
 
+// タイピングアニメーションでセリフを表示し、クリックで即時完了するダイアログコンポーネント
 export function DialogBox({ text, speakerName, className, onComplete }: DialogBoxProps) {
   const [displayed, setDisplayed] = useState('')
   const [done, setDone] = useState(false)
@@ -30,6 +32,7 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
     return () => clearInterval(interval)
   }, [text])
 
+  // クリック時にアニメーションを即時完了しテキスト全文を表示する
   const handleClick = () => {
     if (!done) {
       setDisplayed(text)

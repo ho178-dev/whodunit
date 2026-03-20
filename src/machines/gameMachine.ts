@@ -1,3 +1,4 @@
+// ゲームフェーズ間の遷移ルール定義と遷移可否チェック関数
 import type { GamePhase } from '../types/game'
 import type { GameState } from '../stores/gameStore'
 
@@ -25,6 +26,7 @@ export const PHASE_TRANSITIONS: PhaseTransition[] = [
   { from: 'ending', to: 'title' },
 ]
 
+// 指定されたフェーズ遷移が現在のゲーム状態で許可されるか判定する
 export function canTransition(from: GamePhase, to: GamePhase, state: GameState): boolean {
   const transition = PHASE_TRANSITIONS.find((t) => t.from === from && t.to === to)
   if (!transition) return false

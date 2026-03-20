@@ -1,3 +1,4 @@
+// 容疑者の画像・名前・年齢・職業を表示する汎用カードコンポーネント
 import { useState } from 'react'
 import { cn } from '../../utils/cn'
 import { useCharacterAsset } from '../../hooks/useAsset'
@@ -10,6 +11,7 @@ interface CharacterCardProps {
   small?: boolean
 }
 
+// 容疑者の画像・名前・年齢・職業を表示するカード
 export function CharacterCard({ suspect, selected, onClick, small }: CharacterCardProps) {
   const imgSrc = useCharacterAsset(suspect.appearance_id)
   const [imgError, setImgError] = useState(false)

@@ -1,3 +1,4 @@
+// 部屋一覧を表示し、現在の調査対象部屋を選択するコンポーネント
 import { useGameStore } from '../../stores/gameStore'
 import { cn } from '../../utils/cn'
 

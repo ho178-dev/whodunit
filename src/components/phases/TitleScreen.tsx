@@ -1,15 +1,19 @@
+// ゲームのタイトル画面。固定シナリオかAI生成シナリオかを選択する起点
 import { useGameStore } from '../../stores/gameStore'
 import { FIXED_SCENARIO } from '../../constants/fixedScenario'
 
+// タイトル画面を表示し、固定シナリオかAI生成シナリオかの起動経路を分岐するコンポーネント
 export function TitleScreen() {
   const { setPhase, setScenario, setUseFixedScenario } = useGameStore()
 
+  // 固定シナリオをセットしてシナリオブリーフィングへ遷移する
   const startFixed = () => {
     setScenario(FIXED_SCENARIO)
     setUseFixedScenario(true)
     setPhase('scenario_briefing')
   }
 
+  // APIキー入力フェーズへ遷移してAI生成シナリオを開始する
   const startWithApi = () => {
     setPhase('api_key_input')
   }

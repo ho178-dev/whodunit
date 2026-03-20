@@ -1,3 +1,4 @@
+// 部屋内の証拠品一覧の表示と、証拠調査インタラクション（アクション消費・展開）を管理するコンポーネント
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { EvidenceCard } from '../shared/EvidenceCard'
@@ -7,6 +8,7 @@ interface EvidenceListProps {
   roomId: string
 }
 
+// 証拠品一覧を表示し、調査・展開インタラクションを制御するコンポーネント
 export function EvidenceList({ roomId }: EvidenceListProps) {
   const { scenario, discoveredEvidenceIds, discoverEvidence, consumeAction, actionsRemaining } =
     useGameStore()
@@ -21,6 +23,7 @@ export function EvidenceList({ roomId }: EvidenceListProps) {
     .map((id) => scenario.evidence.find((e) => e.id === id))
     .filter((e): e is Evidence => e !== undefined)
 
+  // アクションを消費して証拠を調査済みに登録する
   const handleExamine = (evidenceId: string) => {
     if (actionsRemaining > 0 && !discoveredEvidenceIds.includes(evidenceId)) {
       discoverEvidence(evidenceId)
@@ -28,6 +31,7 @@ export function EvidenceList({ roomId }: EvidenceListProps) {
     }
   }
 
+  // 証拠品の詳細展開・折りたたみを切り替える
   const handleToggleExpand = (evidenceId: string) => {
     setExpandedId((prev) => (prev === evidenceId ? null : evidenceId))
   }

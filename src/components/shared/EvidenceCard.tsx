@@ -1,3 +1,4 @@
+// 証拠品の画像・名前・説明を表示する汎用カードコンポーネント
 import { useState } from 'react'
 import { cn } from '../../utils/cn'
 import { useEvidenceAsset } from '../../hooks/useAsset'

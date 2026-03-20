@@ -1,3 +1,4 @@
+// 捜査中に収集したタイムライン・証拠品・証言を閲覧できるメモパネル
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 
@@ -7,6 +8,7 @@ interface InvestigationNotesProps {
   onClose: () => void
 }
 
+// タイムライン・証拠・証言をタブ切り替えで表示するメモパネルコンポーネント
 export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
   const { scenario, talkedSuspectIds, discoveredEvidenceIds, heardStatements } = useGameStore()
   const [tab, setTab] = useState<Tab>('timeline')
@@ -28,6 +30,7 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
     }))
     .filter((g) => g.statements.length > 0)
 
+  // 選択中タブかどうかに応じたスタイルクラスを返すユーティリティ関数
   const tabClass = (t: Tab) =>
     `px-4 py-2 text-xs font-display tracking-widest transition-colors ${
       tab === t

@@ -1,3 +1,4 @@
+// ゲームフェーズ・難易度・対決ログエントリの型定義
 export type GamePhase =
   | 'title'
   | 'api_key_input'

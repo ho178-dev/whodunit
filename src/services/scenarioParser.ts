@@ -1,3 +1,4 @@
+// AIが生成したシナリオJSONの構造・整合性をバリデーションするパーサー
 import type { Scenario } from '../types/scenario'
 import { MANSION_BACKGROUND_IDS } from '../constants/assetIds'
 import {
@@ -7,6 +8,7 @@ import {
   FAKE_EVIDENCE_COUNT,
 } from '../constants/gameConfig'
 
+// AIが生成したシナリオの構造・整合性をバリデーションしてScenario型を返す
 export function validateScenario(data: unknown): Scenario {
   const s = data as Scenario
 

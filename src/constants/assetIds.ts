@@ -1,3 +1,4 @@
+// ゲームで使用する各アセット（館背景・キャラクター・部屋・証拠）の有効IDを定数として管理
 import type {
   CharacterAppearanceId,
   RoomTypeId,

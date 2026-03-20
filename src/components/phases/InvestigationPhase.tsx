@@ -1,3 +1,4 @@
+// 捜査フェーズの画面。部屋選択・証拠収集・容疑者との会話・メモ閲覧を管理する
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'

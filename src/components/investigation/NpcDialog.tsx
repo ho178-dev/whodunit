@@ -1,3 +1,4 @@
+// 捜査フェーズで部屋内の容疑者に話しかけ、証言を順番に聞き出すコンポーネント
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { DialogBox } from '../shared/DialogBox'
@@ -8,6 +9,7 @@ interface NpcDialogProps {
   roomId: string
 }
 
+// 部屋内の容疑者一覧表示と会話進行を管理するコンポーネント
 export function NpcDialog({ roomId }: NpcDialogProps) {
   const { scenario, talkedSuspectIds, talkToSuspect, talkActionsRemaining, hearStatement } =
     useGameStore()
@@ -21,6 +23,7 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
     ? scenario.suspects.find((s) => s.id === selectedSuspect)
     : null
 
+  // 容疑者を選択し、挨拶を聴取してダイアログを開始する
   const handleTalk = (suspect: (typeof scenario.suspects)[number]) => {
     if (talkActionsRemaining <= 0) return
     setSelectedSuspect(suspect.id)
@@ -38,6 +41,7 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
     })
   }
 
+  // 次の証言を聴取してダイアログインデックスを進める
   const handleNext = () => {
     if (!currentSuspect) return
     const nextIndex = dialogIndex + 1

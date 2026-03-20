@@ -1,3 +1,4 @@
+// シナリオ概要の表示と難易度選択を行うブリーフィング画面
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
@@ -6,6 +7,7 @@ import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
 import { resolveMansionAsset, MANSION_DEFAULT_ASSET } from '../../services/assetResolver'
 import type { Difficulty } from '../../types/game'
 
+// シナリオ概要・難易度選択を表示し、捜査フェーズ開始を制御するコンポーネント
 export function ScenarioBriefing() {
   const { scenario, setPhase, setDifficulty, difficulty } = useGameStore()
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(difficulty)
@@ -13,6 +15,7 @@ export function ScenarioBriefing() {
 
   if (!scenario) return null
 
+  // 選択した難易度をストアに保存して捜査フェーズへ遷移する
   const handleStart = () => {
     setDifficulty(selectedDifficulty)
     setPhase('investigation')

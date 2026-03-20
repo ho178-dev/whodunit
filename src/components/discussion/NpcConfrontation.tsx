@@ -1,3 +1,4 @@
+// 議論フェーズで容疑者を選んで証拠を突きつけ、リアクションを表示するコンポーネント
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
 import { CharacterCard } from '../shared/CharacterCard'
@@ -9,6 +10,7 @@ interface NpcConfrontationProps {
   onSelectSuspect: (id: string) => void
 }
 
+// 容疑者選択と証拠突きつけ操作、リアクション表示を担うコンポーネント
 export function NpcConfrontation({
   selectedEvidenceId,
   selectedSuspectId,
@@ -31,6 +33,7 @@ export function NpcConfrontation({
           .slice(-1)[0]
       : null
 
+  // 選択中の容疑者に証拠を突きつけてリアクションを対話ログへ追加する
   const handleConfront = () => {
     if (!selectedSuspect || !selectedEvidence) return
     const reaction = selectedSuspect.evidence_reactions[selectedEvidence.id]

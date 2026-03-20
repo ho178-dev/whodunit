@@ -1,3 +1,4 @@
+// シナリオデータ全体の型定義（容疑者・部屋・証拠・シナリオ構造など）
 export type MansionBackgroundId =
   | 'mansion_gothic'
   | 'mansion_japanese'

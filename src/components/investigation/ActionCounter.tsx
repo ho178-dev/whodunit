@@ -1,3 +1,4 @@
+// 捜査フェーズの残り調査アクション数と会話アクション数をピップ形式で表示するコンポーネント
 import { MAX_VISIBLE_TALK_PIPS } from '../../constants/gameConfig'
 
 interface ActionCounterProps {

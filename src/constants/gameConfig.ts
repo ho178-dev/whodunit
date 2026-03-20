@@ -1,3 +1,4 @@
+// ゲーム設定定数。容疑者・部屋・証拠の数、難易度ごとのアクション数などを定義
 import type { Difficulty } from '../types/game'
 
 export const SUSPECT_COUNT = 6

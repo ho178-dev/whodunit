@@ -1,3 +1,4 @@
+// 議論フェーズの画面。証拠選択と容疑者への証拠突きつけを管理する
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { NpcConfrontation } from '../discussion/NpcConfrontation'

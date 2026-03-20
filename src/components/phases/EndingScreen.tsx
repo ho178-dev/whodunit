@@ -1,3 +1,4 @@
+// ゲーム終了画面。投票結果の正否と真相（犯人・動機・真実）を表示する
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
 

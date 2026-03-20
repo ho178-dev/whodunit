@@ -1,3 +1,4 @@
+// Gemini APIを使ってマーダーミステリーシナリオを生成するサービス
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Scenario } from '../types/scenario'
 import {
@@ -72,6 +73,7 @@ const PROMPT = `
 JSONのみを返してください。説明文は不要です。
 `
 
+// Gemini APIにプロンプトを送信してシナリオJSONを生成・バリデーションして返す
 export async function generateScenario(apiKey: string): Promise<Scenario> {
   const genAI = new GoogleGenerativeAI(apiKey)
   const model = genAI.getGenerativeModel({

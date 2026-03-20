@@ -1,3 +1,4 @@
+// 選択した部屋の背景画像・説明・証拠一覧・NPCダイアログを統合表示するコンポーネント
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
@@ -8,6 +9,7 @@ import { NpcDialog } from './NpcDialog'
 
 const DEFAULT_ROOM_IMG = '/assets/rooms/default.png'
 
+// 部屋タイプに応じた背景画像を表示し、読み込み失敗時はデフォルト画像にフォールバックするコンポーネント
 function RoomBackground({ typeId, name }: { typeId: RoomTypeId; name: string }) {
   const imgSrc = useRoomAsset(typeId)
   const [src, setSrc] = useState(imgSrc)
@@ -30,6 +32,7 @@ interface RoomViewProps {
   roomId: string
 }
 
+// 指定部屋の背景・説明・証拠一覧・NPCダイアログをまとめて表示するコンポーネント
 export function RoomView({ roomId }: RoomViewProps) {
   const { scenario } = useGameStore()
   if (!scenario) return null

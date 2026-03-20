@@ -1,3 +1,4 @@
+// 証拠突きつけ時のNPCリアクションとその感情状態を色付きで表示するコンポーネント
 import { cn } from '../../utils/cn'
 import type { NpcBehavior } from '../../types/scenario'
 
