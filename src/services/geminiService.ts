@@ -20,7 +20,6 @@ const PROMPT = `
 
 ## 制約
 - mansion_background_id: 館背景IDカタログからシナリオの舞台・雰囲気に最も合う1つを選択すること
-- detective: { name: string; description: string } を設定すること（探偵は容疑者の外部にいる第三者。容疑者のid/nameとは別人）
 - suspects: 6名固定（全員にユニークなidを付与）
 - rooms: 5室固定（各部屋に証拠IDを1-3個配置）
 - evidence: 12個固定（うちis_fake: trueが3個）

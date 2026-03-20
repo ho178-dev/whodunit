@@ -64,20 +64,6 @@ export function ScenarioBriefing() {
           </div>
         </GothicPanel>
 
-        {/* 探偵情報 */}
-        <GothicPanel title="あなたの役割" className="mb-4">
-          <div className="flex items-start gap-4">
-            <div className="flex-1">
-              <p className="text-gothic-gold font-display text-lg tracking-widest mb-1">
-                {scenario.detective.name}
-              </p>
-              <p className="text-gothic-muted font-serif text-sm leading-relaxed">
-                {scenario.detective.description}
-              </p>
-            </div>
-          </div>
-        </GothicPanel>
-
         {/* 難易度選択 */}
         <GothicPanel title="難易度" className="mb-6">
           <div className="grid grid-cols-3 gap-3">

@@ -13,10 +13,6 @@ export const FIXED_SCENARIO: Scenario = {
     cause_of_death: '致死量のアコニチン（トリカブト毒）による中毒死',
   },
   murder_time_range: '22:00〜01:00（推定）',
-  detective: {
-    name: '桐嶋 蓮',
-    description: '依頼を受けてこの孤島に赴いた私立探偵。冷静な観察眼と論理的な推理で真相に迫る。',
-  },
   murderer_id: 'shiraishi_makoto',
   motive: '黒崎が書き換えた遺言書を元に戻すため。自分への遺産相続分が削除されていた。',
   truth:

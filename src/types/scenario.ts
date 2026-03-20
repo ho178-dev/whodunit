@@ -104,10 +104,6 @@ export interface Scenario {
   setting: string
   murder_time_range: string
   mansion_background_id: MansionBackgroundId
-  detective: {
-    name: string
-    description: string
-  }
   victim: {
     name: string
     appearance_id: CharacterAppearanceId
