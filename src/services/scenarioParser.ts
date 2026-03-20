@@ -1,0 +1,32 @@
+import type { Scenario } from '../types/scenario'
+import { SUSPECT_COUNT, ROOM_COUNT, EVIDENCE_COUNT, FAKE_EVIDENCE_COUNT } from '../constants/gameConfig'
+
+export function validateScenario(data: unknown): Scenario {
+  const s = data as Scenario
+
+  if (!s.title || !s.synopsis || !s.setting) throw new Error('シナリオの基本情報が不正です')
+  if (!s.victim?.name) throw new Error('被害者情報が不正です')
+  if (!s.murderer_id) throw new Error('犯人IDが設定されていません')
+  if (!Array.isArray(s.suspects) || s.suspects.length !== SUSPECT_COUNT)
+    throw new Error(`容疑者は${SUSPECT_COUNT}名必要です（現在: ${s.suspects?.length ?? 0}名）`)
+  if (!Array.isArray(s.rooms) || s.rooms.length !== ROOM_COUNT)
+    throw new Error(`部屋は${ROOM_COUNT}室必要です`)
+  if (!Array.isArray(s.evidence) || s.evidence.length !== EVIDENCE_COUNT)
+    throw new Error(`証拠は${EVIDENCE_COUNT}個必要です`)
+
+  const fakeCount = s.evidence.filter((e) => e.is_fake).length
+  if (fakeCount !== FAKE_EVIDENCE_COUNT)
+    throw new Error(`偽証拠は${FAKE_EVIDENCE_COUNT}個必要です`)
+
+  const murdererExists = s.suspects.some((sus) => sus.id === s.murderer_id)
+  if (!murdererExists) throw new Error('murderer_idが容疑者リストに存在しません')
+
+  const evidenceIds = new Set(s.evidence.map((e) => e.id))
+  for (const room of s.rooms) {
+    for (const eid of room.evidence_ids) {
+      if (!evidenceIds.has(eid)) throw new Error(`部屋 ${room.id} の証拠ID ${eid} が証拠リストに存在しません`)
+    }
+  }
+
+  return s
+}

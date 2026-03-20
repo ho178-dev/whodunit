@@ -1,0 +1,52 @@
+import { useGameStore } from '../../stores/gameStore'
+import { GothicPanel } from '../layout/GothicPanel'
+import { RoomSelector } from '../investigation/RoomSelector'
+import { RoomView } from '../investigation/RoomView'
+import { ActionCounter } from '../investigation/ActionCounter'
+
+export function InvestigationPhase() {
+  const { scenario, currentRoomId, actionsRemaining, setPhase, discoveredEvidenceIds } = useGameStore()
+
+  if (!scenario) return null
+
+  const canProceed = discoveredEvidenceIds.length > 0 || actionsRemaining === 0
+
+  return (
+    <div className="min-h-screen px-4 py-8">
+      <div className="max-w-5xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <h1 className="font-display text-2xl text-gothic-gold tracking-widest">探索フェーズ</h1>
+          <ActionCounter remaining={actionsRemaining} total={8} />
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="lg:col-span-1">
+            <RoomSelector />
+          </div>
+          <div className="lg:col-span-2">
+            {currentRoomId ? (
+              <RoomView roomId={currentRoomId} />
+            ) : (
+              <GothicPanel>
+                <p className="text-gothic-muted font-serif text-center py-8">
+                  部屋を選択して調査を開始してください
+                </p>
+              </GothicPanel>
+            )}
+          </div>
+        </div>
+
+        {canProceed && (
+          <div className="mt-6 flex justify-center">
+            <button
+              onClick={() => setPhase('discussion')}
+              className="border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-4 px-12 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
+            >
+              議論フェーズへ進む
+            </button>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
