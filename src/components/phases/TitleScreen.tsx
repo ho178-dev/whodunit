@@ -23,7 +23,9 @@ export function TitleScreen() {
         {/* ロゴ */}
         <div className="mb-2">
           <div className="inline-block border border-gothic-gold/50 px-8 py-1">
-            <span className="font-display text-gothic-muted text-xs tracking-[0.5em]">MURDER MYSTERY</span>
+            <span className="font-display text-gothic-muted text-xs tracking-[0.5em]">
+              MURDER MYSTERY
+            </span>
           </div>
         </div>
 
@@ -55,9 +57,7 @@ export function TitleScreen() {
           </button>
         </div>
 
-        <p className="mt-8 text-gothic-muted text-xs font-serif">
-          一人用マーダーミステリー
-        </p>
+        <p className="mt-8 text-gothic-muted text-xs font-serif">一人用マーダーミステリー</p>
       </div>
     </div>
   )

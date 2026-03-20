@@ -41,17 +41,24 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
         {/* ヘッダー */}
         <div className="flex items-center justify-between px-4 py-3 border-b border-gothic-border">
           <h2 className="font-display text-gothic-gold tracking-widest text-sm">操作メモ</h2>
-          <button onClick={onClose} className="text-gothic-muted hover:text-gothic-text font-serif text-lg leading-none">×</button>
+          <button
+            onClick={onClose}
+            className="text-gothic-muted hover:text-gothic-text font-serif text-lg leading-none"
+          >
+            ×
+          </button>
         </div>
 
         {/* 被害者情報（常時表示） */}
         <div className="px-4 py-3 border-b border-gothic-border bg-stone-900/50 text-xs font-serif space-y-1">
           <p className="text-gothic-gold font-display tracking-widest text-xs mb-1">被害者</p>
           <p className="text-gothic-text">
-            <span className="text-gothic-muted">氏名：</span>{scenario.victim.name}
+            <span className="text-gothic-muted">氏名：</span>
+            {scenario.victim.name}
           </p>
           <p className="text-gothic-text">
-            <span className="text-gothic-muted">死因：</span>{scenario.victim.cause_of_death}
+            <span className="text-gothic-muted">死因：</span>
+            {scenario.victim.cause_of_death}
           </p>
           <p className="text-gothic-text">
             <span className="text-gothic-muted">推定犯行時刻：</span>
@@ -74,7 +81,6 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
 
         {/* タブコンテンツ */}
         <div className="flex-1 overflow-y-auto p-4 space-y-4">
-
           {/* タイムライン */}
           {tab === 'timeline' && (
             <div>
@@ -86,13 +92,17 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
                 <div className="space-y-4">
                   {talkedSuspects.map((suspect) => {
                     const totalStatements = 1 + suspect.investigation_dialog.statements.length // greeting + statements
-                    const heardCount = heardStatements.filter((h) => h.suspectId === suspect.id).length
+                    const heardCount = heardStatements.filter(
+                      (h) => h.suspectId === suspect.id
+                    ).length
                     const allHeard = heardCount >= totalStatements
                     const remaining = totalStatements - heardCount
                     return (
                       <div key={suspect.id} className="border border-gothic-border p-3">
                         <div className="flex items-center gap-2 mb-2">
-                          <span className="text-gothic-gold font-display text-xs tracking-widest">{suspect.name}</span>
+                          <span className="text-gothic-gold font-display text-xs tracking-widest">
+                            {suspect.name}
+                          </span>
                           <span className="text-gothic-muted text-xs font-serif">の証言</span>
                         </div>
                         {allHeard ? (
@@ -124,15 +134,25 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
                   {discoveredEvidence.map((evidence) => (
                     <div key={evidence.id} className="border border-gothic-border p-3">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="text-gothic-gold font-display text-xs tracking-widest">{evidence.name}</span>
+                        <span className="text-gothic-gold font-display text-xs tracking-widest">
+                          {evidence.name}
+                        </span>
                         {evidence.is_fake && (
-                          <span className="text-xs text-gothic-muted font-serif border border-gothic-muted px-1">要検討</span>
+                          <span className="text-xs text-gothic-muted font-serif border border-gothic-muted px-1">
+                            要検討
+                          </span>
                         )}
                       </div>
-                      <p className="text-gothic-text font-serif text-xs mb-2">{evidence.description}</p>
+                      <p className="text-gothic-text font-serif text-xs mb-2">
+                        {evidence.description}
+                      </p>
                       <div className="border-t border-gothic-border pt-2">
-                        <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">調査メモ</p>
-                        <p className="text-gothic-muted font-serif text-xs leading-relaxed">{evidence.examination_notes}</p>
+                        <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">
+                          調査メモ
+                        </p>
+                        <p className="text-gothic-muted font-serif text-xs leading-relaxed">
+                          {evidence.examination_notes}
+                        </p>
                       </div>
                     </div>
                   ))}
@@ -152,14 +172,18 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
                 <div className="space-y-4">
                   {testimonyBySuspect.map(({ suspect, statements }) => (
                     <div key={suspect.id} className="border border-gothic-border p-3">
-                      <p className="text-gothic-gold font-display text-xs tracking-widest mb-2">{suspect.name}</p>
+                      <p className="text-gothic-gold font-display text-xs tracking-widest mb-2">
+                        {suspect.name}
+                      </p>
                       <div className="space-y-2">
                         {statements.map((s) => (
                           <div key={s.index} className="flex gap-2">
                             <span className="text-gothic-muted text-xs font-serif shrink-0">
                               {s.index === -1 ? '挨拶' : `証言${s.index + 1}`}
                             </span>
-                            <p className="text-gothic-text font-serif text-xs leading-relaxed">{s.text}</p>
+                            <p className="text-gothic-text font-serif text-xs leading-relaxed">
+                              {s.text}
+                            </p>
                           </div>
                         ))}
                       </div>
@@ -169,7 +193,6 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
               )}
             </div>
           )}
-
         </div>
       </div>
     </div>

@@ -7,7 +7,12 @@ interface ActionCounterProps {
   talkActionsTotal: number
 }
 
-export function ActionCounter({ actionsRemaining, actionsTotal, talkActionsRemaining, talkActionsTotal }: ActionCounterProps) {
+export function ActionCounter({
+  actionsRemaining,
+  actionsTotal,
+  talkActionsRemaining,
+  talkActionsTotal,
+}: ActionCounterProps) {
   return (
     <div className="flex flex-col gap-2 items-end">
       <div className="flex items-center gap-2">
@@ -20,7 +25,9 @@ export function ActionCounter({ actionsRemaining, actionsTotal, talkActionsRemai
             />
           ))}
         </div>
-        <span className="text-gothic-gold font-display text-sm">{actionsRemaining}/{actionsTotal}</span>
+        <span className="text-gothic-gold font-display text-sm">
+          {actionsRemaining}/{actionsTotal}
+        </span>
       </div>
       <div className="flex items-center gap-2">
         <span className="text-gothic-muted font-serif text-xs">会話</span>
@@ -32,7 +39,9 @@ export function ActionCounter({ actionsRemaining, actionsTotal, talkActionsRemai
             />
           ))}
         </div>
-        <span className="text-gothic-accent font-display text-sm">{talkActionsRemaining}/{talkActionsTotal}</span>
+        <span className="text-gothic-accent font-display text-sm">
+          {talkActionsRemaining}/{talkActionsTotal}
+        </span>
       </div>
     </div>
   )

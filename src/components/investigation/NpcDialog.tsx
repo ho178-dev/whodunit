@@ -9,20 +9,19 @@ interface NpcDialogProps {
 }
 
 export function NpcDialog({ roomId }: NpcDialogProps) {
-  const {
-    scenario,
-    talkedSuspectIds, talkToSuspect,
-    talkActionsRemaining, hearStatement,
-  } = useGameStore()
+  const { scenario, talkedSuspectIds, talkToSuspect, talkActionsRemaining, hearStatement } =
+    useGameStore()
   const [selectedSuspect, setSelectedSuspect] = useState<string | null>(null)
   const [dialogIndex, setDialogIndex] = useState(0)
 
   if (!scenario) return null
 
   const suspectsHere = scenario.suspects.filter((s) => s.room_id === roomId)
-  const currentSuspect = selectedSuspect ? scenario.suspects.find((s) => s.id === selectedSuspect) : null
+  const currentSuspect = selectedSuspect
+    ? scenario.suspects.find((s) => s.id === selectedSuspect)
+    : null
 
-  const handleTalk = (suspect: typeof scenario.suspects[number]) => {
+  const handleTalk = (suspect: (typeof scenario.suspects)[number]) => {
     if (talkActionsRemaining <= 0) return
     setSelectedSuspect(suspect.id)
     setDialogIndex(0)
@@ -31,13 +30,18 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
       talkToSuspect(suspect.id)
     }
     // 挨拶が未聴なら消費・記録（既聴なら no-op）
-    hearStatement({ suspectId: suspect.id, suspectName: suspect.name, index: -1, text: suspect.investigation_dialog.greeting })
+    hearStatement({
+      suspectId: suspect.id,
+      suspectName: suspect.name,
+      index: -1,
+      text: suspect.investigation_dialog.greeting,
+    })
   }
 
   const handleNext = () => {
     if (!currentSuspect) return
     const nextIndex = dialogIndex + 1
-    const statementIndex = nextIndex - 1  // statements配列のインデックス（dialogIndex 0 = 挨拶）
+    const statementIndex = nextIndex - 1 // statements配列のインデックス（dialogIndex 0 = 挨拶）
     if (statementIndex >= currentSuspect.investigation_dialog.statements.length) return
     if (talkActionsRemaining <= 0) return
 
@@ -54,7 +58,8 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
   const currentDialog = currentSuspect
     ? dialogIndex === 0
       ? currentSuspect.investigation_dialog.greeting
-      : currentSuspect.investigation_dialog.statements[dialogIndex - 1] ?? currentSuspect.investigation_dialog.greeting  // dialogIndex 1以上 = statements[dialogIndex-1]
+      : (currentSuspect.investigation_dialog.statements[dialogIndex - 1] ??
+        currentSuspect.investigation_dialog.greeting) // dialogIndex 1以上 = statements[dialogIndex-1]
     : null
 
   const canTalkMore = talkActionsRemaining > 0
@@ -64,7 +69,9 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
 
   return (
     <div>
-      <h4 className="font-display text-gothic-muted text-xs tracking-widest mb-3">この場所にいる人物</h4>
+      <h4 className="font-display text-gothic-muted text-xs tracking-widest mb-3">
+        この場所にいる人物
+      </h4>
       {suspectsHere.length === 0 ? (
         <p className="text-gothic-muted font-serif text-sm">この場所には誰もいない</p>
       ) : (
@@ -76,7 +83,9 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
               disabled={!canTalkMore && !talkedSuspectIds.includes(suspect.id)}
               className={cn(
                 'text-left border transition-all disabled:opacity-40',
-                suspect.id === selectedSuspect ? 'border-gothic-gold' : 'border-gothic-border hover:border-gothic-accent'
+                suspect.id === selectedSuspect
+                  ? 'border-gothic-gold'
+                  : 'border-gothic-border hover:border-gothic-accent'
               )}
             >
               <CharacterCard suspect={suspect} small />
@@ -89,17 +98,15 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
         <div>
           <div className="mb-3 p-3 bg-stone-900 border border-gothic-border text-xs font-serif space-y-1">
             <p className="text-gothic-muted">
-              <span className="text-gothic-gold">関係：</span>{currentSuspect.relationship_to_victim}
+              <span className="text-gothic-gold">関係：</span>
+              {currentSuspect.relationship_to_victim}
             </p>
             <p className="text-gothic-muted">
-              <span className="text-gothic-gold">アリバイ：</span>{currentSuspect.alibi}
+              <span className="text-gothic-gold">アリバイ：</span>
+              {currentSuspect.alibi}
             </p>
           </div>
-          <DialogBox
-            text={currentDialog}
-            speakerName={currentSuspect.name}
-            onComplete={() => {}}
-          />
+          <DialogBox text={currentDialog} speakerName={currentSuspect.name} onComplete={() => {}} />
           {hasMoreDialog && (
             <button
               onClick={handleNext}

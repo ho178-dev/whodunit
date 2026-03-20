@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { cn } from '../../utils/cn'
 
 interface DialogBoxProps {
@@ -11,6 +11,8 @@ interface DialogBoxProps {
 export function DialogBox({ text, speakerName, className, onComplete }: DialogBoxProps) {
   const [displayed, setDisplayed] = useState('')
   const [done, setDone] = useState(false)
+  const onCompleteRef = useRef(onComplete)
+  onCompleteRef.current = onComplete
 
   useEffect(() => {
     setDisplayed('')
@@ -22,7 +24,7 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
       if (i >= text.length) {
         clearInterval(interval)
         setDone(true)
-        onComplete?.()
+        onCompleteRef.current?.()
       }
     }, 30)
     return () => clearInterval(interval)
@@ -38,10 +40,7 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
 
   return (
     <div
-      className={cn(
-        'border border-gothic-border bg-gothic-panel/90 p-4 cursor-pointer',
-        className
-      )}
+      className={cn('border border-gothic-border bg-gothic-panel/90 p-4 cursor-pointer', className)}
       onClick={handleClick}
     >
       {speakerName && (

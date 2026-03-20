@@ -52,10 +52,14 @@ export function TutorialOverlay({ onClose }: TutorialOverlayProps) {
       <div className="w-full max-w-md mx-4 border border-gothic-gold bg-gothic-panel p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-display text-gothic-gold tracking-widest text-lg">遊び方</h2>
-          <span className="text-gothic-muted text-xs font-serif">{step + 1} / {STEPS.length}</span>
+          <span className="text-gothic-muted text-xs font-serif">
+            {step + 1} / {STEPS.length}
+          </span>
         </div>
 
-        <h3 className="font-display text-gothic-accent tracking-wider text-sm mb-3">{current.title}</h3>
+        <h3 className="font-display text-gothic-accent tracking-wider text-sm mb-3">
+          {current.title}
+        </h3>
         <p className="text-gothic-text font-serif text-sm leading-relaxed whitespace-pre-line mb-6">
           {current.content}
         </p>

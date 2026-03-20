@@ -1,5 +1,10 @@
 import type { Scenario } from '../types/scenario'
-import { SUSPECT_COUNT, ROOM_COUNT, EVIDENCE_COUNT, FAKE_EVIDENCE_COUNT } from '../constants/gameConfig'
+import {
+  SUSPECT_COUNT,
+  ROOM_COUNT,
+  EVIDENCE_COUNT,
+  FAKE_EVIDENCE_COUNT,
+} from '../constants/gameConfig'
 
 export function validateScenario(data: unknown): Scenario {
   const s = data as Scenario
@@ -17,8 +22,7 @@ export function validateScenario(data: unknown): Scenario {
     throw new Error(`証拠は${EVIDENCE_COUNT}個必要です`)
 
   const fakeCount = s.evidence.filter((e) => e.is_fake).length
-  if (fakeCount !== FAKE_EVIDENCE_COUNT)
-    throw new Error(`偽証拠は${FAKE_EVIDENCE_COUNT}個必要です`)
+  if (fakeCount !== FAKE_EVIDENCE_COUNT) throw new Error(`偽証拠は${FAKE_EVIDENCE_COUNT}個必要です`)
 
   const murdererExists = s.suspects.some((sus) => sus.id === s.murderer_id)
   if (!murdererExists) throw new Error('murderer_idが容疑者リストに存在しません')
@@ -26,18 +30,23 @@ export function validateScenario(data: unknown): Scenario {
   const roomIds = new Set(s.rooms.map((r) => r.id))
   for (const suspect of s.suspects) {
     if (!suspect.room_id) throw new Error(`容疑者 ${suspect.id} にroom_idが設定されていません`)
-    if (!roomIds.has(suspect.room_id)) throw new Error(`容疑者 ${suspect.id} のroom_id "${suspect.room_id}" が部屋リストに存在しません`)
+    if (!roomIds.has(suspect.room_id))
+      throw new Error(
+        `容疑者 ${suspect.id} のroom_id "${suspect.room_id}" が部屋リストに存在しません`
+      )
     if (!suspect.timeline) throw new Error(`容疑者 ${suspect.id} にtimelineが設定されていません`)
   }
 
   for (const evidence of s.evidence) {
-    if (!evidence.examination_notes) throw new Error(`証拠 ${evidence.id} にexamination_notesが設定されていません`)
+    if (!evidence.examination_notes)
+      throw new Error(`証拠 ${evidence.id} にexamination_notesが設定されていません`)
   }
 
   const evidenceIds = new Set(s.evidence.map((e) => e.id))
   for (const room of s.rooms) {
     for (const eid of room.evidence_ids) {
-      if (!evidenceIds.has(eid)) throw new Error(`部屋 ${room.id} の証拠ID ${eid} が証拠リストに存在しません`)
+      if (!evidenceIds.has(eid))
+        throw new Error(`部屋 ${room.id} の証拠ID ${eid} が証拠リストに存在しません`)
     }
   }
 

@@ -6,7 +6,7 @@ import { DIFFICULTY_CONFIG } from '../constants/gameConfig'
 export interface HeardStatement {
   suspectId: string
   suspectName: string
-  index: number  // -1 = greeting, 0以上 = statements[index]
+  index: number // -1 = greeting, 0以上 = statements[index]
   text: string
 }
 
@@ -29,7 +29,7 @@ export interface GameState {
 
   // Actions
   setPhase: (phase: GamePhase) => void
-  setApiKey: (key: string) => void
+  setApiKey: (key: string | null) => void
   setUseFixedScenario: (use: boolean) => void
   setScenario: (scenario: Scenario) => void
   setIsGenerating: (generating: boolean) => void
@@ -72,11 +72,12 @@ export const useGameStore = create<GameState>((set) => ({
   setScenario: (scenario) => set({ scenario }),
   setIsGenerating: (generating) => set({ isGenerating: generating }),
   setGenerationError: (error) => set({ generationError: error }),
-  setDifficulty: (difficulty) => set({
-    difficulty,
-    actionsRemaining: DIFFICULTY_CONFIG[difficulty].actions,
-    talkActionsRemaining: DIFFICULTY_CONFIG[difficulty].talkActions,
-  }),
+  setDifficulty: (difficulty) =>
+    set({
+      difficulty,
+      actionsRemaining: DIFFICULTY_CONFIG[difficulty].actions,
+      talkActionsRemaining: DIFFICULTY_CONFIG[difficulty].talkActions,
+    }),
   setCurrentRoomId: (id) => set({ currentRoomId: id }),
   discoverEvidence: (evidenceId) =>
     set((state) => ({

@@ -1,6 +1,10 @@
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Scenario } from '../types/scenario'
-import { CHARACTER_APPEARANCE_IDS, ROOM_TYPE_IDS, EVIDENCE_CATEGORY_IDS } from '../constants/assetIds'
+import {
+  CHARACTER_APPEARANCE_IDS,
+  ROOM_TYPE_IDS,
+  EVIDENCE_CATEGORY_IDS,
+} from '../constants/assetIds'
 import { validateScenario } from './scenarioParser'
 
 const PROMPT = `

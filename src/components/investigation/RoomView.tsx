@@ -18,7 +18,9 @@ function RoomBackground({ typeId, name }: { typeId: RoomTypeId; name: string }) 
         src={src}
         alt={name}
         className="w-full h-full object-cover opacity-60"
-        onError={() => { if (src !== DEFAULT_ROOM_IMG) setSrc(DEFAULT_ROOM_IMG) }}
+        onError={() => {
+          if (src !== DEFAULT_ROOM_IMG) setSrc(DEFAULT_ROOM_IMG)
+        }}
       />
     </div>
   )

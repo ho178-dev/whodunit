@@ -18,7 +18,8 @@ export function ApiKeyInput() {
     <div className="min-h-screen flex items-center justify-center px-4">
       <GothicPanel title="GEMINI API KEY" className="w-full max-w-md">
         <p className="text-gothic-muted font-serif text-sm mb-6">
-          Google AI StudioのAPIキーを入力してください。キーはこのセッション中のみ使用され、保存されません。
+          Google AI
+          StudioのAPIキーを入力してください。キーはこのセッション中のみ使用され、保存されません。
         </p>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input

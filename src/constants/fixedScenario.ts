@@ -2,7 +2,8 @@ import type { Scenario } from '../types/scenario'
 
 export const FIXED_SCENARIO: Scenario = {
   title: '黄昏の晩餐会',
-  synopsis: '孤島の洋館で開催された晩餐会。翌朝、資産家の黒崎源一郎が書斎で冷たくなって発見された。毒殺と思われる。招待された6名の中に犯人がいる。',
+  synopsis:
+    '孤島の洋館で開催された晩餐会。翌朝、資産家の黒崎源一郎が書斎で冷たくなって発見された。毒殺と思われる。招待された6名の中に犯人がいる。',
   setting: '孤島に建つゴシック様式の洋館。外は嵐で孤立無援の状況。',
   victim: {
     name: '黒崎源一郎',
@@ -17,7 +18,8 @@ export const FIXED_SCENARIO: Scenario = {
   },
   murderer_id: 'shiraishi_makoto',
   motive: '黒崎が書き換えた遺言書を元に戻すため。自分への遺産相続分が削除されていた。',
-  truth: '白石誠は黒崎の遠縁で、遺言書に多額の遺産を相続する予定だった。しかし黒崎が密かに遺言書を書き換え、白石への相続分を全て削除していた。白石は書斎の金庫に保管された遺言書の写しを見て事実を知り、晩餐会当日にワイングラスにトリカブト毒を混入した。庭園で採取した毒草を事前に精製し、キッチンで機会を伺って実行した。',
+  truth:
+    '白石誠は黒崎の遠縁で、遺言書に多額の遺産を相続する予定だった。しかし黒崎が密かに遺言書を書き換え、白石への相続分を全て削除していた。白石は書斎の金庫に保管された遺言書の写しを見て事実を知り、晩餐会当日にワイングラスにトリカブト毒を混入した。庭園で採取した毒草を事前に精製し、キッチンで機会を伺って実行した。',
   suspects: [
     {
       id: 'shiraishi_makoto',
@@ -29,9 +31,11 @@ export const FIXED_SCENARIO: Scenario = {
       personality: '計算高く冷静。感情を表に出さない。',
       alibi: '晩餐会の間はずっとダイニングにいたと主張。',
       secret: '多額の借金を抱えており、遺産が唯一の頼みだった。',
-      relationship_to_victim: '遠縁の甥。遺言書で多額の遺産を相続予定だった（本人はそう思っていた）。',
+      relationship_to_victim:
+        '遠縁の甥。遺言書で多額の遺産を相続予定だった（本人はそう思っていた）。',
       room_id: 'room_library',
-      timeline: '20:00 晩餐会開始 → 終始ダイニングで他の参加者と歓談 → 22:30頃 自室へ退室 → 就寝（深夜は部屋を出ていないと主張）',
+      timeline:
+        '20:00 晩餐会開始 → 終始ダイニングで他の参加者と歓談 → 22:30頃 自室へ退室 → 就寝（深夜は部屋を出ていないと主張）',
       investigation_dialog: {
         greeting: '…やあ、何か用かな。私はただの参加者に過ぎないよ。',
         statements: [
@@ -43,18 +47,42 @@ export const FIXED_SCENARIO: Scenario = {
         ],
       },
       evidence_reactions: {
-        poison_bottle: { reaction: '…それは私のものじゃない。誰かが嵌めようとしているんだろう。', behavior: 'evasive' },
-        will_document: { reaction: 'その遺言書は…偽物だ。本物はもっと違う内容のはずだ。', behavior: 'nervous' },
+        poison_bottle: {
+          reaction: '…それは私のものじゃない。誰かが嵌めようとしているんだろう。',
+          behavior: 'evasive',
+        },
+        will_document: {
+          reaction: 'その遺言書は…偽物だ。本物はもっと違う内容のはずだ。',
+          behavior: 'nervous',
+        },
         herb_fragment: { reaction: '庭の植物？私は植物学など知らない。', behavior: 'nervous' },
-        wine_glass: { reaction: '…ワイングラスが何だというんだ。みんな使っていたじゃないか。', behavior: 'angry' },
-        muddy_shoes: { reaction: '泥…？これは関係ない。庭には誰でも出られる。', behavior: 'evasive' },
+        wine_glass: {
+          reaction: '…ワイングラスが何だというんだ。みんな使っていたじゃないか。',
+          behavior: 'angry',
+        },
+        muddy_shoes: {
+          reaction: '泥…？これは関係ない。庭には誰でも出られる。',
+          behavior: 'evasive',
+        },
         note_paper: { reaction: 'そのメモは私には関係ない。', behavior: 'calm' },
         torn_letter: { reaction: 'その手紙は見たことがない。', behavior: 'calm' },
-        kitchen_knife: { reaction: 'これは普通の包丁だろう。料理人なら誰でも使う。', behavior: 'calm' },
-        photo_garden: { reaction: '写真？不鮮明で誰だかわからないじゃないか。', behavior: 'nervous' },
+        kitchen_knife: {
+          reaction: 'これは普通の包丁だろう。料理人なら誰でも使う。',
+          behavior: 'calm',
+        },
+        photo_garden: {
+          reaction: '写真？不鮮明で誰だかわからないじゃないか。',
+          behavior: 'nervous',
+        },
         safe_key: { reaction: '金庫の鍵…それがどうしたんだ。', behavior: 'angry' },
-        handkerchief: { reaction: 'ハンカチか。同じイニシャルの人間が他にもいるかもしれない。', behavior: 'evasive' },
-        diary_entry: { reaction: '日記に何が書いてある…？見せてもらえないか。', behavior: 'nervous' },
+        handkerchief: {
+          reaction: 'ハンカチか。同じイニシャルの人間が他にもいるかもしれない。',
+          behavior: 'evasive',
+        },
+        diary_entry: {
+          reaction: '日記に何が書いてある…？見せてもらえないか。',
+          behavior: 'nervous',
+        },
       },
     },
     {
@@ -82,16 +110,31 @@ export const FIXED_SCENARIO: Scenario = {
       },
       evidence_reactions: {
         poison_bottle: { reaction: 'これは…毒？こんなものが館に！？', behavior: 'sad' },
-        will_document: { reaction: '遺言書！これって叔父の…内容が違う。書き換えられてる！', behavior: 'angry' },
-        herb_fragment: { reaction: 'これって…トリカブトの葉じゃないの？庭にあったの？', behavior: 'nervous' },
-        wine_glass: { reaction: 'ワイングラスに毒が？信じられない…誰がこんな事を。', behavior: 'sad' },
+        will_document: {
+          reaction: '遺言書！これって叔父の…内容が違う。書き換えられてる！',
+          behavior: 'angry',
+        },
+        herb_fragment: {
+          reaction: 'これって…トリカブトの葉じゃないの？庭にあったの？',
+          behavior: 'nervous',
+        },
+        wine_glass: {
+          reaction: 'ワイングラスに毒が？信じられない…誰がこんな事を。',
+          behavior: 'sad',
+        },
         muddy_shoes: { reaction: '泥のついた靴？昨晩誰かが外に出たのね。', behavior: 'calm' },
         note_paper: { reaction: 'このメモの字…見覚えがある気がする。', behavior: 'nervous' },
         torn_letter: { reaction: '破られた手紙。誰かが証拠を隠滅しようとした？', behavior: 'calm' },
         kitchen_knife: { reaction: '包丁…でも叔父は毒で亡くなったんでしょ？', behavior: 'calm' },
-        photo_garden: { reaction: 'この写真、庭で何かを採取している人がいる。誰なの？', behavior: 'nervous' },
+        photo_garden: {
+          reaction: 'この写真、庭で何かを採取している人がいる。誰なの？',
+          behavior: 'nervous',
+        },
         safe_key: { reaction: '叔父の金庫の鍵！これは書斎にあったはずよ。', behavior: 'angry' },
-        handkerchief: { reaction: 'このハンカチは…白石さんのイニシャルじゃない？', behavior: 'nervous' },
+        handkerchief: {
+          reaction: 'このハンカチは…白石さんのイニシャルじゃない？',
+          behavior: 'nervous',
+        },
         diary_entry: { reaction: '叔父の日記！何が書いてあるの？', behavior: 'nervous' },
       },
     },
@@ -157,18 +200,48 @@ export const FIXED_SCENARIO: Scenario = {
         ],
       },
       evidence_reactions: {
-        poison_bottle: { reaction: 'アコニチンの精製品ね。これを作るには専門知識が必要よ。', behavior: 'calm' },
-        will_document: { reaction: '遺言書の内容？私には関係ないけれど、誰かが動機を持っていたのね。', behavior: 'calm' },
-        herb_fragment: { reaction: 'トリカブトの葉。庭で採取したものね。これだけでは毒は作れないけれど。', behavior: 'calm' },
-        wine_glass: { reaction: 'ワイングラスに混入したのね。タイミングを計る必要があったはず。', behavior: 'calm' },
-        muddy_shoes: { reaction: '昨晩外に出た人がいるのね。庭でトリカブトを採取するために。', behavior: 'calm' },
-        note_paper: { reaction: 'このメモ…薬物の計算式？医学的な知識がある人が書いたわね。', behavior: 'nervous' },
-        torn_letter: { reaction: 'この手紙は…患者の情報が含まれているようね。', behavior: 'nervous' },
+        poison_bottle: {
+          reaction: 'アコニチンの精製品ね。これを作るには専門知識が必要よ。',
+          behavior: 'calm',
+        },
+        will_document: {
+          reaction: '遺言書の内容？私には関係ないけれど、誰かが動機を持っていたのね。',
+          behavior: 'calm',
+        },
+        herb_fragment: {
+          reaction: 'トリカブトの葉。庭で採取したものね。これだけでは毒は作れないけれど。',
+          behavior: 'calm',
+        },
+        wine_glass: {
+          reaction: 'ワイングラスに混入したのね。タイミングを計る必要があったはず。',
+          behavior: 'calm',
+        },
+        muddy_shoes: {
+          reaction: '昨晩外に出た人がいるのね。庭でトリカブトを採取するために。',
+          behavior: 'calm',
+        },
+        note_paper: {
+          reaction: 'このメモ…薬物の計算式？医学的な知識がある人が書いたわね。',
+          behavior: 'nervous',
+        },
+        torn_letter: {
+          reaction: 'この手紙は…患者の情報が含まれているようね。',
+          behavior: 'nervous',
+        },
         kitchen_knife: { reaction: '毒殺とは関係ないでしょう。', behavior: 'calm' },
-        photo_garden: { reaction: 'この人物…夜の庭でトリカブトを採っているのね。', behavior: 'calm' },
+        photo_garden: {
+          reaction: 'この人物…夜の庭でトリカブトを採っているのね。',
+          behavior: 'calm',
+        },
         safe_key: { reaction: '金庫の鍵。中に何が入っているのかしら。', behavior: 'calm' },
-        handkerchief: { reaction: 'このハンカチに見覚えが…白石さんのものじゃないかしら。', behavior: 'calm' },
-        diary_entry: { reaction: '黒崎の日記。読んでいいものかしら…でも真相解明には必要ね。', behavior: 'calm' },
+        handkerchief: {
+          reaction: 'このハンカチに見覚えが…白石さんのものじゃないかしら。',
+          behavior: 'calm',
+        },
+        diary_entry: {
+          reaction: '黒崎の日記。読んでいいものかしら…でも真相解明には必要ね。',
+          behavior: 'calm',
+        },
       },
     },
     {
@@ -195,18 +268,45 @@ export const FIXED_SCENARIO: Scenario = {
         ],
       },
       evidence_reactions: {
-        poison_bottle: { reaction: 'こんな証拠が出てくるとは…誰かが計画的に動いていたのですね。', behavior: 'calm' },
-        will_document: { reaction: 'これは…！この遺言書は先月書き換えられたものです。私が立会いました。', behavior: 'nervous' },
+        poison_bottle: {
+          reaction: 'こんな証拠が出てくるとは…誰かが計画的に動いていたのですね。',
+          behavior: 'calm',
+        },
+        will_document: {
+          reaction: 'これは…！この遺言書は先月書き換えられたものです。私が立会いました。',
+          behavior: 'nervous',
+        },
         herb_fragment: { reaction: '植物についての知識は私にはありません。', behavior: 'calm' },
-        wine_glass: { reaction: 'ワイングラスに毒を。タイミングを知っている人間の犯行ですね。', behavior: 'calm' },
-        muddy_shoes: { reaction: '外に出た人物がいるのですね。記録しておきます。', behavior: 'calm' },
-        note_paper: { reaction: 'このメモは…法的に見て問題のある内容が含まれています。', behavior: 'nervous' },
-        torn_letter: { reaction: 'この手紙…黒崎様から私への連絡ですね。証拠として保全が必要です。', behavior: 'nervous' },
+        wine_glass: {
+          reaction: 'ワイングラスに毒を。タイミングを知っている人間の犯行ですね。',
+          behavior: 'calm',
+        },
+        muddy_shoes: {
+          reaction: '外に出た人物がいるのですね。記録しておきます。',
+          behavior: 'calm',
+        },
+        note_paper: {
+          reaction: 'このメモは…法的に見て問題のある内容が含まれています。',
+          behavior: 'nervous',
+        },
+        torn_letter: {
+          reaction: 'この手紙…黒崎様から私への連絡ですね。証拠として保全が必要です。',
+          behavior: 'nervous',
+        },
         kitchen_knife: { reaction: '今回の件には関係ないと思われます。', behavior: 'calm' },
         photo_garden: { reaction: 'この写真の人物…白石さんに似ていますね。', behavior: 'nervous' },
-        safe_key: { reaction: '金庫の鍵！これは書斎の金庫に保管されているはずの…なぜここに？', behavior: 'angry' },
-        handkerchief: { reaction: '誰かの所有物ですね。持ち主を特定すれば手がかりになります。', behavior: 'calm' },
-        diary_entry: { reaction: '黒崎様の日記…これは重要な証拠になります。内容次第では。', behavior: 'calm' },
+        safe_key: {
+          reaction: '金庫の鍵！これは書斎の金庫に保管されているはずの…なぜここに？',
+          behavior: 'angry',
+        },
+        handkerchief: {
+          reaction: '誰かの所有物ですね。持ち主を特定すれば手がかりになります。',
+          behavior: 'calm',
+        },
+        diary_entry: {
+          reaction: '黒崎様の日記…これは重要な証拠になります。内容次第では。',
+          behavior: 'calm',
+        },
       },
     },
     {
@@ -233,18 +333,55 @@ export const FIXED_SCENARIO: Scenario = {
         ],
       },
       evidence_reactions: {
-        poison_bottle: { reaction: 'これです！キッチンで見た小瓶に似ています。白石様が持っていかれた…。', behavior: 'nervous' },
-        will_document: { reaction: '遺言書…旦那様は先月こっそり書き直されていました。白石様には内緒で、と言っていました。', behavior: 'sad' },
-        herb_fragment: { reaction: 'これは庭のトリカブトですね。白石様が立っていた場所の近くに生えているもの。', behavior: 'nervous' },
-        wine_glass: { reaction: 'そのグラス…白石様が旦那様のそばに立っていた時に持っていたものかも。', behavior: 'nervous' },
-        muddy_shoes: { reaction: 'この泥の形…裏庭の土と同じです。深夜に出た方のものでしょう。', behavior: 'calm' },
-        note_paper: { reaction: '白石様のお部屋で見たものと同じ紙に見えます。', behavior: 'nervous' },
-        torn_letter: { reaction: '破られた手紙…ゴミ箱から回収したものかもしれません。', behavior: 'calm' },
-        kitchen_knife: { reaction: 'これはキッチンの包丁です。普通のものですよ。', behavior: 'calm' },
-        photo_garden: { reaction: 'この写真！これは白石様です。深夜の庭で何かを採っています。', behavior: 'nervous' },
-        safe_key: { reaction: '旦那様の金庫の鍵…これは書斎にあったはずです。誰かが持ち出した？', behavior: 'nervous' },
-        handkerchief: { reaction: 'これは白石様のハンカチです。イニシャルが刺繍してあります。', behavior: 'calm' },
-        diary_entry: { reaction: '旦那様の日記。最後のページに白石様のことが書かれていたはずです。', behavior: 'sad' },
+        poison_bottle: {
+          reaction: 'これです！キッチンで見た小瓶に似ています。白石様が持っていかれた…。',
+          behavior: 'nervous',
+        },
+        will_document: {
+          reaction:
+            '遺言書…旦那様は先月こっそり書き直されていました。白石様には内緒で、と言っていました。',
+          behavior: 'sad',
+        },
+        herb_fragment: {
+          reaction: 'これは庭のトリカブトですね。白石様が立っていた場所の近くに生えているもの。',
+          behavior: 'nervous',
+        },
+        wine_glass: {
+          reaction: 'そのグラス…白石様が旦那様のそばに立っていた時に持っていたものかも。',
+          behavior: 'nervous',
+        },
+        muddy_shoes: {
+          reaction: 'この泥の形…裏庭の土と同じです。深夜に出た方のものでしょう。',
+          behavior: 'calm',
+        },
+        note_paper: {
+          reaction: '白石様のお部屋で見たものと同じ紙に見えます。',
+          behavior: 'nervous',
+        },
+        torn_letter: {
+          reaction: '破られた手紙…ゴミ箱から回収したものかもしれません。',
+          behavior: 'calm',
+        },
+        kitchen_knife: {
+          reaction: 'これはキッチンの包丁です。普通のものですよ。',
+          behavior: 'calm',
+        },
+        photo_garden: {
+          reaction: 'この写真！これは白石様です。深夜の庭で何かを採っています。',
+          behavior: 'nervous',
+        },
+        safe_key: {
+          reaction: '旦那様の金庫の鍵…これは書斎にあったはずです。誰かが持ち出した？',
+          behavior: 'nervous',
+        },
+        handkerchief: {
+          reaction: 'これは白石様のハンカチです。イニシャルが刺繍してあります。',
+          behavior: 'calm',
+        },
+        diary_entry: {
+          reaction: '旦那様の日記。最後のページに白石様のことが書かれていたはずです。',
+          behavior: 'sad',
+        },
       },
     },
   ],
@@ -253,7 +390,8 @@ export const FIXED_SCENARIO: Scenario = {
       id: 'room_study',
       name: '書斎',
       type_id: 'study',
-      description: '重厚な木製の本棚に囲まれた部屋。主人の遺体が発見された場所。デスクの上には書類が散乱している。',
+      description:
+        '重厚な木製の本棚に囲まれた部屋。主人の遺体が発見された場所。デスクの上には書類が散乱している。',
       evidence_ids: ['will_document', 'safe_key', 'diary_entry'],
     },
     {
@@ -267,7 +405,8 @@ export const FIXED_SCENARIO: Scenario = {
       id: 'room_kitchen',
       name: 'キッチン',
       type_id: 'kitchen',
-      description: '業務用の厨房設備が並ぶ広いキッチン。料理道具の隙間に何かが隠れているかもしれない。',
+      description:
+        '業務用の厨房設備が並ぶ広いキッチン。料理道具の隙間に何かが隠れているかもしれない。',
       evidence_ids: ['poison_bottle', 'kitchen_knife', 'note_paper'],
     },
     {
@@ -281,7 +420,8 @@ export const FIXED_SCENARIO: Scenario = {
       id: 'room_garden',
       name: '庭園',
       type_id: 'garden',
-      description: '洋館を囲む広大な庭園。様々な植物が植えられており、夜露に濡れた泥が足跡を残している。',
+      description:
+        '洋館を囲む広大な庭園。様々な植物が植えられており、夜露に濡れた泥が足跡を残している。',
       evidence_ids: ['herb_fragment', 'muddy_shoes', 'photo_garden'],
     },
   ],
@@ -290,19 +430,23 @@ export const FIXED_SCENARIO: Scenario = {
       id: 'poison_bottle',
       name: '小さな小瓶',
       category_id: 'poison',
-      description: 'キッチンの棚の奥に隠されていた無色の液体が入った小瓶。微量でも致死量のアコニチンが含まれている。',
+      description:
+        'キッチンの棚の奥に隠されていた無色の液体が入った小瓶。微量でも致死量のアコニチンが含まれている。',
       is_fake: false,
       relevance: '犯行に使用された毒薬。白石誠の指紋が検出された。',
-      examination_notes: '成分を調べると高純度のアコニチン。市販品ではなく手製の精製品。瓶の表面に拭き取りきれない指紋が残っており、鑑定によって所持者を特定できる可能性がある。庭で採取したトリカブトから精製したと考えると、毒草の葉片との物証が繋がる。',
+      examination_notes:
+        '成分を調べると高純度のアコニチン。市販品ではなく手製の精製品。瓶の表面に拭き取りきれない指紋が残っており、鑑定によって所持者を特定できる可能性がある。庭で採取したトリカブトから精製したと考えると、毒草の葉片との物証が繋がる。',
     },
     {
       id: 'will_document',
       name: '遺言書の写し',
       category_id: 'document_contract',
-      description: '書斎の金庫に保管されていた遺言書のコピー。先月日付が変更されており、白石誠への相続分が削除されている。',
+      description:
+        '書斎の金庫に保管されていた遺言書のコピー。先月日付が変更されており、白石誠への相続分が削除されている。',
       is_fake: false,
       relevance: '白石誠の殺害動機を示す直接的な証拠。',
-      examination_notes: '先月20日付けで書き換えられた遺言書のコピー。白石誠への相続分（推定3000万円相当）が完全に削除されている。藤堂弁護士の署名と立会日も記載されており、書き換えが正式に行われたことがわかる。これを知った者には強烈な動機が生まれる。',
+      examination_notes:
+        '先月20日付けで書き換えられた遺言書のコピー。白石誠への相続分（推定3000万円相当）が完全に削除されている。藤堂弁護士の署名と立会日も記載されており、書き換えが正式に行われたことがわかる。これを知った者には強烈な動機が生まれる。',
     },
     {
       id: 'herb_fragment',
@@ -311,7 +455,8 @@ export const FIXED_SCENARIO: Scenario = {
       description: '庭園で採取されたと思われるトリカブトの葉の断片。摘み取られた形跡がある。',
       is_fake: false,
       relevance: '毒の原料となった植物。採取場所の特定につながる。',
-      examination_notes: '庭園の特定区画（裏口近く）に生えるトリカブトの葉。摘み取り痕が新しく、昨晩採取されたと考えられる。葉の断片が泥のついた革靴の踵部分にも付着しており、同一人物が庭に出て採取したことを示す。',
+      examination_notes:
+        '庭園の特定区画（裏口近く）に生えるトリカブトの葉。摘み取り痕が新しく、昨晩採取されたと考えられる。葉の断片が泥のついた革靴の踵部分にも付着しており、同一人物が庭に出て採取したことを示す。',
     },
     {
       id: 'wine_glass',
@@ -320,7 +465,8 @@ export const FIXED_SCENARIO: Scenario = {
       description: 'ダイニングに残された被害者のワイングラス。底部に毒物の残留反応がある。',
       is_fake: false,
       relevance: '毒が投与された経路。グラスに近づいた人物が犯人の可能性が高い。',
-      examination_notes: '底部に微量のアコニチンが検出された。グラスの指紋は意図的に拭き取られているが、縁付近に使い捨て手袋のラテックス片が残っていた。誰かが証拠隠滅を図ったことを示す。毒を混入できたのはグラスに近づいた機会を持つ者だ。',
+      examination_notes:
+        '底部に微量のアコニチンが検出された。グラスの指紋は意図的に拭き取られているが、縁付近に使い捨て手袋のラテックス片が残っていた。誰かが証拠隠滅を図ったことを示す。毒を混入できたのはグラスに近づいた機会を持つ者だ。',
     },
     {
       id: 'muddy_shoes',
@@ -329,25 +475,30 @@ export const FIXED_SCENARIO: Scenario = {
       description: '庭園の特有の粘土質の土がついた革靴。サイズは26.5cm程度。',
       is_fake: false,
       relevance: '昨晩深夜に庭に出た人物のもの。白石誠のサイズと一致。',
-      examination_notes: '靴底の泥は庭園裏口付近特有の粘土質で、他の場所とは組成が異なる。サイズ26.5cmで、この館の参加者のうち誰が該当するか照合する必要がある。踵にトリカブトの葉片が付着しており、この靴の持ち主が庭でトリカブトを採取したと断定できる。',
+      examination_notes:
+        '靴底の泥は庭園裏口付近特有の粘土質で、他の場所とは組成が異なる。サイズ26.5cmで、この館の参加者のうち誰が該当するか照合する必要がある。踵にトリカブトの葉片が付着しており、この靴の持ち主が庭でトリカブトを採取したと断定できる。',
     },
     {
       id: 'note_paper',
       name: '計算メモ',
       category_id: 'document_letter',
-      description: 'キッチンで見つかった小さなメモ。アコニチンの致死量計算と思われる数式が走り書きされている。',
+      description:
+        'キッチンで見つかった小さなメモ。アコニチンの致死量計算と思われる数式が走り書きされている。',
       is_fake: false,
       relevance: '事前に毒の量を計算していた証拠。筆跡鑑定で白石誠のものと判明。',
-      examination_notes: 'アコニチンの致死量計算式が記されており、体重70kgの人物への投与量が計算されている。書いた人物の特定には筆跡鑑定が必要だが、犯行を事前に綿密に計画していた証拠となる。',
+      examination_notes:
+        'アコニチンの致死量計算式が記されており、体重70kgの人物への投与量が計算されている。書いた人物の特定には筆跡鑑定が必要だが、犯行を事前に綿密に計画していた証拠となる。',
     },
     {
       id: 'safe_key',
       name: '金庫の鍵',
       category_id: 'key',
-      description: '書斎の金庫を開ける鍵。通常は黒崎が肌身離さず持っていたはずだが、デスクの引き出しに放置されていた。',
+      description:
+        '書斎の金庫を開ける鍵。通常は黒崎が肌身離さず持っていたはずだが、デスクの引き出しに放置されていた。',
       is_fake: false,
       relevance: '白石誠が金庫を開け遺言書を確認した証拠となりうる。',
-      examination_notes: '黒崎源一郎が常に携帯していた金庫の鍵が、なぜか書斎のデスク引き出しに放置されていた。誰かが金庫を開けて遺言書の内容を確認した後に放置したと考えられる。昨晩書斎に立ち入った人物の特定が重要だ。',
+      examination_notes:
+        '黒崎源一郎が常に携帯していた金庫の鍵が、なぜか書斎のデスク引き出しに放置されていた。誰かが金庫を開けて遺言書の内容を確認した後に放置したと考えられる。昨晩書斎に立ち入った人物の特定が重要だ。',
     },
     {
       id: 'diary_entry',
@@ -356,16 +507,19 @@ export const FIXED_SCENARIO: Scenario = {
       description: '黒崎の日記。「白石には知らせていない。今夜の反応が見ものだ」という記述がある。',
       is_fake: false,
       relevance: '黒崎が遺言書変更を白石に意図的に隠していたことを示す。',
-      examination_notes: '日記には遺言書の変更を知らせていない参加者がいることが示唆されている。その人物が今夜どのような反応を示したか——黒崎はそれを楽しみにしていた。変更内容を知った人物の反応こそが、事件の動機に直結する可能性がある。',
+      examination_notes:
+        '日記には遺言書の変更を知らせていない参加者がいることが示唆されている。その人物が今夜どのような反応を示したか——黒崎はそれを楽しみにしていた。変更内容を知った人物の反応こそが、事件の動機に直結する可能性がある。',
     },
     {
       id: 'photo_garden',
       name: '防犯カメラの画像',
       category_id: 'photograph',
-      description: '庭園の防犯カメラが捉えた深夜の人物。トリカブトが生える区画に立っている。顔は不鮮明で誰か特定するには詳細な分析が必要。',
+      description:
+        '庭園の防犯カメラが捉えた深夜の人物。トリカブトが生える区画に立っている。顔は不鮮明で誰か特定するには詳細な分析が必要。',
       is_fake: false,
       relevance: '白石誠が深夜に庭でトリカブトを採取した可能性を示す写真証拠。',
-      examination_notes: '深夜0時過ぎに庭園のトリカブト群生地に立つ人物が写っている。体型・コートの形状を参加者と照合することで人物を特定できる可能性がある。画像解析により植物を採取する動作が確認でき、この時刻の行動が翌朝の毒殺と時系列上一致する。',
+      examination_notes:
+        '深夜0時過ぎに庭園のトリカブト群生地に立つ人物が写っている。体型・コートの形状を参加者と照合することで人物を特定できる可能性がある。画像解析により植物を採取する動作が確認でき、この時刻の行動が翌朝の毒殺と時系列上一致する。',
     },
     {
       id: 'handkerchief',
@@ -374,25 +528,31 @@ export const FIXED_SCENARIO: Scenario = {
       description: 'ダイニングのテーブル下に落ちていた白いハンカチ。「S.M.」の刺繍がある。',
       is_fake: false,
       relevance: 'Shiraishi Makoto（白石誠）のイニシャルと一致。犯行現場付近に残された物証。',
-      examination_notes: '「S.M.」のイニシャルに該当する参加者がいないか確認が必要。被害者の席の真横というこの位置は、ワイングラスへの毒物混入時に落とされた可能性を示唆する。所持者が被害者のグラスに近づいていたことを示す物的証拠となりうる。',
+      examination_notes:
+        '「S.M.」のイニシャルに該当する参加者がいないか確認が必要。被害者の席の真横というこの位置は、ワイングラスへの毒物混入時に落とされた可能性を示唆する。所持者が被害者のグラスに近づいていたことを示す物的証拠となりうる。',
     },
     {
       id: 'torn_letter',
       name: '破られた手紙の断片',
       category_id: 'document_letter',
-      description: '図書室のゴミ箱から回収した手紙の断片。「…取引の証拠は私が握っている。おとなしくしていろ…」という文字が読める。',
+      description:
+        '図書室のゴミ箱から回収した手紙の断片。「…取引の証拠は私が握っている。おとなしくしていろ…」という文字が読める。',
       is_fake: true,
-      relevance: '鬼頭武雄への脅迫状の可能性がある。ただし今回の殺人との直接的な関係はない偽の手がかり。',
-      examination_notes: '一見して鬼頭武雄への脅迫状に見えるが、詳しく調べると黒崎が過去に送った不正取引に関する警告文と判明。鬼頭には確かに不正行為があるが、彼のアリバイはバーテンダーが証言しており、今回の毒殺とは無関係。これは別の問題を示す偽の手がかりだ。',
+      relevance:
+        '鬼頭武雄への脅迫状の可能性がある。ただし今回の殺人との直接的な関係はない偽の手がかり。',
+      examination_notes:
+        '一見して鬼頭武雄への脅迫状に見えるが、詳しく調べると黒崎が過去に送った不正取引に関する警告文と判明。鬼頭には確かに不正行為があるが、彼のアリバイはバーテンダーが証言しており、今回の毒殺とは無関係。これは別の問題を示す偽の手がかりだ。',
     },
     {
       id: 'kitchen_knife',
       name: '血のついた包丁',
       category_id: 'weapon_blade',
-      description: 'キッチンで発見された包丁。赤い染みがついているが、分析すると牛肉の血液と判明した。',
+      description:
+        'キッチンで発見された包丁。赤い染みがついているが、分析すると牛肉の血液と判明した。',
       is_fake: true,
       relevance: '一見すると凶器に見えるが、実際は料理で使用された無関係な包丁。',
-      examination_notes: '赤い染みは一見すると血痕に見えるが、成分分析の結果、昨晩のディナーで使用した牛肉の血液と確認された。黒崎源一郎の死因はアコニチン中毒であり、刃物とは無関係。犯人を誤誘導する偽の手がかりに過ぎない。',
+      examination_notes:
+        '赤い染みは一見すると血痕に見えるが、成分分析の結果、昨晩のディナーで使用した牛肉の血液と確認された。黒崎源一郎の死因はアコニチン中毒であり、刃物とは無関係。犯人を誤誘導する偽の手がかりに過ぎない。',
     },
   ],
 }

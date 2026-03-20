@@ -26,7 +26,12 @@ export function CharacterCard({ suspect, selected, onClick, small }: CharacterCa
       )}
       onClick={onClick}
     >
-      <div className={cn('bg-stone-800 flex items-center justify-center overflow-hidden', small ? 'h-16 w-16 mx-auto' : 'h-32 w-full mb-3')}>
+      <div
+        className={cn(
+          'bg-stone-800 flex items-center justify-center overflow-hidden',
+          small ? 'h-16 w-16 mx-auto' : 'h-32 w-full mb-3'
+        )}
+      >
         {imgError ? (
           <span className="text-gothic-muted text-4xl">👤</span>
         ) : (
@@ -41,7 +46,9 @@ export function CharacterCard({ suspect, selected, onClick, small }: CharacterCa
       {!small && (
         <>
           <div className="text-gothic-gold font-display text-sm font-semibold">{suspect.name}</div>
-          <div className="text-gothic-muted text-xs mt-1">{suspect.age}歳・{suspect.occupation}</div>
+          <div className="text-gothic-muted text-xs mt-1">
+            {suspect.age}歳・{suspect.occupation}
+          </div>
         </>
       )}
       {small && (

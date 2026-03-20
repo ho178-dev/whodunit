@@ -20,7 +20,9 @@ export function RoomSelector() {
           )}
         >
           <div className="text-sm font-semibold">{room.name}</div>
-          <div className="text-xs text-gothic-muted mt-0.5 line-clamp-1">{room.description.slice(0, 40)}…</div>
+          <div className="text-xs text-gothic-muted mt-0.5 line-clamp-1">
+            {room.description.slice(0, 40)}…
+          </div>
         </button>
       ))}
     </div>

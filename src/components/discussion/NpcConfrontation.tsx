@@ -9,16 +9,27 @@ interface NpcConfrontationProps {
   onSelectSuspect: (id: string) => void
 }
 
-export function NpcConfrontation({ selectedEvidenceId, selectedSuspectId, onSelectSuspect }: NpcConfrontationProps) {
+export function NpcConfrontation({
+  selectedEvidenceId,
+  selectedSuspectId,
+  onSelectSuspect,
+}: NpcConfrontationProps) {
   const { scenario, addConfrontation, confrontationLog } = useGameStore()
   if (!scenario) return null
 
-  const selectedEvidence = selectedEvidenceId ? scenario.evidence.find((e) => e.id === selectedEvidenceId) : null
-  const selectedSuspect = selectedSuspectId ? scenario.suspects.find((s) => s.id === selectedSuspectId) : null
-
-  const latestReaction = selectedSuspectId && selectedEvidenceId
-    ? confrontationLog.filter((c) => c.suspectId === selectedSuspectId && c.evidenceId === selectedEvidenceId).slice(-1)[0]
+  const selectedEvidence = selectedEvidenceId
+    ? scenario.evidence.find((e) => e.id === selectedEvidenceId)
     : null
+  const selectedSuspect = selectedSuspectId
+    ? scenario.suspects.find((s) => s.id === selectedSuspectId)
+    : null
+
+  const latestReaction =
+    selectedSuspectId && selectedEvidenceId
+      ? confrontationLog
+          .filter((c) => c.suspectId === selectedSuspectId && c.evidenceId === selectedEvidenceId)
+          .slice(-1)[0]
+      : null
 
   const handleConfront = () => {
     if (!selectedSuspect || !selectedEvidence) return
@@ -37,7 +48,9 @@ export function NpcConfrontation({ selectedEvidenceId, selectedSuspectId, onSele
     <GothicPanel title="証拠を突きつける">
       <div className="space-y-4">
         <div>
-          <h4 className="font-display text-gothic-muted text-xs tracking-widest mb-2">容疑者を選択</h4>
+          <h4 className="font-display text-gothic-muted text-xs tracking-widest mb-2">
+            容疑者を選択
+          </h4>
           <div className="grid grid-cols-3 gap-2">
             {scenario.suspects.map((suspect) => (
               <button

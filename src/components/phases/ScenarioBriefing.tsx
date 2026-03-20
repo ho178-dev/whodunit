@@ -25,8 +25,12 @@ export function ScenarioBriefing() {
 
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          <h1 className="font-display text-3xl text-gothic-gold tracking-widest mb-2">{scenario.title}</h1>
-          <p className="text-gothic-muted font-serif text-sm max-w-xl mx-auto leading-relaxed">{scenario.synopsis}</p>
+          <h1 className="font-display text-3xl text-gothic-gold tracking-widest mb-2">
+            {scenario.title}
+          </h1>
+          <p className="text-gothic-muted font-serif text-sm max-w-xl mx-auto leading-relaxed">
+            {scenario.synopsis}
+          </p>
         </div>
 
         {/* 事件概要 */}
@@ -40,7 +44,9 @@ export function ScenarioBriefing() {
               <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">被害者</p>
               <p className="text-gothic-text">{scenario.victim.name}</p>
               <p className="text-gothic-muted text-xs mt-1">{scenario.victim.cause_of_death}</p>
-              <p className="text-gothic-gold text-xs mt-1">推定犯行時刻：{scenario.murder_time_range}</p>
+              <p className="text-gothic-gold text-xs mt-1">
+                推定犯行時刻：{scenario.murder_time_range}
+              </p>
             </div>
           </div>
         </GothicPanel>
@@ -49,8 +55,12 @@ export function ScenarioBriefing() {
         <GothicPanel title="あなたの役割" className="mb-4">
           <div className="flex items-start gap-4">
             <div className="flex-1">
-              <p className="text-gothic-gold font-display text-lg tracking-widest mb-1">{scenario.detective.name}</p>
-              <p className="text-gothic-muted font-serif text-sm leading-relaxed">{scenario.detective.description}</p>
+              <p className="text-gothic-gold font-display text-lg tracking-widest mb-1">
+                {scenario.detective.name}
+              </p>
+              <p className="text-gothic-muted font-serif text-sm leading-relaxed">
+                {scenario.detective.description}
+              </p>
             </div>
           </div>
         </GothicPanel>
@@ -71,16 +81,28 @@ export function ScenarioBriefing() {
                       : 'border-gothic-border hover:border-gothic-accent'
                   }`}
                 >
-                  <p className={`font-display tracking-widest text-sm mb-1 ${isSelected ? 'text-gothic-gold' : 'text-gothic-text'}`}>
+                  <p
+                    className={`font-display tracking-widest text-sm mb-1 ${isSelected ? 'text-gothic-gold' : 'text-gothic-text'}`}
+                  >
                     {cfg.label}
                   </p>
-                  <p className="text-gothic-muted font-serif text-xs leading-relaxed mb-2">{cfg.description}</p>
+                  <p className="text-gothic-muted font-serif text-xs leading-relaxed mb-2">
+                    {cfg.description}
+                  </p>
                   <div className="space-y-0.5">
                     <p className="text-gothic-muted font-serif text-xs">
-                      調査 <span className={isSelected ? 'text-gothic-gold' : 'text-gothic-text'}>{cfg.actions}</span> 回
+                      調査{' '}
+                      <span className={isSelected ? 'text-gothic-gold' : 'text-gothic-text'}>
+                        {cfg.actions}
+                      </span>{' '}
+                      回
                     </p>
                     <p className="text-gothic-muted font-serif text-xs">
-                      会話 <span className={isSelected ? 'text-gothic-gold' : 'text-gothic-text'}>{cfg.talkActions}</span> 回
+                      会話{' '}
+                      <span className={isSelected ? 'text-gothic-gold' : 'text-gothic-text'}>
+                        {cfg.talkActions}
+                      </span>{' '}
+                      回
                     </p>
                   </div>
                 </button>

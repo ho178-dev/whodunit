@@ -10,6 +10,7 @@
 ファイルが存在しない場合はフォールバック（絵文字）が自動表示されるため、未配置でも動作する。
 
 ## 画像生成
+
 stable-diffusion-webui-1.7.0で生成した画像を使用。
 ① キャラクターイラスト用Model
 DreamShaper XL
@@ -34,20 +35,20 @@ public/
 
 ### キャラクター画像 `public/assets/characters/`
 
-| ファイル名 | 説明 |
-|-----------|------|
-| `male_teen.png` | 男性・10代 |
-| `male_young.png` | 男性・20〜30代 |
-| `male_young_alt.png` | 男性・20〜30代（別バリエーション） |
-| `male_middle.png` | 男性・中年 |
-| `male_middle_alt.png` | 男性・中年（別バリエーション） |
-| `male_elderly.png` | 男性・老年 |
-| `female_teen.png` | 女性・10代 |
-| `female_young.png` | 女性・20〜30代 |
-| `female_young_alt.png` | 女性・20〜30代（別バリエーション） |
-| `female_middle.png` | 女性・中年 |
-| `female_middle_alt.png` | 女性・中年（別バリエーション） |
-| `female_elderly.png` | 女性・老年 |
+| ファイル名              | 説明                               |
+| ----------------------- | ---------------------------------- |
+| `male_teen.png`         | 男性・10代                         |
+| `male_young.png`        | 男性・20〜30代                     |
+| `male_young_alt.png`    | 男性・20〜30代（別バリエーション） |
+| `male_middle.png`       | 男性・中年                         |
+| `male_middle_alt.png`   | 男性・中年（別バリエーション）     |
+| `male_elderly.png`      | 男性・老年                         |
+| `female_teen.png`       | 女性・10代                         |
+| `female_young.png`      | 女性・20〜30代                     |
+| `female_young_alt.png`  | 女性・20〜30代（別バリエーション） |
+| `female_middle.png`     | 女性・中年                         |
+| `female_middle_alt.png` | 女性・中年（別バリエーション）     |
+| `female_elderly.png`    | 女性・老年                         |
 
 - **フォーマット**: PNG（推奨サイズ: 256×320px 以上、縦長）
 - **フォールバック**: 画像なしの場合 `👤` を表示
@@ -56,47 +57,47 @@ public/
 
 ### 部屋画像 `public/assets/rooms/`
 
-| ファイル名 | 説明 |
-|-----------|------|
-| `study.png` | 書斎 |
-| `kitchen.png` | キッチン |
-| `bedroom.png` | 寝室 |
-| `dining_room.png` | ダイニング |
-| `library.png` | 図書室 |
-| `garden.png` | 庭園 |
-| `hallway.png` | 廊下 |
-| `basement.png` | 地下室 |
-| `attic.png` | 屋根裏 |
-| `bathroom.png` | 浴室 |
-| `default.png` | デフォルト画像 |
+| ファイル名        | 説明           |
+| ----------------- | -------------- |
+| `study.png`       | 書斎           |
+| `kitchen.png`     | キッチン       |
+| `bedroom.png`     | 寝室           |
+| `dining_room.png` | ダイニング     |
+| `library.png`     | 図書室         |
+| `garden.png`      | 庭園           |
+| `hallway.png`     | 廊下           |
+| `basement.png`    | 地下室         |
+| `attic.png`       | 屋根裏         |
+| `bathroom.png`    | 浴室           |
+| `default.png`     | デフォルト画像 |
 
 - **フォーマット**: PNG（推奨サイズ: 800×500px 以上、横長）
-- **フォールバック**: 画像なしの場合は背景なしで表示
+- **フォールバック**: 画像なしの場合は`default.png`で表示
 
 ---
 
 ### 証拠品アイコン `public/assets/evidence/`
 
-| ファイル名 | 説明 |
-|-----------|------|
-| `weapon_blade.png` | 刃物 |
-| `weapon_blunt.png` | 鈍器 |
-| `weapon_firearm.png` | 銃器 |
-| `poison.png` | 毒物 |
-| `document_letter.png` | 手紙・メモ |
-| `document_diary.png` | 日記 |
+| ファイル名              | 説明           |
+| ----------------------- | -------------- |
+| `weapon_blade.png`      | 刃物           |
+| `weapon_blunt.png`      | 鈍器           |
+| `weapon_firearm.png`    | 銃器           |
+| `poison.png`            | 毒物           |
+| `document_letter.png`   | 手紙・メモ     |
+| `document_diary.png`    | 日記           |
 | `document_contract.png` | 契約書・遺言書 |
-| `clothing.png` | 衣類・靴 |
-| `jewelry.png` | 装飾品 |
-| `key.png` | 鍵 |
-| `container.png` | 容器・グラス |
-| `photograph.png` | 写真・画像 |
-| `medicine.png` | 薬品 |
-| `food_drink.png` | 食物・飲料 |
-| `tool.png` | 道具 |
-| `fabric.png` | 布・ハンカチ |
-| `fingerprint.png` | 指紋 |
-| `blood_stain.png` | 血痕 |
+| `clothing.png`          | 衣類・靴       |
+| `jewelry.png`           | 装飾品         |
+| `key.png`               | 鍵             |
+| `container.png`         | 容器・グラス   |
+| `photograph.png`        | 写真・画像     |
+| `medicine.png`          | 薬品           |
+| `food_drink.png`        | 食物・飲料     |
+| `tool.png`              | 道具           |
+| `fabric.png`            | 布・ハンカチ   |
+| `fingerprint.png`       | 指紋           |
+| `blood_stain.png`       | 血痕           |
 
 - **フォーマット**: PNG・透過推奨（推奨サイズ: 128×128px）
 - **フォールバック**: 画像なしの場合 `🔍` を表示

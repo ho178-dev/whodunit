@@ -12,7 +12,9 @@ export function EvidenceSelector({ discoveredIds, selectedId, onSelect }: Eviden
   const { scenario } = useGameStore()
   if (!scenario) return null
 
-  const discovered = discoveredIds.map((id) => scenario.evidence.find((e) => e.id === id)!).filter(Boolean)
+  const discovered = discoveredIds
+    .map((id) => scenario.evidence.find((e) => e.id === id)!)
+    .filter(Boolean)
 
   return (
     <GothicPanel title="発見した証拠">

@@ -13,7 +13,7 @@ const config: Config = {
           gold: '#d97706',
           text: '#fef3c7',
           muted: '#a8a29e',
-        }
+        },
       },
       fontFamily: {
         serif: ['Noto Serif JP', 'Georgia', 'serif'],

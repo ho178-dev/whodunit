@@ -3,7 +3,15 @@ import { useGameStore } from '../../stores/gameStore'
 import { generateScenario } from '../../services/geminiService'
 
 export function LoadingScreen() {
-  const { apiKey, setApiKey, setScenario, setPhase, setIsGenerating, setGenerationError, generationError } = useGameStore()
+  const {
+    apiKey,
+    setApiKey,
+    setScenario,
+    setPhase,
+    setIsGenerating,
+    setGenerationError,
+    generationError,
+  } = useGameStore()
 
   useEffect(() => {
     if (!apiKey) return
@@ -11,15 +19,15 @@ export function LoadingScreen() {
     generateScenario(apiKey)
       .then((scenario) => {
         setScenario(scenario)
-        setApiKey(null)  // 生成完了後はキーを保持しない
+        setApiKey(null) // 生成完了後はキーを保持しない
         setPhase('scenario_briefing')
       })
       .catch((err) => {
         setGenerationError(err.message || 'シナリオの生成に失敗しました')
       })
       .finally(() => setIsGenerating(false))
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [])  // 意図的にマウント時1回のみ実行
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // 意図的にマウント時1回のみ実行
 
   if (generationError) {
     return (
@@ -29,7 +37,10 @@ export function LoadingScreen() {
           <p>{generationError}</p>
         </div>
         <button
-          onClick={() => { setGenerationError(null); setPhase('api_key_input') }}
+          onClick={() => {
+            setGenerationError(null)
+            setPhase('api_key_input')
+          }}
           className="border border-gothic-border text-gothic-muted px-6 py-2 font-serif hover:border-gothic-accent transition-colors"
         >
           APIキーを再入力する

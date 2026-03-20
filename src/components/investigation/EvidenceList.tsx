@@ -8,7 +8,8 @@ interface EvidenceListProps {
 }
 
 export function EvidenceList({ roomId }: EvidenceListProps) {
-  const { scenario, discoveredEvidenceIds, discoverEvidence, consumeAction, actionsRemaining } = useGameStore()
+  const { scenario, discoveredEvidenceIds, discoverEvidence, consumeAction, actionsRemaining } =
+    useGameStore()
   const [expandedId, setExpandedId] = useState<string | null>(null)
 
   if (!scenario) return null
@@ -48,8 +49,8 @@ export function EvidenceList({ roomId }: EvidenceListProps) {
                   discovered
                     ? () => handleToggleExpand(evidence.id)
                     : actionsRemaining > 0
-                    ? () => handleExamine(evidence.id)
-                    : undefined
+                      ? () => handleExamine(evidence.id)
+                      : undefined
                 }
               />
               {discovered && (
@@ -60,8 +61,12 @@ export function EvidenceList({ roomId }: EvidenceListProps) {
               )}
               {discovered && isExpanded && (
                 <div className="p-3 bg-stone-900 border-t border-gothic-border">
-                  <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">調査メモ</p>
-                  <p className="text-gothic-text font-serif text-sm">{evidence.examination_notes}</p>
+                  <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">
+                    調査メモ
+                  </p>
+                  <p className="text-gothic-text font-serif text-sm">
+                    {evidence.examination_notes}
+                  </p>
                 </div>
               )}
             </div>

@@ -14,23 +14,30 @@ export function GameShell() {
 
   const renderPhase = () => {
     switch (phase) {
-      case 'title': return <TitleScreen />
-      case 'api_key_input': return <ApiKeyInput />
-      case 'generating': return <LoadingScreen />
-      case 'scenario_briefing': return <ScenarioBriefing />
-      case 'investigation': return <InvestigationPhase />
-      case 'discussion': return <DiscussionPhase />
-      case 'voting': return <VotingPhase />
-      case 'ending': return <EndingScreen />
-      default: return <TitleScreen />
+      case 'title':
+        return <TitleScreen />
+      case 'api_key_input':
+        return <ApiKeyInput />
+      case 'generating':
+        return <LoadingScreen />
+      case 'scenario_briefing':
+        return <ScenarioBriefing />
+      case 'investigation':
+        return <InvestigationPhase />
+      case 'discussion':
+        return <DiscussionPhase />
+      case 'voting':
+        return <VotingPhase />
+      case 'ending':
+        return <EndingScreen />
+      default:
+        return <TitleScreen />
     }
   }
 
   return (
     <div className="min-h-screen bg-gothic-bg">
-      <FadeTransition triggerKey={phase}>
-        {renderPhase()}
-      </FadeTransition>
+      <FadeTransition triggerKey={phase}>{renderPhase()}</FadeTransition>
     </div>
   )
 }

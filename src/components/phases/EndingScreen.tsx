@@ -22,7 +22,9 @@ export function EndingScreen() {
           ) : (
             <>
               <div className="text-red-400 font-display text-5xl mb-4">誤謬</div>
-              <h1 className="font-display text-2xl text-red-400 tracking-widest">真犯人を見逃した</h1>
+              <h1 className="font-display text-2xl text-red-400 tracking-widest">
+                真犯人を見逃した
+              </h1>
             </>
           )}
         </div>

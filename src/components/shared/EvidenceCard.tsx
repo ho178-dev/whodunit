@@ -26,7 +26,12 @@ export function EvidenceCard({ evidence, selected, onClick, compact }: EvidenceC
       )}
       onClick={onClick}
     >
-      <div className={cn('bg-stone-800 flex items-center justify-center overflow-hidden flex-shrink-0', compact ? 'h-10 w-10' : 'h-20 w-full mb-2')}>
+      <div
+        className={cn(
+          'bg-stone-800 flex items-center justify-center overflow-hidden flex-shrink-0',
+          compact ? 'h-10 w-10' : 'h-20 w-full mb-2'
+        )}
+      >
         {imgError ? (
           <span className="text-gothic-muted text-2xl">🔍</span>
         ) : (
@@ -39,7 +44,14 @@ export function EvidenceCard({ evidence, selected, onClick, compact }: EvidenceC
         )}
       </div>
       <div>
-        <div className={cn('text-gothic-text font-serif', compact ? 'text-sm' : 'text-sm font-semibold')}>{evidence.name}</div>
+        <div
+          className={cn(
+            'text-gothic-text font-serif',
+            compact ? 'text-sm' : 'text-sm font-semibold'
+          )}
+        >
+          {evidence.name}
+        </div>
         {!compact && (
           <div className="text-gothic-muted text-xs mt-1 line-clamp-2">{evidence.description}</div>
         )}
