@@ -33,7 +33,7 @@ export function TitleScreen() {
           </div>
         </div>
 
-        <h1 className="font-display text-5xl md:text-7xl text-gothic-gold mb-2 tracking-wider">
+        <h1 className="font-title text-5xl md:text-7xl text-gothic-gold mb-2 tracking-wider">
           WhoDuNiT
         </h1>
 
