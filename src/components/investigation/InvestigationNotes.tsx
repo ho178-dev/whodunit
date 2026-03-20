@@ -10,12 +10,13 @@ interface InvestigationNotesProps {
 
 // タイムライン・証拠・証言をタブ切り替えで表示するメモパネルコンポーネント
 export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
-  const { scenario, talkedSuspectIds, discoveredEvidenceIds, heardStatements } = useGameStore()
+  const { scenario, talkedSuspectIds, inspectedEvidenceIds, examinedEvidenceIds, heardStatements } =
+    useGameStore()
   const [tab, setTab] = useState<Tab>('timeline')
 
   if (!scenario) return null
 
-  const discoveredEvidence = scenario.evidence.filter((e) => discoveredEvidenceIds.includes(e.id))
+  const discoveredEvidence = scenario.evidence.filter((e) => inspectedEvidenceIds.includes(e.id))
 
   // 話しかけた容疑者のtimeline
   const talkedSuspects = scenario.suspects.filter((s) => talkedSuspectIds.includes(s.id))
@@ -134,31 +135,40 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
                 </p>
               ) : (
                 <div className="space-y-3">
-                  {discoveredEvidence.map((evidence) => (
-                    <div key={evidence.id} className="border border-gothic-border p-3">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-gothic-gold font-display text-xs tracking-widest">
-                          {evidence.name}
-                        </span>
-                        {evidence.is_fake && (
-                          <span className="text-xs text-gothic-muted font-serif border border-gothic-muted px-1">
-                            要検討
+                  {discoveredEvidence.map((evidence) => {
+                    const examined = examinedEvidenceIds.includes(evidence.id)
+                    return (
+                      <div key={evidence.id} className="border border-gothic-border p-3">
+                        <div className="flex items-center gap-2 mb-1">
+                          <span className="text-gothic-gold font-display text-xs tracking-widest">
+                            {evidence.name}
                           </span>
+                          {evidence.is_fake && (
+                            <span className="text-xs text-gothic-muted font-serif border border-gothic-muted px-1">
+                              要検討
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-gothic-text font-serif text-xs mb-2">
+                          {evidence.description}
+                        </p>
+                        {examined ? (
+                          <div className="border-t border-gothic-border pt-2">
+                            <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">
+                              調査メモ
+                            </p>
+                            <p className="text-gothic-muted font-serif text-xs leading-relaxed">
+                              {evidence.examination_notes}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-gothic-muted font-serif text-xs italic border-t border-gothic-border pt-2">
+                            詳細調査が必要です
+                          </p>
                         )}
                       </div>
-                      <p className="text-gothic-text font-serif text-xs mb-2">
-                        {evidence.description}
-                      </p>
-                      <div className="border-t border-gothic-border pt-2">
-                        <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">
-                          調査メモ
-                        </p>
-                        <p className="text-gothic-muted font-serif text-xs leading-relaxed">
-                          {evidence.examination_notes}
-                        </p>
-                      </div>
-                    </div>
-                  ))}
+                    )
+                  })}
                 </div>
               )}
             </div>

@@ -22,7 +22,8 @@ export interface GameState {
   actionsRemaining: number
   talkActionsRemaining: number
   currentRoomId: string | null
-  discoveredEvidenceIds: string[]
+  inspectedEvidenceIds: string[] // 1段階目：外観開示済み
+  examinedEvidenceIds: string[] // 2段階目：論理的示唆開示済み
   talkedSuspectIds: string[]
   heardStatements: HeardStatement[]
   confrontationLog: ConfrontationEntry[]
@@ -37,7 +38,8 @@ export interface GameState {
   setGenerationError: (error: string | null) => void
   setDifficulty: (difficulty: Difficulty) => void
   setCurrentRoomId: (id: string | null) => void
-  discoverEvidence: (evidenceId: string) => void
+  inspectEvidence: (evidenceId: string) => void
+  examineEvidence: (evidenceId: string) => void
   talkToSuspect: (suspectId: string) => void
   consumeAction: () => void
   hearStatement: (entry: HeardStatement) => void
@@ -45,6 +47,9 @@ export interface GameState {
   setVotedSuspectId: (id: string) => void
   resetGame: () => void
 }
+
+// IDリストへの重複なし追加ヘルパー（既存の場合はearly returnでno-op）
+const addId = (arr: string[], id: string) => (arr.includes(id) ? null : [...arr, id])
 
 const initialState = {
   phase: 'title' as GamePhase,
@@ -57,7 +62,8 @@ const initialState = {
   actionsRemaining: DIFFICULTY_CONFIG.normal.actions,
   talkActionsRemaining: DIFFICULTY_CONFIG.normal.talkActions,
   currentRoomId: null,
-  discoveredEvidenceIds: [],
+  inspectedEvidenceIds: [],
+  examinedEvidenceIds: [],
   talkedSuspectIds: [],
   heardStatements: [],
   confrontationLog: [],
@@ -88,20 +94,24 @@ export const useGameStore = create<GameState>((set) => ({
     }),
   // 現在の選択部屋IDを更新する
   setCurrentRoomId: (id) => set({ currentRoomId: id }),
-  // 証拠を発見済みリストに追加する（重複追加しない）
-  discoverEvidence: (evidenceId) =>
-    set((state) => ({
-      discoveredEvidenceIds: state.discoveredEvidenceIds.includes(evidenceId)
-        ? state.discoveredEvidenceIds
-        : [...state.discoveredEvidenceIds, evidenceId],
-    })),
+  // 証拠を外観開示済みリストに追加する（1段階目、重複追加しない）
+  inspectEvidence: (evidenceId) =>
+    set((state) => {
+      const next = addId(state.inspectedEvidenceIds, evidenceId)
+      return next ? { inspectedEvidenceIds: next } : {}
+    }),
+  // 証拠を論理的示唆開示済みリストに追加する（2段階目、重複追加しない）
+  examineEvidence: (evidenceId) =>
+    set((state) => {
+      const next = addId(state.examinedEvidenceIds, evidenceId)
+      return next ? { examinedEvidenceIds: next } : {}
+    }),
   // 容疑者を会話済みリストに追加する（重複追加しない）
   talkToSuspect: (suspectId) =>
-    set((state) => ({
-      talkedSuspectIds: state.talkedSuspectIds.includes(suspectId)
-        ? state.talkedSuspectIds
-        : [...state.talkedSuspectIds, suspectId],
-    })),
+    set((state) => {
+      const next = addId(state.talkedSuspectIds, suspectId)
+      return next ? { talkedSuspectIds: next } : {}
+    }),
   // 調査アクションを1消費する（0を下回らない）
   consumeAction: () =>
     set((state) => ({

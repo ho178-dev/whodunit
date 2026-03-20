@@ -20,7 +20,8 @@
       "Bash(powershell -Command \"Copy-Item -Path ''D:\\\\workspace\\\\app'' -Destination ''D:\\\\workspace\\\\whodunit'' -Recurse -Force\")",
       "Bash(\"D:\\\\workspace\\\\whodunit\\\\README.md\":*)",
       "Bash(npx tsc:*)",
-      "Bash(npx husky:*)"
+      "Bash(npx husky:*)",
+      "Bash(xargs grep:*)"
     ]
   }
 }

@@ -16,7 +16,7 @@ export function InvestigationPhase() {
     talkActionsRemaining,
     difficulty,
     setPhase,
-    discoveredEvidenceIds,
+    inspectedEvidenceIds,
   } = useGameStore()
   const diffCfg = DIFFICULTY_CONFIG[difficulty]
   const [showNotes, setShowNotes] = useState(false)
@@ -25,7 +25,7 @@ export function InvestigationPhase() {
 
   // いずれかのアクションプールが尽きた場合もソフトロック防止のため進行を許可する
   const canProceed =
-    discoveredEvidenceIds.length > 0 || actionsRemaining === 0 || talkActionsRemaining === 0
+    inspectedEvidenceIds.length > 0 || actionsRemaining === 0 || talkActionsRemaining === 0
 
   return (
     <div className="min-h-screen px-4 py-8">

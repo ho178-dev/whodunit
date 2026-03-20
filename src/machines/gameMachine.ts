@@ -17,7 +17,7 @@ export const PHASE_TRANSITIONS: PhaseTransition[] = [
   {
     from: 'investigation',
     to: 'discussion',
-    guard: (s) => s.discoveredEvidenceIds.length > 0 || s.actionsRemaining === 0,
+    guard: (s) => s.inspectedEvidenceIds.length > 0 || s.actionsRemaining === 0,
   },
   { from: 'discussion', to: 'voting' },
   { from: 'voting', to: 'ending', guard: (s) => !!s.votedSuspectId },

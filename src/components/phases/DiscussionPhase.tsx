@@ -5,7 +5,7 @@ import { NpcConfrontation } from '../discussion/NpcConfrontation'
 import { EvidenceSelector } from '../discussion/EvidenceSelector'
 
 export function DiscussionPhase() {
-  const { scenario, setPhase, discoveredEvidenceIds } = useGameStore()
+  const { scenario, setPhase, inspectedEvidenceIds } = useGameStore()
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null)
 
@@ -27,7 +27,7 @@ export function DiscussionPhase() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
             <EvidenceSelector
-              discoveredIds={discoveredEvidenceIds}
+              discoveredIds={inspectedEvidenceIds}
               selectedId={selectedEvidenceId}
               onSelect={setSelectedEvidenceId}
             />
