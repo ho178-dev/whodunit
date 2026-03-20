@@ -3,7 +3,7 @@ import { FadeTransition } from '../shared/FadeTransition'
 import { TitleScreen } from '../phases/TitleScreen'
 import { ApiKeyInput } from '../phases/ApiKeyInput'
 import { LoadingScreen } from '../phases/LoadingScreen'
-import { CharacterSelect } from '../phases/CharacterSelect'
+import { ScenarioBriefing } from '../phases/ScenarioBriefing'
 import { InvestigationPhase } from '../phases/InvestigationPhase'
 import { DiscussionPhase } from '../phases/DiscussionPhase'
 import { VotingPhase } from '../phases/VotingPhase'
@@ -17,7 +17,7 @@ export function GameShell() {
       case 'title': return <TitleScreen />
       case 'api_key_input': return <ApiKeyInput />
       case 'generating': return <LoadingScreen />
-      case 'character_select': return <CharacterSelect />
+      case 'scenario_briefing': return <ScenarioBriefing />
       case 'investigation': return <InvestigationPhase />
       case 'discussion': return <DiscussionPhase />
       case 'voting': return <VotingPhase />

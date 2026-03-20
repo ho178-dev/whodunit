@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { cn } from '../../utils/cn'
 import { useEvidenceAsset } from '../../hooks/useAsset'
 import type { Evidence } from '../../types/scenario'
@@ -11,6 +12,7 @@ interface EvidenceCardProps {
 
 export function EvidenceCard({ evidence, selected, onClick, compact }: EvidenceCardProps) {
   const imgSrc = useEvidenceAsset(evidence.category_id)
+  const [imgError, setImgError] = useState(false)
 
   return (
     <div
@@ -25,16 +27,16 @@ export function EvidenceCard({ evidence, selected, onClick, compact }: EvidenceC
       onClick={onClick}
     >
       <div className={cn('bg-stone-800 flex items-center justify-center overflow-hidden flex-shrink-0', compact ? 'h-10 w-10' : 'h-20 w-full mb-2')}>
-        <img
-          src={imgSrc}
-          alt={evidence.name}
-          className="w-full h-full object-contain p-1"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement
-            target.style.display = 'none'
-            target.parentElement!.innerHTML = `<span class="text-gothic-muted text-2xl">🔍</span>`
-          }}
-        />
+        {imgError ? (
+          <span className="text-gothic-muted text-2xl">🔍</span>
+        ) : (
+          <img
+            src={imgSrc}
+            alt={evidence.name}
+            className="w-full h-full object-contain p-1"
+            onError={() => setImgError(true)}
+          />
+        )}
       </div>
       <div>
         <div className={cn('text-gothic-text font-serif', compact ? 'text-sm' : 'text-sm font-semibold')}>{evidence.name}</div>

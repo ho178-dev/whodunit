@@ -17,7 +17,9 @@
       "Bash(gh auth:*)",
       "Bash(taskkill //F //IM node.exe)",
       "Bash(powershell -Command \"Rename-Item -Path ''D:\\\\workspace\\\\app'' -NewName ''whodunit''\")",
-      "Bash(powershell -Command \"Copy-Item -Path ''D:\\\\workspace\\\\app'' -Destination ''D:\\\\workspace\\\\whodunit'' -Recurse -Force\")"
+      "Bash(powershell -Command \"Copy-Item -Path ''D:\\\\workspace\\\\app'' -Destination ''D:\\\\workspace\\\\whodunit'' -Recurse -Force\")",
+      "Bash(\"D:\\\\workspace\\\\whodunit\\\\README.md\":*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }

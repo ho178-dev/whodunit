@@ -7,7 +7,7 @@ export function TitleScreen() {
   const startFixed = () => {
     setScenario(FIXED_SCENARIO)
     setUseFixedScenario(true)
-    setPhase('character_select')
+    setPhase('scenario_briefing')
   }
 
   const startWithApi = () => {
@@ -28,7 +28,7 @@ export function TitleScreen() {
         </div>
 
         <h1 className="font-display text-5xl md:text-7xl text-gothic-gold mb-2 tracking-wider">
-          館ミステリー
+          WhoDuNiT
         </h1>
 
         <div className="border-t border-b border-gothic-border/50 py-4 mb-8">

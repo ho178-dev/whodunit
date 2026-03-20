@@ -9,10 +9,10 @@ export type PhaseTransition = {
 
 export const PHASE_TRANSITIONS: PhaseTransition[] = [
   { from: 'title', to: 'api_key_input' },
-  { from: 'title', to: 'character_select', guard: () => true },
+  { from: 'title', to: 'scenario_briefing', guard: () => true },
   { from: 'api_key_input', to: 'generating', guard: (s) => !!s.apiKey },
-  { from: 'generating', to: 'character_select', guard: (s) => !!s.scenario },
-  { from: 'character_select', to: 'investigation', guard: (s) => !!s.selectedSuspectId },
+  { from: 'generating', to: 'scenario_briefing', guard: (s) => !!s.scenario },
+  { from: 'scenario_briefing', to: 'investigation' },
   {
     from: 'investigation',
     to: 'discussion',
@@ -20,7 +20,7 @@ export const PHASE_TRANSITIONS: PhaseTransition[] = [
   },
   { from: 'discussion', to: 'voting' },
   { from: 'voting', to: 'ending', guard: (s) => !!s.votedSuspectId },
-  { from: 'ending', to: 'character_select' },
+  { from: 'ending', to: 'scenario_briefing' },
   { from: 'ending', to: 'api_key_input' },
   { from: 'ending', to: 'title' },
 ]

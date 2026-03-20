@@ -1,27 +1,46 @@
+import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
 import { RoomSelector } from '../investigation/RoomSelector'
 import { RoomView } from '../investigation/RoomView'
 import { ActionCounter } from '../investigation/ActionCounter'
+import { InvestigationNotes } from '../investigation/InvestigationNotes'
+import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
 
 export function InvestigationPhase() {
-  const { scenario, currentRoomId, actionsRemaining, setPhase, discoveredEvidenceIds } = useGameStore()
+  const { scenario, currentRoomId, actionsRemaining, talkActionsRemaining, difficulty, setPhase, discoveredEvidenceIds } = useGameStore()
+  const diffCfg = DIFFICULTY_CONFIG[difficulty]
+  const [showNotes, setShowNotes] = useState(false)
 
   if (!scenario) return null
 
-  const canProceed = discoveredEvidenceIds.length > 0 || actionsRemaining === 0
+  // いずれかのアクションプールが尽きた場合もソフトロック防止のため進行を許可する
+  const canProceed = discoveredEvidenceIds.length > 0 || actionsRemaining === 0 || talkActionsRemaining === 0
 
   return (
     <div className="min-h-screen px-4 py-8">
+      {showNotes && <InvestigationNotes onClose={() => setShowNotes(false)} />}
+
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="font-display text-2xl text-gothic-gold tracking-widest">探索フェーズ</h1>
-          <ActionCounter remaining={actionsRemaining} total={8} />
+          <ActionCounter
+            actionsRemaining={actionsRemaining}
+            actionsTotal={diffCfg.actions}
+            talkActionsRemaining={talkActionsRemaining}
+            talkActionsTotal={diffCfg.talkActions}
+          />
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <div className="lg:col-span-1">
+          <div className="lg:col-span-1 flex flex-col gap-4">
             <RoomSelector />
+            <button
+              onClick={() => setShowNotes(true)}
+              className="w-full border border-gothic-border bg-gothic-panel hover:border-gothic-accent text-gothic-muted hover:text-gothic-text font-serif text-sm py-3 px-4 transition-all text-left"
+            >
+              📋 操作メモを開く
+            </button>
           </div>
           <div className="lg:col-span-2">
             {currentRoomId ? (

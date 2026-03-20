@@ -28,6 +28,8 @@ export interface Suspect {
   alibi: string
   secret: string
   relationship_to_victim: string
+  room_id: string
+  timeline: string
   investigation_dialog: {
     greeting: string
     statements: string[]
@@ -55,12 +57,18 @@ export interface Evidence {
   description: string
   is_fake: boolean
   relevance: string
+  examination_notes: string
 }
 
 export interface Scenario {
   title: string
   synopsis: string
   setting: string
+  murder_time_range: string
+  detective: {
+    name: string
+    description: string
+  }
   victim: {
     name: string
     appearance_id: CharacterAppearanceId

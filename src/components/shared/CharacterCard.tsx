@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { cn } from '../../utils/cn'
 import { useCharacterAsset } from '../../hooks/useAsset'
 import type { Suspect } from '../../types/scenario'
@@ -11,6 +12,7 @@ interface CharacterCardProps {
 
 export function CharacterCard({ suspect, selected, onClick, small }: CharacterCardProps) {
   const imgSrc = useCharacterAsset(suspect.appearance_id)
+  const [imgError, setImgError] = useState(false)
 
   return (
     <div
@@ -25,16 +27,16 @@ export function CharacterCard({ suspect, selected, onClick, small }: CharacterCa
       onClick={onClick}
     >
       <div className={cn('bg-stone-800 flex items-center justify-center overflow-hidden', small ? 'h-16 w-16 mx-auto' : 'h-32 w-full mb-3')}>
-        <img
-          src={imgSrc}
-          alt={suspect.name}
-          className="w-full h-full object-cover"
-          onError={(e) => {
-            const target = e.target as HTMLImageElement
-            target.style.display = 'none'
-            target.parentElement!.innerHTML = `<span class="text-gothic-muted text-4xl">👤</span>`
-          }}
-        />
+        {imgError ? (
+          <span className="text-gothic-muted text-4xl">👤</span>
+        ) : (
+          <img
+            src={imgSrc}
+            alt={suspect.name}
+            className="w-full h-full object-cover"
+            onError={() => setImgError(true)}
+          />
+        )}
       </div>
       {!small && (
         <>

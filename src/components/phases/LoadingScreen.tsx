@@ -3,7 +3,7 @@ import { useGameStore } from '../../stores/gameStore'
 import { generateScenario } from '../../services/geminiService'
 
 export function LoadingScreen() {
-  const { apiKey, setScenario, setPhase, setIsGenerating, setGenerationError, generationError } = useGameStore()
+  const { apiKey, setApiKey, setScenario, setPhase, setIsGenerating, setGenerationError, generationError } = useGameStore()
 
   useEffect(() => {
     if (!apiKey) return
@@ -11,13 +11,15 @@ export function LoadingScreen() {
     generateScenario(apiKey)
       .then((scenario) => {
         setScenario(scenario)
-        setPhase('character_select')
+        setApiKey(null)  // 生成完了後はキーを保持しない
+        setPhase('scenario_briefing')
       })
       .catch((err) => {
         setGenerationError(err.message || 'シナリオの生成に失敗しました')
       })
       .finally(() => setIsGenerating(false))
-  }, [])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])  // 意図的にマウント時1回のみ実行
 
   if (generationError) {
     return (

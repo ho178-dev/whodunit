@@ -5,7 +5,7 @@ export function resolveCharacterAsset(id: CharacterAppearanceId): string {
 }
 
 export function resolveRoomAsset(id: RoomTypeId): string {
-  return `/assets/rooms/${id}.jpg`
+  return `/assets/rooms/${id}.png`
 }
 
 export function resolveEvidenceAsset(id: EvidenceCategoryId): string {

@@ -5,6 +5,8 @@ export function validateScenario(data: unknown): Scenario {
   const s = data as Scenario
 
   if (!s.title || !s.synopsis || !s.setting) throw new Error('シナリオの基本情報が不正です')
+  if (!s.murder_time_range) throw new Error('murder_time_rangeが設定されていません')
+  if (!s.detective?.name || !s.detective?.description) throw new Error('detective情報が不正です')
   if (!s.victim?.name) throw new Error('被害者情報が不正です')
   if (!s.murderer_id) throw new Error('犯人IDが設定されていません')
   if (!Array.isArray(s.suspects) || s.suspects.length !== SUSPECT_COUNT)
@@ -20,6 +22,17 @@ export function validateScenario(data: unknown): Scenario {
 
   const murdererExists = s.suspects.some((sus) => sus.id === s.murderer_id)
   if (!murdererExists) throw new Error('murderer_idが容疑者リストに存在しません')
+
+  const roomIds = new Set(s.rooms.map((r) => r.id))
+  for (const suspect of s.suspects) {
+    if (!suspect.room_id) throw new Error(`容疑者 ${suspect.id} にroom_idが設定されていません`)
+    if (!roomIds.has(suspect.room_id)) throw new Error(`容疑者 ${suspect.id} のroom_id "${suspect.room_id}" が部屋リストに存在しません`)
+    if (!suspect.timeline) throw new Error(`容疑者 ${suspect.id} にtimelineが設定されていません`)
+  }
+
+  for (const evidence of s.evidence) {
+    if (!evidence.examination_notes) throw new Error(`証拠 ${evidence.id} にexamination_notesが設定されていません`)
+  }
 
   const evidenceIds = new Set(s.evidence.map((e) => e.id))
   for (const room of s.rooms) {

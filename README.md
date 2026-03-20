@@ -1,145 +1,119 @@
-# whodunit — 館ミステリー
+# 館ミステリー
 
-一人用マーダーミステリーWebゲーム。孤島の洋館で起きた殺人事件の犯人を推理する。
+一人用マーダーミステリーゲーム。固定シナリオまたはGemini APIによるAI生成シナリオで遊べる。
 
-## 概要
+---
 
-- **ジャンル**: 一人用マーダーミステリー（推理ゲーム）
-- **プレイ時間**: 約20〜40分／シナリオ
-- **言語**: 日本語
-- **ポートフォリオ兼販売目的**（itch.io / BOOTH予定）
+## アセット配置ガイド
 
-## デモシナリオ
+ゲームで使用する画像は `public/assets/` 以下に配置する。
+ファイルが存在しない場合はフォールバック（絵文字）が自動表示されるため、未配置でも動作する。
 
-**「黄昏の晩餐会」** — 固定シナリオ（APIキー不要）
+## 画像生成
+stable-diffusion-webui-1.7.0で生成した画像を使用。
+① キャラクターイラスト用Model
+DreamShaper XL
 
-孤島の洋館で開催された晩餐会。翌朝、資産家の黒崎源一郎が書斎で毒殺死体で発見された。招待された6名の容疑者の中に犯人がいる。
+② 背景・館の雰囲気画像用Model
+Juggernaut XL
 
-## ゲームフロー
+③ ゴシック特化LoRA（上記と組み合わせ）
+Dark Gothic Horror LoRA
+
+### ディレクトリ構成
 
 ```
-タイトル
-  ├─ 固定シナリオ ──────────────────────────────────┐
-  └─ APIキー入力 → Gemini APIでシナリオ生成 ────────┤
-                                                      ↓
-                                              キャラクター選択
-                                                      ↓
-                                    探索フェーズ（8アクション制限）
-                                      ├─ 部屋を選んで証拠を発見
-                                      └─ NPCに話しかける
-                                                      ↓
-                                              議論フェーズ
-                                        証拠を容疑者に突きつけてリアクションを観察
-                                                      ↓
-                                              最終投票
-                                                      ↓
-                                       エンディング（正解 / 不正解）
+public/
+└── assets/
+    ├── characters/   # キャラクター立ち絵
+    ├── rooms/        # 部屋の背景画像
+    └── evidence/     # 証拠品アイコン
+```
+
+---
+
+### キャラクター画像 `public/assets/characters/`
+
+| ファイル名 | 説明 |
+|-----------|------|
+| `male_teen.png` | 男性・10代 |
+| `male_young.png` | 男性・20〜30代 |
+| `male_young_alt.png` | 男性・20〜30代（別バリエーション） |
+| `male_middle.png` | 男性・中年 |
+| `male_middle_alt.png` | 男性・中年（別バリエーション） |
+| `male_elderly.png` | 男性・老年 |
+| `female_teen.png` | 女性・10代 |
+| `female_young.png` | 女性・20〜30代 |
+| `female_young_alt.png` | 女性・20〜30代（別バリエーション） |
+| `female_middle.png` | 女性・中年 |
+| `female_middle_alt.png` | 女性・中年（別バリエーション） |
+| `female_elderly.png` | 女性・老年 |
+
+- **フォーマット**: PNG（推奨サイズ: 256×320px 以上、縦長）
+- **フォールバック**: 画像なしの場合 `👤` を表示
+
+---
+
+### 部屋画像 `public/assets/rooms/`
+
+| ファイル名 | 説明 |
+|-----------|------|
+| `study.png` | 書斎 |
+| `kitchen.png` | キッチン |
+| `bedroom.png` | 寝室 |
+| `dining_room.png` | ダイニング |
+| `library.png` | 図書室 |
+| `garden.png` | 庭園 |
+| `hallway.png` | 廊下 |
+| `basement.png` | 地下室 |
+| `attic.png` | 屋根裏 |
+| `bathroom.png` | 浴室 |
+| `default.png` | デフォルト画像 |
+
+- **フォーマット**: PNG（推奨サイズ: 800×500px 以上、横長）
+- **フォールバック**: 画像なしの場合は背景なしで表示
+
+---
+
+### 証拠品アイコン `public/assets/evidence/`
+
+| ファイル名 | 説明 |
+|-----------|------|
+| `weapon_blade.png` | 刃物 |
+| `weapon_blunt.png` | 鈍器 |
+| `weapon_firearm.png` | 銃器 |
+| `poison.png` | 毒物 |
+| `document_letter.png` | 手紙・メモ |
+| `document_diary.png` | 日記 |
+| `document_contract.png` | 契約書・遺言書 |
+| `clothing.png` | 衣類・靴 |
+| `jewelry.png` | 装飾品 |
+| `key.png` | 鍵 |
+| `container.png` | 容器・グラス |
+| `photograph.png` | 写真・画像 |
+| `medicine.png` | 薬品 |
+| `food_drink.png` | 食物・飲料 |
+| `tool.png` | 道具 |
+| `fabric.png` | 布・ハンカチ |
+| `fingerprint.png` | 指紋 |
+| `blood_stain.png` | 血痕 |
+
+- **フォーマット**: PNG・透過推奨（推奨サイズ: 128×128px）
+- **フォールバック**: 画像なしの場合 `🔍` を表示
+
+---
+
+## 開発
+
+```bash
+npm install
+npm run dev    # 開発サーバー起動
+npm run build  # プロダクションビルド
 ```
 
 ## 技術スタック
 
-| 項目 | 採用技術 |
-|---|---|
-| ビルドツール | Vite |
-| フレームワーク | React + TypeScript |
-| スタイリング | Tailwind CSS |
-| 状態管理 | Zustand |
-| 画面遷移 | カスタムステートマシン（React Router不使用） |
-| AI API | Google Gemini API（`gemini-2.0-flash`） |
-| UIテーマ | ゴシック・ダーク |
-| フォント | Noto Serif JP + Cinzel |
-
-## ディレクトリ構成
-
-```
-src/
-├── constants/
-│   ├── assetIds.ts          # キャラ・部屋・証拠のIDカタログ
-│   ├── fixedScenario.ts     # 固定シナリオ「黄昏の晩餐会」
-│   └── gameConfig.ts        # ゲーム定数（MAX_ACTIONS=8等）
-├── types/
-│   ├── scenario.ts          # シナリオJSON型定義
-│   └── game.ts              # ゲーム状態型
-├── stores/
-│   └── gameStore.ts         # Zustand グローバルストア
-├── machines/
-│   └── gameMachine.ts       # フェーズ遷移 + ガード条件
-├── services/
-│   ├── geminiService.ts     # Gemini API呼び出し
-│   ├── scenarioParser.ts    # JSONバリデーション（10項目）
-│   └── assetResolver.ts     # アセットID → パス解決
-├── hooks/
-│   ├── useGamePhase.ts      # フェーズ遷移フック
-│   └── useAsset.ts          # アセットパス生成フック
-├── components/
-│   ├── layout/              # GameShell, GothicPanel
-│   ├── phases/              # 各フェーズ画面（8画面）
-│   ├── investigation/       # 探索フェーズ用コンポーネント
-│   ├── discussion/          # 議論フェーズ用コンポーネント
-│   └── shared/              # 共通UI（CharacterCard, EvidenceCard等）
-└── utils/
-    └── cn.ts                # clsx + tailwind-merge
-```
-
-## セットアップ
-
-```bash
-npm install
-npm run dev
-```
-
-ブラウザで `http://localhost:5173` を開く。
-
-## AIシナリオ生成（オプション）
-
-タイトル画面から「AIでシナリオ生成」を選択し、[Google AI Studio](https://aistudio.google.com/) で取得したAPIキーを入力するとGemini APIがランダムな館ミステリーシナリオを生成します。
-
-- モデル: `gemini-2.0-flash`
-- APIキーはセッション中のみ使用・保存なし
-
-## ゲームシステム詳細
-
-### 探索フェーズ
-- 5つの部屋を自由に選択して調査
-- 証拠発見・NPC会話それぞれ1アクション消費
-- 8アクション使い切るか、証拠を1つ以上発見で議論フェーズへ進める
-
-### 議論フェーズ
-- 発見した証拠を6名の容疑者に突きつける
-- 容疑者ごとに証拠に対する固有のリアクションと態度（冷静・動揺・怒り・悲嘆・回避）が設定されている
-- 投票前に何度でも突きつけ可能
-
-### 投票フェーズ
-- 6名の中から犯人と思う人物を1名選んで告発
-
-### エンディング
-- 正解：「謎は解けた」— 動機・真相が全文表示
-- 不正解：「真犯人を見逃した」— 同様に真相が開示
-- 同じシナリオでのリトライ、タイトルへの帰還が可能
-
-## アセットID仕様
-
-キャラクター外見（12種）、部屋タイプ（10種）、証拠カテゴリ（18種）のIDカタログを定義済み。
-`public/assets/` 以下に同名の画像ファイルを配置することで差し替え可能。
-
-| カテゴリ | ディレクトリ | フォーマット |
-|---|---|---|
-| キャラクター | `public/assets/characters/` | `{id}.png` |
-| 部屋 | `public/assets/rooms/` | `{id}.jpg` |
-| 証拠 | `public/assets/evidence/` | `{id}.png` |
-
-## 公開ロードマップ
-
-| ステップ | 内容 |
-|---|---|
-| Step 1 | 固定シナリオ1本 + APIキー方式。GitHub公開（現在） |
-| Step 2 | 固定シナリオ3〜5本追加。Vercel等でデプロイ + PWA対応 |
-| Step 3 | itch.io / BOOTHで公開・販売 |
-
-## ビルド
-
-```bash
-npm run build
-```
-
-`dist/` に静的ファイルが出力されます。バックエンド不要・静的ホスティングのみで動作します。
+- React + TypeScript + Vite
+- Tailwind CSS（ゴシックテーマ）
+- Zustand（状態管理）
+- Google Gemini API（AIシナリオ生成）

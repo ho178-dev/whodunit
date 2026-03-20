@@ -1,0 +1,109 @@
+import { useState } from 'react'
+import { useGameStore } from '../../stores/gameStore'
+import { GothicPanel } from '../layout/GothicPanel'
+import { TutorialOverlay } from './TutorialOverlay'
+import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
+import type { Difficulty } from '../../types/game'
+
+export function ScenarioBriefing() {
+  const { scenario, setPhase, setDifficulty, difficulty } = useGameStore()
+  const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(difficulty)
+  const [showTutorial, setShowTutorial] = useState(false)
+
+  if (!scenario) return null
+
+  const handleStart = () => {
+    setDifficulty(selectedDifficulty)
+    setPhase('investigation')
+  }
+
+  const difficultyKeys: Difficulty[] = ['easy', 'normal', 'hard']
+
+  return (
+    <div className="min-h-screen px-4 py-8">
+      {showTutorial && <TutorialOverlay onClose={() => setShowTutorial(false)} />}
+
+      <div className="max-w-2xl mx-auto">
+        <div className="text-center mb-8">
+          <h1 className="font-display text-3xl text-gothic-gold tracking-widest mb-2">{scenario.title}</h1>
+          <p className="text-gothic-muted font-serif text-sm max-w-xl mx-auto leading-relaxed">{scenario.synopsis}</p>
+        </div>
+
+        {/* 事件概要 */}
+        <GothicPanel title="事件概要" className="mb-4">
+          <div className="grid grid-cols-2 gap-4 text-sm font-serif">
+            <div>
+              <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">舞台</p>
+              <p className="text-gothic-text">{scenario.setting}</p>
+            </div>
+            <div>
+              <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">被害者</p>
+              <p className="text-gothic-text">{scenario.victim.name}</p>
+              <p className="text-gothic-muted text-xs mt-1">{scenario.victim.cause_of_death}</p>
+              <p className="text-gothic-gold text-xs mt-1">推定犯行時刻：{scenario.murder_time_range}</p>
+            </div>
+          </div>
+        </GothicPanel>
+
+        {/* 探偵情報 */}
+        <GothicPanel title="あなたの役割" className="mb-4">
+          <div className="flex items-start gap-4">
+            <div className="flex-1">
+              <p className="text-gothic-gold font-display text-lg tracking-widest mb-1">{scenario.detective.name}</p>
+              <p className="text-gothic-muted font-serif text-sm leading-relaxed">{scenario.detective.description}</p>
+            </div>
+          </div>
+        </GothicPanel>
+
+        {/* 難易度選択 */}
+        <GothicPanel title="難易度" className="mb-6">
+          <div className="grid grid-cols-3 gap-3">
+            {difficultyKeys.map((key) => {
+              const cfg = DIFFICULTY_CONFIG[key]
+              const isSelected = selectedDifficulty === key
+              return (
+                <button
+                  key={key}
+                  onClick={() => setSelectedDifficulty(key)}
+                  className={`border p-3 text-left transition-all ${
+                    isSelected
+                      ? 'border-gothic-gold bg-stone-800'
+                      : 'border-gothic-border hover:border-gothic-accent'
+                  }`}
+                >
+                  <p className={`font-display tracking-widest text-sm mb-1 ${isSelected ? 'text-gothic-gold' : 'text-gothic-text'}`}>
+                    {cfg.label}
+                  </p>
+                  <p className="text-gothic-muted font-serif text-xs leading-relaxed mb-2">{cfg.description}</p>
+                  <div className="space-y-0.5">
+                    <p className="text-gothic-muted font-serif text-xs">
+                      調査 <span className={isSelected ? 'text-gothic-gold' : 'text-gothic-text'}>{cfg.actions}</span> 回
+                    </p>
+                    <p className="text-gothic-muted font-serif text-xs">
+                      会話 <span className={isSelected ? 'text-gothic-gold' : 'text-gothic-text'}>{cfg.talkActions}</span> 回
+                    </p>
+                  </div>
+                </button>
+              )
+            })}
+          </div>
+        </GothicPanel>
+
+        <div className="flex flex-col items-center gap-3">
+          <button
+            onClick={() => setShowTutorial(true)}
+            className="border border-gothic-border text-gothic-muted font-serif text-sm py-2 px-8 hover:border-gothic-accent hover:text-gothic-text transition-all"
+          >
+            ？ 遊び方を見る
+          </button>
+          <button
+            onClick={handleStart}
+            className="border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-4 px-12 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
+          >
+            捜査を開始する
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
