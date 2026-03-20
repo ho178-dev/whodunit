@@ -1,1 +1,6 @@
-export type { CharacterAppearanceId, RoomTypeId, EvidenceCategoryId } from './scenario'
+export type {
+  CharacterAppearanceId,
+  RoomTypeId,
+  EvidenceCategoryId,
+  MansionBackgroundId,
+} from './scenario'

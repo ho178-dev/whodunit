@@ -5,6 +5,7 @@ export const FIXED_SCENARIO: Scenario = {
   synopsis:
     '孤島の洋館で開催された晩餐会。翌朝、資産家の黒崎源一郎が書斎で冷たくなって発見された。毒殺と思われる。招待された6名の中に犯人がいる。',
   setting: '孤島に建つゴシック様式の洋館。外は嵐で孤立無援の状況。',
+  mansion_background_id: 'mansion_seaside',
   victim: {
     name: '黒崎源一郎',
     appearance_id: 'male_elderly',
@@ -12,10 +13,6 @@ export const FIXED_SCENARIO: Scenario = {
     cause_of_death: '致死量のアコニチン（トリカブト毒）による中毒死',
   },
   murder_time_range: '22:00〜01:00（推定）',
-  detective: {
-    name: '桐嶋 蓮',
-    description: '依頼を受けてこの孤島に赴いた私立探偵。冷静な観察眼と論理的な推理で真相に迫る。',
-  },
   murderer_id: 'shiraishi_makoto',
   motive: '黒崎が書き換えた遺言書を元に戻すため。自分への遺産相続分が削除されていた。',
   truth:

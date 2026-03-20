@@ -1,3 +1,12 @@
+export type MansionBackgroundId =
+  | 'mansion_gothic'
+  | 'mansion_japanese'
+  | 'mansion_seaside'
+  | 'mansion_forest'
+  | 'mansion_snowy'
+  | 'mansion_night'
+  | 'mansion_ruins'
+
 export type CharacterAppearanceId =
   | 'male_teen'
   | 'male_young'
@@ -94,10 +103,7 @@ export interface Scenario {
   synopsis: string
   setting: string
   murder_time_range: string
-  detective: {
-    name: string
-    description: string
-  }
+  mansion_background_id: MansionBackgroundId
   victim: {
     name: string
     appearance_id: CharacterAppearanceId
