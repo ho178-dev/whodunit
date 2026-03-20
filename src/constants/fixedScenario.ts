@@ -5,6 +5,7 @@ export const FIXED_SCENARIO: Scenario = {
   synopsis:
     '孤島の洋館で開催された晩餐会。翌朝、資産家の黒崎源一郎が書斎で冷たくなって発見された。毒殺と思われる。招待された6名の中に犯人がいる。',
   setting: '孤島に建つゴシック様式の洋館。外は嵐で孤立無援の状況。',
+  mansion_background_id: 'mansion_seaside',
   victim: {
     name: '黒崎源一郎',
     appearance_id: 'male_elderly',

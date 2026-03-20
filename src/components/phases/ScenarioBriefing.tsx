@@ -3,6 +3,7 @@ import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
 import { TutorialOverlay } from './TutorialOverlay'
 import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
+import { resolveMansionAsset, MANSION_DEFAULT_ASSET } from '../../services/assetResolver'
 import type { Difficulty } from '../../types/game'
 
 export function ScenarioBriefing() {
@@ -24,13 +25,25 @@ export function ScenarioBriefing() {
       {showTutorial && <TutorialOverlay onClose={() => setShowTutorial(false)} />}
 
       <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="font-display text-3xl text-gothic-gold tracking-widest mb-2">
-            {scenario.title}
-          </h1>
-          <p className="text-gothic-muted font-serif text-sm max-w-xl mx-auto leading-relaxed">
-            {scenario.synopsis}
-          </p>
+        {/* 館背景ヘッダー */}
+        <div className="relative mb-8 overflow-hidden" style={{ height: '220px' }}>
+          <img
+            src={resolveMansionAsset(scenario.mansion_background_id)}
+            onError={(e) => {
+              e.currentTarget.src = MANSION_DEFAULT_ASSET
+            }}
+            alt={scenario.title}
+            className="w-full h-full object-cover"
+          />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-gothic-bg" />
+          <div className="absolute bottom-0 inset-x-0 text-center pb-4">
+            <h1 className="font-display text-3xl text-gothic-gold tracking-widest drop-shadow-lg mb-1">
+              {scenario.title}
+            </h1>
+            <p className="text-gothic-muted font-serif text-sm max-w-xl mx-auto leading-relaxed px-4">
+              {scenario.synopsis}
+            </p>
+          </div>
         </div>
 
         {/* 事件概要 */}

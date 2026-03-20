@@ -1,4 +1,19 @@
-import type { CharacterAppearanceId, RoomTypeId, EvidenceCategoryId } from '../types/scenario'
+import type {
+  CharacterAppearanceId,
+  RoomTypeId,
+  EvidenceCategoryId,
+  MansionBackgroundId,
+} from '../types/scenario'
+
+export const MANSION_BACKGROUND_IDS: MansionBackgroundId[] = [
+  'mansion_gothic',
+  'mansion_japanese',
+  'mansion_seaside',
+  'mansion_forest',
+  'mansion_snowy',
+  'mansion_night',
+  'mansion_ruins',
+]
 
 export const CHARACTER_APPEARANCE_IDS: CharacterAppearanceId[] = [
   'male_teen',

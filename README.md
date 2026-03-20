@@ -12,14 +12,15 @@
 ## 画像生成
 
 stable-diffusion-webui-1.7.0で生成した画像を使用。
-① キャラクターイラスト用Model
-DreamShaper XL
 
-② 背景・館の雰囲気画像用Model
-Juggernaut XL
+- キャラクターイラスト用Model
+  DreamShaper XL
 
-③ ゴシック特化LoRA（上記と組み合わせ）
-Dark Gothic Horror LoRA
+- 背景・館の雰囲気画像用Model
+  Juggernaut XL
+
+- ゴシック特化LoRA（上記と組み合わせ）
+  Dark Gothic Horror LoRA
 
 ### ディレクトリ構成
 
@@ -27,9 +28,31 @@ Dark Gothic Horror LoRA
 public/
 └── assets/
     ├── characters/   # キャラクター立ち絵
+    ├── mansion/      # 館の背景画像（事件概要画面）
     ├── rooms/        # 部屋の背景画像
     └── evidence/     # 証拠品アイコン
 ```
+
+---
+
+### 館背景画像 `public/assets/mansion/`
+
+事件概要画面（シナリオブリーフィング）のヘッダーに表示される館の外観・雰囲気画像。
+AIシナリオ生成時にシナリオの設定に合う `mansion_background_id` が自動選択される。
+
+| ファイル名             | 説明                                     |
+| ---------------------- | ---------------------------------------- |
+| `mansion_gothic.png`   | ゴシック様式の洋館（西洋古典）           |
+| `mansion_japanese.png` | 日本家屋・豪邸（和風）                   |
+| `mansion_seaside.png`  | 孤島・海辺の館（嵐・孤立）               |
+| `mansion_forest.png`   | 深森の中の屋敷（霧・幽玄）               |
+| `mansion_snowy.png`    | 雪景色の館（冬・静寂）                   |
+| `mansion_night.png`    | 月夜の館（闇夜・月明かり）               |
+| `mansion_ruins.png`    | 廃墟・古城風（荒廃・呪われた）           |
+| `default.png`          | デフォルト（上記が存在しない場合に使用） |
+
+- **フォーマット**: PNG（推奨サイズ: 1200×600px 以上、横長）
+- **フォールバック**: 各IDの画像がない場合は `default.png` で表示
 
 ---
 

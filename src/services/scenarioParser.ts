@@ -1,4 +1,5 @@
 import type { Scenario } from '../types/scenario'
+import { MANSION_BACKGROUND_IDS } from '../constants/assetIds'
 import {
   SUSPECT_COUNT,
   ROOM_COUNT,
@@ -11,6 +12,8 @@ export function validateScenario(data: unknown): Scenario {
 
   if (!s.title || !s.synopsis || !s.setting) throw new Error('シナリオの基本情報が不正です')
   if (!s.murder_time_range) throw new Error('murder_time_rangeが設定されていません')
+  if (!MANSION_BACKGROUND_IDS.includes(s.mansion_background_id))
+    throw new Error(`mansion_background_idが不正です: ${s.mansion_background_id}`)
   if (!s.detective?.name || !s.detective?.description) throw new Error('detective情報が不正です')
   if (!s.victim?.name) throw new Error('被害者情報が不正です')
   if (!s.murderer_id) throw new Error('犯人IDが設定されていません')

@@ -4,6 +4,7 @@ import {
   CHARACTER_APPEARANCE_IDS,
   ROOM_TYPE_IDS,
   EVIDENCE_CATEGORY_IDS,
+  MANSION_BACKGROUND_IDS,
 } from '../constants/assetIds'
 import { validateScenario } from './scenarioParser'
 
@@ -15,8 +16,10 @@ const PROMPT = `
 キャラクター外見ID（いずれか1つを選択）: ${CHARACTER_APPEARANCE_IDS.join(', ')}
 部屋タイプID（5つ選択）: ${ROOM_TYPE_IDS.join(', ')}
 証拠カテゴリID（12個選択）: ${EVIDENCE_CATEGORY_IDS.join(', ')}
+館背景ID（いずれか1つを選択）: ${MANSION_BACKGROUND_IDS.join(', ')}
 
 ## 制約
+- mansion_background_id: 館背景IDカタログからシナリオの舞台・雰囲気に最も合う1つを選択すること
 - detective: { name: string; description: string } を設定すること（探偵は容疑者の外部にいる第三者。容疑者のid/nameとは別人）
 - suspects: 6名固定（全員にユニークなidを付与）
 - rooms: 5室固定（各部屋に証拠IDを1-3個配置）
