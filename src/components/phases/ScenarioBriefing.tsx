@@ -6,6 +6,8 @@ import { TutorialOverlay } from './TutorialOverlay'
 import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
 import { resolveMansionAsset, MANSION_DEFAULT_ASSET } from '../../services/assetResolver'
 import type { Difficulty } from '../../types/game'
+import { PixelImageWithFallback } from '../shared/PixelImage'
+import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 
 // シナリオ概要・難易度選択を表示し、捜査フェーズ開始を制御するコンポーネント
 export function ScenarioBriefing() {
@@ -30,13 +32,13 @@ export function ScenarioBriefing() {
       <div className="max-w-2xl mx-auto">
         {/* 館背景ヘッダー */}
         <div className="relative mb-8 overflow-hidden" style={{ height: '220px' }}>
-          <img
+          <PixelImageWithFallback
             src={resolveMansionAsset(scenario.mansion_background_id)}
-            onError={(e) => {
-              e.currentTarget.src = MANSION_DEFAULT_ASSET
-            }}
             alt={scenario.title}
-            className="w-full h-full object-cover"
+            pixelSize={PIXEL_ART_CONFIG.pixelSize.mansion}
+            canvasWidth={PIXEL_ART_CONFIG.canvasSize.mansion.width}
+            canvasHeight={PIXEL_ART_CONFIG.canvasSize.mansion.height}
+            fallbackSrc={MANSION_DEFAULT_ASSET}
           />
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-gothic-bg" />
           <div className="absolute bottom-0 inset-x-0 text-center pb-4">

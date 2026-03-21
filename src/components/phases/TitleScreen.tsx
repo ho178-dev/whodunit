@@ -39,7 +39,7 @@ export function TitleScreen() {
 
         <div className="border-t border-b border-gothic-border/50 py-4 mb-8">
           <p className="text-gothic-muted font-serif text-sm tracking-widest">
-            ― 孤島の洋館に潜む真実を暴け ―
+            ― 犯人は、この中にいる ―
           </p>
         </div>
 

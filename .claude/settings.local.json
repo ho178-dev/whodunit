@@ -28,7 +28,9 @@
       "Bash(python3:*)",
       "Bash(node:*)",
       "Bash(npx lint-staged:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(find /d/workspace/whodunit/public/assets -type f -exec ls -lh {})",
+      "Bash(npx eslint:*)"
     ]
   }
 }

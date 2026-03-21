@@ -1,8 +1,11 @@
 // 証拠品の画像・名前・説明を表示する汎用カードコンポーネント
-import { useState } from 'react'
 import { cn } from '../../utils/cn'
 import { useEvidenceAsset } from '../../hooks/useAsset'
 import type { Evidence } from '../../types/scenario'
+import { PixelImageWithFallback } from './PixelImage'
+import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
+
+const DEFAULT_EVIDENCE_IMG = '/assets/evidence/default.png'
 
 interface EvidenceCardProps {
   evidence: Evidence
@@ -13,7 +16,6 @@ interface EvidenceCardProps {
 
 export function EvidenceCard({ evidence, selected, onClick, compact }: EvidenceCardProps) {
   const imgSrc = useEvidenceAsset(evidence.category_id)
-  const [imgError, setImgError] = useState(false)
 
   return (
     <div
@@ -33,16 +35,18 @@ export function EvidenceCard({ evidence, selected, onClick, compact }: EvidenceC
           compact ? 'h-10 w-10' : 'h-20 w-full mb-2'
         )}
       >
-        {imgError ? (
-          <span className="text-gothic-muted text-2xl">🔍</span>
-        ) : (
-          <img
-            src={imgSrc}
-            alt={evidence.name}
-            className="w-full h-full object-contain p-1"
-            onError={() => setImgError(true)}
-          />
-        )}
+        <PixelImageWithFallback
+          src={imgSrc}
+          alt={evidence.name}
+          pixelSize={
+            compact
+              ? PIXEL_ART_CONFIG.pixelSize.evidenceCompact
+              : PIXEL_ART_CONFIG.pixelSize.evidence
+          }
+          canvasWidth={PIXEL_ART_CONFIG.canvasSize.evidence.width}
+          canvasHeight={PIXEL_ART_CONFIG.canvasSize.evidence.height}
+          fallbackSrc={DEFAULT_EVIDENCE_IMG}
+        />
       </div>
       <div>
         <div
