@@ -4,6 +4,22 @@ import type { GamePhase, ConfrontationEntry, Difficulty } from '../types/game'
 import type { Scenario } from '../types/scenario'
 import { DIFFICULTY_CONFIG } from '../constants/gameConfig'
 
+// 詳細調査済みの証拠IDリストとシナリオを元に、新たに発見すべき組み合わせIDを返すヘルパー
+function checkCombinations(
+  scenario: Scenario | null,
+  examinedIds: string[],
+  alreadyDiscovered: string[]
+): string[] {
+  if (!scenario?.evidence_combinations) return []
+  return scenario.evidence_combinations
+    .filter(
+      (c) =>
+        !alreadyDiscovered.includes(c.id) &&
+        c.evidence_ids.every((eid) => examinedIds.includes(eid))
+    )
+    .map((c) => c.id)
+}
+
 export interface HeardStatement {
   suspectId: string
   suspectName: string
@@ -24,6 +40,8 @@ export interface GameState {
   currentRoomId: string | null
   inspectedEvidenceIds: string[] // 1段階目：外観開示済み
   examinedEvidenceIds: string[] // 2段階目：論理的示唆開示済み
+  discoveredCombinationIds: string[] // 発見済み証拠組み合わせID
+  pendingCombinationIds: string[] // 通知待ち組み合わせIDキュー（先頭を表示）
   talkedSuspectIds: string[]
   heardStatements: HeardStatement[]
   confrontationLog: ConfrontationEntry[]
@@ -40,6 +58,7 @@ export interface GameState {
   setCurrentRoomId: (id: string | null) => void
   inspectEvidence: (evidenceId: string) => void
   examineEvidence: (evidenceId: string) => void
+  clearPendingCombination: () => void
   talkToSuspect: (suspectId: string) => void
   consumeAction: () => void
   hearStatement: (entry: HeardStatement) => void
@@ -64,6 +83,8 @@ const initialState = {
   currentRoomId: null,
   inspectedEvidenceIds: [],
   examinedEvidenceIds: [],
+  discoveredCombinationIds: [],
+  pendingCombinationIds: [],
   talkedSuspectIds: [],
   heardStatements: [],
   confrontationLog: [],
@@ -100,12 +121,26 @@ export const useGameStore = create<GameState>((set) => ({
       const next = addId(state.inspectedEvidenceIds, evidenceId)
       return next ? { inspectedEvidenceIds: next } : {}
     }),
-  // 証拠を論理的示唆開示済みリストに追加する（2段階目、重複追加しない）
+  // 証拠を論理的示唆開示済みリストに追加し、組み合わせ発見をチェックする（2段階目）
   examineEvidence: (evidenceId) =>
     set((state) => {
       const next = addId(state.examinedEvidenceIds, evidenceId)
-      return next ? { examinedEvidenceIds: next } : {}
+      if (!next) return {}
+      const newlyDiscovered = checkCombinations(
+        state.scenario,
+        next,
+        state.discoveredCombinationIds
+      )
+      if (newlyDiscovered.length === 0) return { examinedEvidenceIds: next }
+      return {
+        examinedEvidenceIds: next,
+        discoveredCombinationIds: [...state.discoveredCombinationIds, ...newlyDiscovered],
+        pendingCombinationIds: [...state.pendingCombinationIds, ...newlyDiscovered],
+      }
     }),
+  // 通知済みの先頭組み合わせをキューから取り除く
+  clearPendingCombination: () =>
+    set((state) => ({ pendingCombinationIds: state.pendingCombinationIds.slice(1) })),
   // 容疑者を会話済みリストに追加する（重複追加しない）
   talkToSuspect: (suspectId) =>
     set((state) => {

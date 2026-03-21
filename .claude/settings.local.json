@@ -21,7 +21,8 @@
       "Bash(\"D:\\\\workspace\\\\whodunit\\\\README.md\":*)",
       "Bash(npx tsc:*)",
       "Bash(npx husky:*)",
-      "Bash(xargs grep:*)"
+      "Bash(xargs grep:*)",
+      "Bash(npx vite:*)"
     ]
   }
 }

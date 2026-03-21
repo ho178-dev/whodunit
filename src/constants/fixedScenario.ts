@@ -552,4 +552,39 @@ export const FIXED_SCENARIO: Scenario = {
         '赤い染みは一見すると血痕に見えるが、成分分析の結果、昨晩のディナーで使用した牛肉の血液と確認された。黒崎源一郎の死因はアコニチン中毒であり、刃物とは無関係。犯人を誤誘導する偽の手がかりに過ぎない。',
     },
   ],
+  // 証拠クロス参照：複数の証拠が揃って初めて解放される決定的事実
+  evidence_combinations: [
+    {
+      id: 'combo_garden_intruder',
+      evidence_ids: ['muddy_shoes', 'photo_garden'],
+      name: '深夜に庭へ出た人物が特定された',
+      description:
+        '泥靴の足跡サイズと庭園の写真に映り込んだ人物の輪郭が一致する。深夜0時頃、白石誠が庭園へ出て何かを採取していたことが明らかになった。アリバイ「部屋にいた」と矛盾する。',
+      is_critical: false,
+    },
+    {
+      id: 'combo_poison_origin',
+      evidence_ids: ['herb_fragment', 'poison_bottle'],
+      name: '毒の入手経路が判明した',
+      description:
+        '庭で採取されたトリカブトの葉片と小瓶の毒成分が同一種由来と確認された。犯人は庭園からトリカブトを採取し、キッチンで毒を精製していた。市販品でなく自家製である点が、館内の人物による犯行を強く示唆する。',
+      is_critical: true,
+    },
+    {
+      id: 'combo_motive_confirmed',
+      evidence_ids: ['will_document', 'diary_entry'],
+      name: '遺言書書き換えによる動機が確定した',
+      description:
+        '遺言書の写しと日記の記述が合致し、黒崎源一郎が先月密かに遺言書を書き換えていた事実が確定した。相続分を削除された人物には3000万円超の損失が生じる。この事実を知っていた者が最有力の動機を持つ。',
+      is_critical: true,
+    },
+    {
+      id: 'combo_study_intrusion',
+      evidence_ids: ['handkerchief', 'safe_key', 'will_document'],
+      name: '書斎へ侵入して遺言書を確認した人物が特定された',
+      description:
+        '「S.M.」イニシャルのハンカチ・金庫の鍵・遺言書の写しが一つの行動を示す。白石誠が金庫の鍵を用いて書斎に侵入し、遺言書の内容を確認した上でコピーを残した。動機・機会・現場の三点が交差する決定的な証拠連鎖だ。',
+      is_critical: true,
+    },
+  ],
 }

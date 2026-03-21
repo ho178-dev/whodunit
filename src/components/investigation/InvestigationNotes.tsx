@@ -1,22 +1,32 @@
-// 捜査中に収集したタイムライン・証拠品・証言を閲覧できるメモパネル
+// 捜査中に収集したタイムライン・証拠品・証言・発見を閲覧できるメモパネル
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
+import { getEvidenceNames } from '../../utils/scenario'
 
-type Tab = 'timeline' | 'evidence' | 'testimony'
+type Tab = 'timeline' | 'evidence' | 'testimony' | 'discovery'
 
 interface InvestigationNotesProps {
   onClose: () => void
 }
 
-// タイムライン・証拠・証言をタブ切り替えで表示するメモパネルコンポーネント
+// タイムライン・証拠・証言・発見をタブ切り替えで表示するメモパネルコンポーネント
 export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
-  const { scenario, talkedSuspectIds, inspectedEvidenceIds, examinedEvidenceIds, heardStatements } =
-    useGameStore()
+  const {
+    scenario,
+    talkedSuspectIds,
+    inspectedEvidenceIds,
+    examinedEvidenceIds,
+    heardStatements,
+    discoveredCombinationIds,
+  } = useGameStore()
   const [tab, setTab] = useState<Tab>('timeline')
 
   if (!scenario) return null
 
   const discoveredEvidence = scenario.evidence.filter((e) => inspectedEvidenceIds.includes(e.id))
+  const discoveredCombinations = (scenario.evidence_combinations ?? []).filter((c) =>
+    discoveredCombinationIds.includes(c.id)
+  )
 
   // 話しかけた容疑者のtimeline
   const talkedSuspects = scenario.suspects.filter((s) => talkedSuspectIds.includes(s.id))
@@ -33,7 +43,7 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
 
   // 選択中タブかどうかに応じたスタイルクラスを返すユーティリティ関数
   const tabClass = (t: Tab) =>
-    `px-4 py-2 text-xs font-display tracking-widest transition-colors ${
+    `px-3 py-2 text-xs font-display tracking-widest transition-colors ${
       tab === t
         ? 'text-gothic-gold border-b border-gothic-gold'
         : 'text-gothic-muted hover:text-gothic-text'
@@ -80,6 +90,12 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
           </button>
           <button onClick={() => setTab('testimony')} className={tabClass('testimony')}>
             証言 {heardStatements.length > 0 && `(${heardStatements.length})`}
+          </button>
+          <button onClick={() => setTab('discovery')} className={tabClass('discovery')}>
+            発見
+            {discoveredCombinations.length > 0 && (
+              <span className="ml-1 text-gothic-gold">({discoveredCombinations.length})</span>
+            )}
           </button>
         </div>
 
@@ -202,6 +218,53 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
                       </div>
                     </div>
                   ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 発見（証拠クロス参照） */}
+          {tab === 'discovery' && (
+            <div>
+              {discoveredCombinations.length === 0 ? (
+                <p className="text-gothic-muted font-serif text-sm text-center py-4">
+                  複数の証拠を詳しく調査すると決定的事実が解放されます
+                </p>
+              ) : (
+                <div className="space-y-4">
+                  {discoveredCombinations.map((combo) => {
+                    const evidenceNames = getEvidenceNames(combo.evidence_ids, scenario.evidence)
+                    return (
+                      <div
+                        key={combo.id}
+                        className="border border-gothic-gold/40 p-3 bg-stone-900/30"
+                      >
+                        <div className="flex items-start gap-2 mb-2">
+                          <span className="text-gothic-gold font-display text-xs tracking-widest leading-snug">
+                            {combo.name}
+                          </span>
+                          {combo.is_critical && (
+                            <span className="shrink-0 text-xs font-serif border border-gothic-gold/60 text-gothic-gold px-1">
+                              重要
+                            </span>
+                          )}
+                        </div>
+                        <div className="flex flex-wrap gap-1 mb-2">
+                          {evidenceNames.map((name, i) => (
+                            <span
+                              key={i}
+                              className="border border-gothic-border text-gothic-muted font-serif text-xs px-1.5 py-0.5"
+                            >
+                              {name}
+                            </span>
+                          ))}
+                        </div>
+                        <p className="text-gothic-text font-serif text-xs leading-relaxed">
+                          {combo.description}
+                        </p>
+                      </div>
+                    )
+                  })}
                 </div>
               )}
             </div>

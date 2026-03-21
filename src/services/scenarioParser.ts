@@ -54,5 +54,27 @@ export function validateScenario(data: unknown): Scenario {
     }
   }
 
+  // evidence_combinations は省略可。存在する場合のみバリデーション
+  if (s.evidence_combinations !== undefined) {
+    if (!Array.isArray(s.evidence_combinations))
+      throw new Error('evidence_combinationsは配列である必要があります')
+    for (const combo of s.evidence_combinations) {
+      if (!combo.id || !combo.name || !combo.description)
+        throw new Error(`evidence_combination "${combo.id}" の必須フィールドが不正です`)
+      if (
+        !Array.isArray(combo.evidence_ids) ||
+        combo.evidence_ids.length < 2 ||
+        combo.evidence_ids.length > 3
+      )
+        throw new Error(`evidence_combination "${combo.id}" のevidence_idsは2〜3個必要です`)
+      for (const eid of combo.evidence_ids) {
+        if (!evidenceIds.has(eid))
+          throw new Error(
+            `evidence_combination "${combo.id}" の証拠ID "${eid}" が証拠リストに存在しません`
+          )
+      }
+    }
+  }
+
   return s
 }

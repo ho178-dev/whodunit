@@ -6,6 +6,7 @@ import { RoomSelector } from '../investigation/RoomSelector'
 import { RoomView } from '../investigation/RoomView'
 import { ActionCounter } from '../investigation/ActionCounter'
 import { InvestigationNotes } from '../investigation/InvestigationNotes'
+import { CombinationDiscovery } from '../investigation/CombinationDiscovery'
 import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
 
 export function InvestigationPhase() {
@@ -29,6 +30,7 @@ export function InvestigationPhase() {
 
   return (
     <div className="min-h-screen px-4 py-8">
+      <CombinationDiscovery />
       {showNotes && <InvestigationNotes onClose={() => setShowNotes(false)} />}
 
       <div className="max-w-5xl mx-auto">

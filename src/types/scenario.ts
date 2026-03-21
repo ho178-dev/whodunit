@@ -56,6 +56,15 @@ export type EvidenceCategoryId =
 
 export type NpcBehavior = 'calm' | 'nervous' | 'angry' | 'sad' | 'evasive'
 
+// 複数証拠の組み合わせで解放される決定的事実
+export interface EvidenceCombination {
+  id: string
+  evidence_ids: [string, string] | [string, string, string]
+  name: string // 解放されるファクト名（例: "深夜に庭へ出た人物が特定"）
+  description: string // ファクトの詳細説明
+  is_critical: boolean // true = 犯人特定に必須の決定的証拠
+}
+
 export interface Suspect {
   id: string
   name: string
@@ -117,4 +126,5 @@ export interface Scenario {
   suspects: Suspect[]
   rooms: Room[]
   evidence: Evidence[]
+  evidence_combinations?: EvidenceCombination[] // 証拠クロス参照システム（省略可）
 }
