@@ -1,6 +1,6 @@
-// Zustandによるゲーム全体の状態管理ストア（フェーズ・証拠・会話履歴など）
+// Zustandによるゲーム全体の状態管理ストア（フェーズ・証拠・会話履歴・仮説など）
 import { create } from 'zustand'
-import type { GamePhase, ConfrontationEntry, Difficulty } from '../types/game'
+import type { GamePhase, ConfrontationEntry, Difficulty, SuspectHypothesis } from '../types/game'
 import type { Scenario } from '../types/scenario'
 import { DIFFICULTY_CONFIG } from '../constants/gameConfig'
 
@@ -19,6 +19,9 @@ function checkCombinations(
     )
     .map((c) => c.id)
 }
+
+// localStorage キー生成（シナリオタイトルをキーとして仮説データを区別する）
+const hypothesesKey = (scenarioTitle: string) => `whodunit_hypotheses_${scenarioTitle}`
 
 export interface HeardStatement {
   suspectId: string
@@ -46,6 +49,7 @@ export interface GameState {
   heardStatements: HeardStatement[]
   confrontationLog: ConfrontationEntry[]
   votedSuspectId: string | null
+  hypotheses: SuspectHypothesis[] // 容疑者ごとの仮説メモ
 
   // Actions
   setPhase: (phase: GamePhase) => void
@@ -64,6 +68,11 @@ export interface GameState {
   hearStatement: (entry: HeardStatement) => void
   addConfrontation: (entry: Omit<ConfrontationEntry, 'timestamp'>) => void
   setVotedSuspectId: (id: string) => void
+  updateHypothesis: (
+    suspectId: string,
+    field: keyof Omit<SuspectHypothesis, 'suspectId'>,
+    value: string
+  ) => void
   resetGame: () => void
 }
 
@@ -89,6 +98,7 @@ const initialState = {
   heardStatements: [],
   confrontationLog: [],
   votedSuspectId: null,
+  hypotheses: [],
 }
 
 export const useGameStore = create<GameState>((set) => ({
@@ -100,8 +110,18 @@ export const useGameStore = create<GameState>((set) => ({
   setApiKey: (key) => set({ apiKey: key }),
   // 固定シナリオ使用フラグを更新する
   setUseFixedScenario: (use) => set({ useFixedScenario: use }),
-  // シナリオデータを設定する
-  setScenario: (scenario) => set({ scenario }),
+  // シナリオデータを設定し、保存済み仮説を localStorage から復元する
+  setScenario: (scenario) =>
+    set(() => {
+      let hypotheses: SuspectHypothesis[] = []
+      try {
+        const stored = localStorage.getItem(hypothesesKey(scenario.title))
+        if (stored) hypotheses = JSON.parse(stored) as SuspectHypothesis[]
+      } catch {
+        /* localStorage が使えない環境では仮説を空のまま初期化 */
+      }
+      return { scenario, hypotheses }
+    }),
   // 生成中フラグを更新する
   setIsGenerating: (generating) => set({ isGenerating: generating }),
   // 生成エラーメッセージを更新する
@@ -171,16 +191,49 @@ export const useGameStore = create<GameState>((set) => ({
     })),
   // 投票した容疑者IDを設定する
   setVotedSuspectId: (id) => set({ votedSuspectId: id }),
-  // ゲームをリセットして同一シナリオ・APIキーで再挑戦できる状態にする
+  // 容疑者の仮説フィールドを更新し、localStorage に保存する
+  updateHypothesis: (suspectId, field, value) =>
+    set((state) => {
+      let found = false
+      const mapped = state.hypotheses.map((h) => {
+        if (h.suspectId !== suspectId) return h
+        found = true
+        return { ...h, [field]: value }
+      })
+      const updated = found
+        ? mapped
+        : [
+            ...state.hypotheses,
+            { suspectId, motive: '', opportunity: '', means: '', notes: '', [field]: value },
+          ]
+      try {
+        if (state.scenario) {
+          localStorage.setItem(hypothesesKey(state.scenario.title), JSON.stringify(updated))
+        }
+      } catch {
+        /* localStorage への保存失敗は無視 */
+      }
+      return { hypotheses: updated }
+    }),
+  // ゲームをリセットして同一シナリオ・APIキーで再挑戦できる状態にする（仮説も削除）
   resetGame: () =>
-    set((state) => ({
-      ...initialState,
-      phase: 'scenario_briefing' as GamePhase,
-      scenario: state.scenario,
-      apiKey: state.apiKey,
-      useFixedScenario: state.useFixedScenario,
-      difficulty: state.difficulty,
-      actionsRemaining: DIFFICULTY_CONFIG[state.difficulty].actions,
-      talkActionsRemaining: DIFFICULTY_CONFIG[state.difficulty].talkActions,
-    })),
+    set((state) => {
+      try {
+        if (state.scenario) {
+          localStorage.removeItem(hypothesesKey(state.scenario.title))
+        }
+      } catch {
+        /* localStorage からの削除失敗は無視 */
+      }
+      return {
+        ...initialState,
+        phase: 'scenario_briefing' as GamePhase,
+        scenario: state.scenario,
+        apiKey: state.apiKey,
+        useFixedScenario: state.useFixedScenario,
+        difficulty: state.difficulty,
+        actionsRemaining: DIFFICULTY_CONFIG[state.difficulty].actions,
+        talkActionsRemaining: DIFFICULTY_CONFIG[state.difficulty].talkActions,
+      }
+    }),
 }))

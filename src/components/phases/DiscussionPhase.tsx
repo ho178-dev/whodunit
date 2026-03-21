@@ -3,11 +3,13 @@ import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { NpcConfrontation } from '../discussion/NpcConfrontation'
 import { EvidenceSelector } from '../discussion/EvidenceSelector'
+import { InvestigationNotes } from '../investigation/InvestigationNotes'
 
 export function DiscussionPhase() {
   const { scenario, setPhase, inspectedEvidenceIds } = useGameStore()
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null)
+  const [showNotes, setShowNotes] = useState(false)
 
   if (!scenario) return null
 
@@ -16,13 +18,23 @@ export function DiscussionPhase() {
       <div className="max-w-5xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="font-display text-2xl text-gothic-gold tracking-widest">議論フェーズ</h1>
-          <button
-            onClick={() => setPhase('voting')}
-            className="border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-[0.1em] py-2 px-6 transition-all text-sm"
-          >
-            投票へ進む
-          </button>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowNotes(true)}
+              className="border border-stone-600 bg-gothic-panel hover:bg-stone-800 text-stone-400 font-display tracking-[0.1em] py-2 px-4 transition-all text-sm"
+            >
+              📋 操作メモを開く
+            </button>
+            <button
+              onClick={() => setPhase('voting')}
+              className="border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-[0.1em] py-2 px-6 transition-all text-sm"
+            >
+              投票へ進む
+            </button>
+          </div>
         </div>
+
+        {showNotes && <InvestigationNotes onClose={() => setShowNotes(false)} />}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <div>
