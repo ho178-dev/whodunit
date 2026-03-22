@@ -24,6 +24,8 @@ export const FIXED_SCENARIO: Scenario = {
       appearance_id: 'male_young',
       age: 32,
       occupation: '無職（元投資家）',
+      default_wrong_pursuit_response:
+        'その証言と証拠に関連性を見出すのは、いささか飛躍が過ぎるのではないですか。',
       description: '端正な顔立ちの青年。常に落ち着いた笑みを浮かべているが、目が笑っていない。',
       personality: '計算高く冷静。感情を表に出さない。',
       alibi: '晩餐会の間はずっとダイニングにいたと主張。',
@@ -51,6 +53,26 @@ export const FIXED_SCENARIO: Scenario = {
         will_document: {
           reaction: 'その遺言書は…偽物だ。本物はもっと違う内容のはずだ。',
           behavior: 'nervous',
+          contradicts_statement_index: 4,
+          wrong_testimony_response:
+            'その証言とこの遺言書に、直接の矛盾は見当たらない。見当違いだ。',
+          pursuit_questions: [
+            {
+              id: 'shiraishi_pq_will_1',
+              text: 'あなたは「おじさんは私に多額の遺産を残すと以前言っていた」とおっしゃいましたね。ではなぜ「偽物」だとわかるのですか？口頭で聞いただけなら内容の確認はできないはずです。',
+              response:
+                '…おじさんから以前、口頭で聞いていたんだ。私への相続がある、と。それが今回の内容と違うから偽物と言っているんだ。',
+              behavior: 'evasive',
+              unlocks_pursuit_question_ids: ['shiraishi_pq_will_2'],
+            },
+            {
+              id: 'shiraishi_pq_will_2',
+              text: 'この遺言書は金庫に保管されていました。内容を知るには金庫を開けるしかありません。',
+              response:
+                '（顔色が変わる）…金庫…？私は金庫を開けていない。コピーがどこから出てきたか知らない。',
+              behavior: 'angry',
+            },
+          ],
         },
         herb_fragment: { reaction: '庭の植物？私は植物学など知らない。', behavior: 'nervous' },
         wine_glass: {
@@ -60,6 +82,24 @@ export const FIXED_SCENARIO: Scenario = {
         muddy_shoes: {
           reaction: '泥…？これは関係ない。庭には誰でも出られる。',
           behavior: 'evasive',
+          contradicts_statement_index: 2,
+          wrong_testimony_response: 'その証言と、この泥靴に直接の繋がりはない。見当違いだ。',
+          pursuit_questions: [
+            {
+              id: 'shiraishi_pq_muddy_1',
+              text: 'あなたは「庭園？そんな夜に外へ出る理由がないじゃないか」と言いましたね。ではこの泥靴はどう説明しますか？',
+              response: '…（視線を逸らす）…少し外の空気を吸いに出ただけだ。それの何が問題なんだ。',
+              behavior: 'nervous',
+              unlocks_pursuit_question_ids: ['shiraishi_pq_muddy_2'],
+            },
+            {
+              id: 'shiraishi_pq_muddy_2',
+              text: '深夜に庭へ出た時刻を教えてください。防犯カメラに映っています。',
+              response:
+                '（顔が青ざめる）…それは…カメラは故障していると聞いていた。…仮に外に出たとしても、それが何だというんだ。',
+              behavior: 'angry',
+            },
+          ],
         },
         note_paper: { reaction: 'そのメモは私には関係ない。', behavior: 'calm' },
         torn_letter: { reaction: 'その手紙は見たことがない。', behavior: 'calm' },
@@ -70,6 +110,25 @@ export const FIXED_SCENARIO: Scenario = {
         photo_garden: {
           reaction: '写真？不鮮明で誰だかわからないじゃないか。',
           behavior: 'nervous',
+          contradicts_statement_index: 3,
+          wrong_testimony_response: 'その証言と、この写真に直接の矛盾はない。的外れだ。',
+          pursuit_questions: [
+            {
+              id: 'shiraishi_pq_photo_1',
+              text: 'あなたは「園田さんは見間違えた、深夜0時は部屋にいた」と言いましたね。この写真の撮影時刻は深夜0:15です。どう説明しますか？',
+              response:
+                '…それは…カメラの時刻設定がおかしいんだろう。あの晩、嵐で電力が不安定だったじゃないか。',
+              behavior: 'evasive',
+              unlocks_pursuit_question_ids: ['shiraishi_pq_photo_2'],
+            },
+            {
+              id: 'shiraishi_pq_photo_2',
+              text: '同じ時刻に裏口の電池式センサーが反応しています。停電は関係ありません。',
+              response:
+                '（長い沈黙の後）…わかった。外に出た。だが煙草を吸いに行っただけだ。あそこで何かを採取したわけじゃない。',
+              behavior: 'nervous',
+            },
+          ],
         },
         safe_key: { reaction: '金庫の鍵…それがどうしたんだ。', behavior: 'angry' },
         handkerchief: {
@@ -88,6 +147,8 @@ export const FIXED_SCENARIO: Scenario = {
       appearance_id: 'female_young',
       age: 28,
       occupation: 'OL',
+      default_wrong_pursuit_response:
+        'その証言とこの証拠に何の関係があるっていうんですか！？見当違いもいいところです！',
       description: '被害者の姪。黒い喪服のような服が印象的。泣き腫らした目をしている。',
       personality: '感情的で思ったことをすぐ口にする。',
       alibi: '自室で眠っていたと主張。',
@@ -110,6 +171,26 @@ export const FIXED_SCENARIO: Scenario = {
         will_document: {
           reaction: '遺言書！これって叔父の…内容が違う。書き換えられてる！',
           behavior: 'angry',
+          contradicts_statement_index: 4,
+          wrong_testimony_response:
+            'その証言と、この遺言書に直接の矛盾はないわ。見当違いじゃない？',
+          pursuit_questions: [
+            {
+              id: 'misaki_pq_will_1',
+              text: 'あなたは「藤堂弁護士から遺言書の書き換えを聞いた」と言いましたね。しかし今の反応はまるで初めて見たかのようです。いつ弁護士から聞いたのですか？',
+              response:
+                '…ッ。…聞いたのは昨晩よ。でも…実際に書き換えられた遺言書を目にしたのは初めてだから…動揺してしまって。',
+              behavior: 'nervous',
+              unlocks_pursuit_question_ids: ['misaki_pq_will_2'],
+            },
+            {
+              id: 'misaki_pq_will_2',
+              text: '弁護士はなぜ相続人でもないあなたに守秘義務のある遺言内容を教えたのですか？',
+              response:
+                '（観念したように）…正直に言う。廊下で叔父と藤堂先生が話しているのを立ち聞きしてしまったの。直接聞いたわけじゃない。でも私は遺言の受益者じゃないから、殺す動機がない。叔父への借金は…別の問題よ。',
+              behavior: 'evasive',
+            },
+          ],
         },
         herb_fragment: {
           reaction: 'これって…トリカブトの葉じゃないの？庭にあったの？',
@@ -120,7 +201,11 @@ export const FIXED_SCENARIO: Scenario = {
           behavior: 'sad',
         },
         muddy_shoes: { reaction: '泥のついた靴？昨晩誰かが外に出たのね。', behavior: 'calm' },
-        note_paper: { reaction: 'このメモの字…見覚えがある気がする。', behavior: 'nervous' },
+        note_paper: {
+          reaction: 'このメモの字…見覚えがある気がする。',
+          behavior: 'nervous',
+          contradicts_statement_index: 1,
+        },
         torn_letter: { reaction: '破られた手紙。誰かが証拠を隠滅しようとした？', behavior: 'calm' },
         kitchen_knife: { reaction: '包丁…でも叔父は毒で亡くなったんでしょ？', behavior: 'calm' },
         photo_garden: {
@@ -141,6 +226,8 @@ export const FIXED_SCENARIO: Scenario = {
       appearance_id: 'male_middle',
       age: 52,
       occupation: '会社役員',
+      default_wrong_pursuit_response:
+        '見当違いな追及だ。その証言とこの証拠に何の繋がりがある？時間を無駄にするな。',
       description: '恰幅のいい中年男性。高価なスーツを着ており、傲慢な態度が目立つ。',
       personality: '権威的で強引。金と権力を重視する。',
       alibi: 'バーラウンジで酒を飲んでいたと主張。バーテンダーが証言。',
@@ -165,7 +252,29 @@ export const FIXED_SCENARIO: Scenario = {
         wine_glass: { reaction: 'ワイングラスで毒を？用意周到な犯人だな。', behavior: 'calm' },
         muddy_shoes: { reaction: '泥だと？私は昨晩外に出ていない。', behavior: 'calm' },
         note_paper: { reaction: 'このメモ…黒崎の筆跡だな。何が書いてある？', behavior: 'nervous' },
-        torn_letter: { reaction: 'これは…まずい。私宛の手紙じゃないか。', behavior: 'nervous' },
+        torn_letter: {
+          reaction: 'これは…まずい。私宛の手紙じゃないか。',
+          behavior: 'nervous',
+          contradicts_statement_index: 2,
+          wrong_testimony_response: 'その証言とこの手紙に、直接の矛盾はない。見当違いだ。',
+          pursuit_questions: [
+            {
+              id: 'kito_pq_letter_1',
+              text: 'あなたは「不正取引？そんな話は知らない」と言いました。ではこの手紙に「取引の証拠を握っている」と書かれているのに、なぜこれほど動揺するのですか？',
+              response:
+                '…うるさい！これは昔の話だ。今回の事件とは関係ない！黒崎が死んでも私には何の得もない！',
+              behavior: 'angry',
+              unlocks_pursuit_question_ids: ['kito_pq_letter_2'],
+            },
+            {
+              id: 'kito_pq_letter_2',
+              text: '黒崎はあなたを脅していたのですか？正直に話してください。',
+              response:
+                '（大きなため息）…そうだ。証拠を握られていた。だから私は彼が死んでは困る。生きていてもらわないと困る側の人間だ。殺したのは私じゃない。',
+              behavior: 'evasive',
+            },
+          ],
+        },
         kitchen_knife: { reaction: '刃物か。毒殺とは関係ないだろう。', behavior: 'calm' },
         photo_garden: { reaction: 'この写真は関係ない。', behavior: 'calm' },
         safe_key: { reaction: '金庫の鍵か。中身が気になるが私には関係ない。', behavior: 'nervous' },
@@ -179,6 +288,8 @@ export const FIXED_SCENARIO: Scenario = {
       appearance_id: 'female_middle',
       age: 45,
       occupation: '医師',
+      default_wrong_pursuit_response:
+        '論理的に整理してください。その証言とこの証拠の間に矛盾は存在しません。',
       description: '白衣を脱いでも医師の雰囲気が漂う女性。知的な目をしている。',
       personality: '論理的で冷静。感情より事実を重視する。',
       alibi: '図書室で本を読んでいたと主張。',
@@ -220,6 +331,26 @@ export const FIXED_SCENARIO: Scenario = {
         note_paper: {
           reaction: 'このメモ…薬物の計算式？医学的な知識がある人が書いたわね。',
           behavior: 'nervous',
+          contradicts_statement_index: 1,
+          wrong_testimony_response:
+            'その証言と、このメモの間に直接の矛盾は見当たらない。的外れよ。',
+          pursuit_questions: [
+            {
+              id: 'akai_pq_note_1',
+              text: 'あなたは「アコニチンについての文献を読んでいた、偶然よ」と言いました。このメモにはアコニチンの致死量計算が記されています。偶然にしては詳しすぎませんか？',
+              response:
+                '…筆跡を見れば私のものじゃないとわかるはずよ。でも…確かにこのフォーマットは医師が使う記録方式ね。',
+              behavior: 'evasive',
+              unlocks_pursuit_question_ids: ['akai_pq_note_2'],
+            },
+            {
+              id: 'akai_pq_note_2',
+              text: '医師として致死量を知っているなら、誰かに頼まれてこの量を計算することも可能だったのでは？',
+              response:
+                '（深く息をついて）…正直に言う。私は黒崎様の体重を知っていた。主治医だから。でもこのメモは私が書いたものじゃない。誰かが私に疑いを向けようとしている。',
+              behavior: 'nervous',
+            },
+          ],
         },
         torn_letter: {
           reaction: 'この手紙は…患者の情報が含まれているようね。',
@@ -247,6 +378,8 @@ export const FIXED_SCENARIO: Scenario = {
       appearance_id: 'male_young_alt',
       age: 35,
       occupation: '弁護士',
+      default_wrong_pursuit_response:
+        '証拠と証言の関連性が示されていません。それは推測の域を出ない話です。',
       description: 'メガネをかけた細身の男性。常に書類を持ち歩いている印象。',
       personality: '慎重で言葉を選ぶ。法的な観点から物事を見る。',
       alibi: '自室で書類仕事をしていたと主張。',
@@ -295,6 +428,26 @@ export const FIXED_SCENARIO: Scenario = {
         safe_key: {
           reaction: '金庫の鍵！これは書斎の金庫に保管されているはずの…なぜここに？',
           behavior: 'angry',
+          contradicts_statement_index: 1,
+          wrong_testimony_response:
+            'その証言と、この鍵に直接の矛盾はありません。もう一度考え直してください。',
+          pursuit_questions: [
+            {
+              id: 'todo_pq_key_1',
+              text: 'あなたは「21:00から自室で書類仕事をしていた」と言いましたね。この鍵の通常の保管場所をなぜご存知なのですか？部屋にいたはずなのに。',
+              response:
+                '…弁護士として書斎の金庫を管理する立場ですので、保管場所を知っているのは当然です。自室にいたことと、知識があることは矛盾しません。',
+              behavior: 'nervous',
+              unlocks_pursuit_question_ids: ['todo_pq_key_2'],
+            },
+            {
+              id: 'todo_pq_key_2',
+              text: 'では昨晩、書斎に立ち入りましたか？正直に教えてください。',
+              response:
+                '（しばらく沈黙の後）…実は22:00頃、黒崎様に書類確認のため呼ばれて書斎へ行きました。その際、金庫の鍵は黒崎様がデスクに置いていました。私はそれを確認して自室に戻りました。白石さんが後から来たのかもしれません。',
+              behavior: 'evasive',
+            },
+          ],
         },
         handkerchief: {
           reaction: '誰かの所有物ですね。持ち主を特定すれば手がかりになります。',
@@ -312,6 +465,8 @@ export const FIXED_SCENARIO: Scenario = {
       appearance_id: 'female_young_alt',
       age: 24,
       occupation: '家政婦',
+      default_wrong_pursuit_response:
+        'その証言は…この証拠とは関係ないように思いますが。私の見方が違うでしょうか？',
       description: '小柄で物静かな女性。館で長年働いており、館の事情を最もよく知っている。',
       personality: '観察眼が鋭い。普段は目立たないが、見ている。',
       alibi: 'キッチンで後片付けをしていたと主張。',
@@ -378,6 +533,7 @@ export const FIXED_SCENARIO: Scenario = {
         diary_entry: {
           reaction: '旦那様の日記。最後のページに白石様のことが書かれていたはずです。',
           behavior: 'sad',
+          contradicts_statement_index: 4,
         },
       },
     },
@@ -535,10 +691,12 @@ export const FIXED_SCENARIO: Scenario = {
       description:
         '図書室のゴミ箱から回収した手紙の断片。「…取引の証拠は私が握っている。おとなしくしていろ…」という文字が読める。',
       is_fake: true,
+      first_impression:
+        '「取引の証拠を握っている」という脅迫文句。宛先は不明だが、誰かが事件当日に受け取りゴミ箱に捨てたと考えられる。この手紙を送りつけた人物——あるいは受け取った人物——が今夜の殺人と関わっている可能性がある。',
       relevance:
         '鬼頭武雄への脅迫状の可能性がある。ただし今回の殺人との直接的な関係はない偽の手がかり。',
       examination_notes:
-        '一見して鬼頭武雄への脅迫状に見えるが、詳しく調べると黒崎が過去に送った不正取引に関する警告文と判明。鬼頭には確かに不正行為があるが、彼のアリバイはバーテンダーが証言しており、今回の毒殺とは無関係。これは別の問題を示す偽の手がかりだ。',
+        '断片を仔細に検討すると、これは今夜書かれたものではない。インクの酸化度から数週間前に作成されたと推定できる。内容を精査すると黒崎が鬼頭の不正取引を掴んで送った警告文と判明し、今回の毒殺とは無関係だ。あなたが仮説に組み込んでいた動機の一つは崩れた。',
     },
     {
       id: 'kitchen_knife',
@@ -547,9 +705,46 @@ export const FIXED_SCENARIO: Scenario = {
       description:
         'キッチンで発見された包丁。赤い染みがついているが、分析すると牛肉の血液と判明した。',
       is_fake: true,
+      first_impression:
+        'キッチンのまな板脇に無造作に置かれた包丁。刃には赤褐色の染みが複数残っており、まだ乾ききっていない。被害者が倒れた時刻から逆算すると、この包丁が使われた可能性は十分にある。',
       relevance: '一見すると凶器に見えるが、実際は料理で使用された無関係な包丁。',
       examination_notes:
-        '赤い染みは一見すると血痕に見えるが、成分分析の結果、昨晩のディナーで使用した牛肉の血液と確認された。黒崎源一郎の死因はアコニチン中毒であり、刃物とは無関係。犯人を誤誘導する偽の手がかりに過ぎない。',
+        '赤褐色の染みを詳細に分析した結果、ヒト由来のヘモグロビン反応は陰性だった。昨晩のディナーで使用した牛肉の血液と確認され、凶器ではない。黒崎源一郎の死因はアコニチン中毒であり、刃物は一切関係しない。包丁を凶器と見ていた仮説は根底から崩れる。',
+    },
+  ],
+  // 証拠クロス参照：複数の証拠が揃って初めて解放される決定的事実
+  evidence_combinations: [
+    {
+      id: 'combo_garden_intruder',
+      evidence_ids: ['muddy_shoes', 'photo_garden'],
+      name: '深夜に庭へ出た人物が特定された',
+      description:
+        '泥靴の足跡サイズと庭園の写真に映り込んだ人物の輪郭が一致する。深夜0時頃、白石誠が庭園へ出て何かを採取していたことが明らかになった。アリバイ「部屋にいた」と矛盾する。',
+      is_critical: false,
+    },
+    {
+      id: 'combo_poison_origin',
+      evidence_ids: ['herb_fragment', 'poison_bottle'],
+      name: '毒の入手経路が判明した',
+      description:
+        '庭で採取されたトリカブトの葉片と小瓶の毒成分が同一種由来と確認された。犯人は庭園からトリカブトを採取し、キッチンで毒を精製していた。市販品でなく自家製である点が、館内の人物による犯行を強く示唆する。',
+      is_critical: true,
+    },
+    {
+      id: 'combo_motive_confirmed',
+      evidence_ids: ['will_document', 'diary_entry'],
+      name: '遺言書書き換えによる動機が確定した',
+      description:
+        '遺言書の写しと日記の記述が合致し、黒崎源一郎が先月密かに遺言書を書き換えていた事実が確定した。相続分を削除された人物には3000万円超の損失が生じる。この事実を知っていた者が最有力の動機を持つ。',
+      is_critical: true,
+    },
+    {
+      id: 'combo_study_intrusion',
+      evidence_ids: ['handkerchief', 'safe_key', 'will_document'],
+      name: '書斎へ侵入して遺言書を確認した人物が特定された',
+      description:
+        '「S.M.」イニシャルのハンカチ・金庫の鍵・遺言書の写しが一つの行動を示す。白石誠が金庫の鍵を用いて書斎に侵入し、遺言書の内容を確認した上でコピーを残した。動機・機会・現場の三点が交差する決定的な証拠連鎖だ。',
+      is_critical: true,
     },
   ],
 }

@@ -1,3 +1,4 @@
+// 捜査フェーズの残り調査アクション数と会話アクション数をピップ形式で表示するコンポーネント
 import { MAX_VISIBLE_TALK_PIPS } from '../../constants/gameConfig'
 
 interface ActionCounterProps {
@@ -25,7 +26,7 @@ export function ActionCounter({
             />
           ))}
         </div>
-        <span className="text-gothic-gold font-display text-sm">
+        <span className="text-gothic-gold font-pixel text-xs">
           {actionsRemaining}/{actionsTotal}
         </span>
       </div>
@@ -39,7 +40,7 @@ export function ActionCounter({
             />
           ))}
         </div>
-        <span className="text-gothic-accent font-display text-sm">
+        <span className="text-gothic-accent font-pixel text-xs">
           {talkActionsRemaining}/{talkActionsTotal}
         </span>
       </div>

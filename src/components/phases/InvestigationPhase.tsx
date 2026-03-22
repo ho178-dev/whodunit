@@ -1,3 +1,4 @@
+// 捜査フェーズの画面。部屋選択・証拠収集・容疑者との会話・メモ閲覧を管理する
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
@@ -5,6 +6,8 @@ import { RoomSelector } from '../investigation/RoomSelector'
 import { RoomView } from '../investigation/RoomView'
 import { ActionCounter } from '../investigation/ActionCounter'
 import { InvestigationNotes } from '../investigation/InvestigationNotes'
+import { CombinationDiscovery } from '../investigation/CombinationDiscovery'
+import { FakeRevealModal } from '../investigation/FakeRevealModal'
 import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
 
 export function InvestigationPhase() {
@@ -15,7 +18,7 @@ export function InvestigationPhase() {
     talkActionsRemaining,
     difficulty,
     setPhase,
-    discoveredEvidenceIds,
+    inspectedEvidenceIds,
   } = useGameStore()
   const diffCfg = DIFFICULTY_CONFIG[difficulty]
   const [showNotes, setShowNotes] = useState(false)
@@ -24,10 +27,12 @@ export function InvestigationPhase() {
 
   // いずれかのアクションプールが尽きた場合もソフトロック防止のため進行を許可する
   const canProceed =
-    discoveredEvidenceIds.length > 0 || actionsRemaining === 0 || talkActionsRemaining === 0
+    inspectedEvidenceIds.length > 0 || actionsRemaining === 0 || talkActionsRemaining === 0
 
   return (
     <div className="min-h-screen px-4 py-8">
+      <CombinationDiscovery />
+      <FakeRevealModal />
       {showNotes && <InvestigationNotes onClose={() => setShowNotes(false)} />}
 
       <div className="max-w-5xl mx-auto">

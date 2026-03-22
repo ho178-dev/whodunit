@@ -1,15 +1,19 @@
+// ゲームのタイトル画面。固定シナリオかAI生成シナリオかを選択する起点
 import { useGameStore } from '../../stores/gameStore'
 import { FIXED_SCENARIO } from '../../constants/fixedScenario'
 
+// タイトル画面を表示し、固定シナリオかAI生成シナリオかの起動経路を分岐するコンポーネント
 export function TitleScreen() {
   const { setPhase, setScenario, setUseFixedScenario } = useGameStore()
 
+  // 固定シナリオをセットしてシナリオブリーフィングへ遷移する
   const startFixed = () => {
     setScenario(FIXED_SCENARIO)
     setUseFixedScenario(true)
     setPhase('scenario_briefing')
   }
 
+  // APIキー入力フェーズへ遷移してAI生成シナリオを開始する
   const startWithApi = () => {
     setPhase('api_key_input')
   }
@@ -29,13 +33,13 @@ export function TitleScreen() {
           </div>
         </div>
 
-        <h1 className="font-display text-5xl md:text-7xl text-gothic-gold mb-2 tracking-wider">
+        <h1 className="font-title text-5xl md:text-7xl text-gothic-gold mb-2 tracking-wider">
           WhoDuNiT
         </h1>
 
         <div className="border-t border-b border-gothic-border/50 py-4 mb-8">
           <p className="text-gothic-muted font-serif text-sm tracking-widest">
-            ― 孤島の洋館に潜む真実を暴け ―
+            ― 犯人は、この中にいる ―
           </p>
         </div>
 

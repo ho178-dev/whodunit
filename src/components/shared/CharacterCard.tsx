@@ -1,7 +1,11 @@
-import { useState } from 'react'
+// 容疑者の画像・名前・年齢・職業を表示する汎用カードコンポーネント
 import { cn } from '../../utils/cn'
 import { useCharacterAsset } from '../../hooks/useAsset'
 import type { Suspect } from '../../types/scenario'
+import { PixelImageWithFallback } from './PixelImage'
+import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
+
+const DEFAULT_CHARACTER_IMG = '/assets/characters/default.png'
 
 interface CharacterCardProps {
   suspect: Suspect
@@ -10,9 +14,9 @@ interface CharacterCardProps {
   small?: boolean
 }
 
+// 容疑者の画像・名前・年齢・職業を表示するカード
 export function CharacterCard({ suspect, selected, onClick, small }: CharacterCardProps) {
   const imgSrc = useCharacterAsset(suspect.appearance_id)
-  const [imgError, setImgError] = useState(false)
 
   return (
     <div
@@ -32,16 +36,16 @@ export function CharacterCard({ suspect, selected, onClick, small }: CharacterCa
           small ? 'h-16 w-16 mx-auto' : 'h-32 w-full mb-3'
         )}
       >
-        {imgError ? (
-          <span className="text-gothic-muted text-4xl">👤</span>
-        ) : (
-          <img
-            src={imgSrc}
-            alt={suspect.name}
-            className="w-full h-full object-cover"
-            onError={() => setImgError(true)}
-          />
-        )}
+        <PixelImageWithFallback
+          src={imgSrc}
+          alt={suspect.name}
+          pixelSize={
+            small ? PIXEL_ART_CONFIG.pixelSize.characterSmall : PIXEL_ART_CONFIG.pixelSize.character
+          }
+          canvasWidth={PIXEL_ART_CONFIG.canvasSize.character.width}
+          canvasHeight={PIXEL_ART_CONFIG.canvasSize.character.height}
+          fallbackSrc={DEFAULT_CHARACTER_IMG}
+        />
       </div>
       {!small && (
         <>

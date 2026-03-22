@@ -1,3 +1,4 @@
+// ゲームフェーズに応じた画面切り替えを行うルートレイアウトコンポーネント
 import { useGameStore } from '../../stores/gameStore'
 import { FadeTransition } from '../shared/FadeTransition'
 import { TitleScreen } from '../phases/TitleScreen'
@@ -9,9 +10,11 @@ import { DiscussionPhase } from '../phases/DiscussionPhase'
 import { VotingPhase } from '../phases/VotingPhase'
 import { EndingScreen } from '../phases/EndingScreen'
 
+// ゲームのルートレイアウト。フェーズに応じた画面を切り替えてレンダリングする
 export function GameShell() {
   const phase = useGameStore((s) => s.phase)
 
+  // 現在のフェーズに対応するコンポーネントを返す
   const renderPhase = () => {
     switch (phase) {
       case 'title':

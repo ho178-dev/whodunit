@@ -1,3 +1,4 @@
+// ゴシックスタイルのタイトル付きパネル汎用コンポーネント
 import type { ReactNode } from 'react'
 import { cn } from '../../utils/cn'
 

@@ -1,3 +1,4 @@
+// Gemini APIを使ってマーダーミステリーシナリオを生成するサービス
 import { GoogleGenerativeAI } from '@google/generative-ai'
 import type { Scenario } from '../types/scenario'
 import {
@@ -7,6 +8,7 @@ import {
   MANSION_BACKGROUND_IDS,
 } from '../constants/assetIds'
 import { validateScenario } from './scenarioParser'
+import { SUSPECT_CONTRADICTION_COUNT, MURDERER_CONTRADICTION_COUNT } from '../constants/gameConfig'
 
 const PROMPT = `
 あなたは日本のマーダーミステリーシナリオ作家です。
@@ -32,6 +34,7 @@ const PROMPT = `
 - descriptionおよびexamination_notesに「〇〇（容疑者名）の指紋と一致」「〇〇が犯人」「〇〇のサイズと一致」のような特定人物を犯人と断定・示唆する記述を含めないこと。物証の客観的な特徴のみを記述し、プレイヤー自身が推理できる余地を残すこと
 - 日本語の館ミステリーとして成立するストーリーにすること
 - 各容疑者のstatementsは必ず5個設定すること
+- 各容疑者にdefault_wrong_pursuit_responseを設定すること（見当違いの証言で矛盾を追及されたときの容疑者ごとの反応。性格に合った1文）
 - 各容疑者にroom_idを設定し、5部屋に6人を割り当てること（1部屋に1〜2人）
 - 各証拠にexamination_notesを設定すること
 - シナリオにmurder_time_rangeを設定すること（例: "22:00〜01:00（推定）"）
@@ -48,12 +51,26 @@ const PROMPT = `
 - 調査員目線の推理メモを2〜4文で記述すること
 - 他の証拠や容疑者の証言との論理的な接続を含むこと
 - 真の証拠は「なぜ犯人に繋がるか」を明示すること
-- 偽証拠（is_fake: true）は「詳しく調べると無関係と判明する理由」を記述すること
+- 偽証拠（is_fake: true）は「詳しく調べると無関係と判明する理由」を記述すること。「あなたが立てていた仮説が崩れる」という体験を与えるような文言にすること
+
+## first_impression の設計（偽証拠のみ必須）
+- is_fake: true の証拠には必ず first_impression フィールドを設定すること
+- 1段階目の調査（外観確認）時に表示する「本物っぽく見えるミスリード説明」を記述すること
+- 2〜3文で、プレイヤーが「これは重要な証拠かもしれない」と感じる内容にすること
+- description とは異なり、本物であるかのように偽装した文体で書くこと（「〜の可能性がある」「〜と考えられる」など）
+- examination_notes で覆される伏線を仕込むこと（例：染みの色→血痕に見える、手紙の内容→今夜の事件と関係ありそう）
 
 ## statements の設計（各容疑者に必須・5個）
 - 少なくとも1つは他の容疑者の行動についての証言を含むこと
 - 犯人は1つの矛盾する証言を含むこと（後で他の証拠で反証できる内容）
 - 容疑者同士の証言が相互に補強・矛盾するよう設計すること
+
+## contradicts_statement_index の設計（矛盾インジケーター）
+- ある証拠が容疑者の発言（statements[]の0〜4のいずれか）と直接矛盾する場合、その evidence_reaction に contradicts_statement_index を設定すること
+- 犯人には必ず ${MURDERER_CONTRADICTION_COUNT} 件の evidence_reaction に contradicts_statement_index を設定すること
+- 犯人以外の各容疑者には ${SUSPECT_CONTRADICTION_COUNT} 件の evidence_reaction に contradicts_statement_index を設定すること
+- 矛盾の定義：証拠の存在が「その容疑者が当該 statements で語った内容を嘘または不正確と示す」場合のみ設定すること
+- 値は矛盾する statements[] のインデックス（0〜4の整数）
 
 ## murder_time_range の設計（シナリオに必須）
 - 推定犯行時刻の範囲を記述すること（例: "22:00〜01:00（推定）"）
@@ -69,9 +86,143 @@ const PROMPT = `
 - 6人を5部屋に割り当てること（1部屋に2人まで）
 - 容疑者のroom_idはrooms配列のいずれかのidと一致すること
 
+## evidence_combinations の設計（必須・3〜5個）
+証拠クロス参照システム。単体では意味が薄い証拠が2〜3個組み合わさって初めて「決定的事実」が解放される仕組み。
+プレイヤーが能動的に論理を組み立てる体験の核となる。
+
+### 設計原則
+- 各組み合わせは evidence 配列の id を正確に参照すること
+- evidence_ids は2〜3個（タプル形式）
+- 組み合わせの数は3〜5個（多すぎると総当たりになる）
+- 単体証拠では「何かが繋がる気がする」程度に留め、組み合わせで初めて決定的になること
+
+### is_critical の設計
+- is_critical: true → 犯人特定に直接必要な組み合わせ（2〜3個）
+- is_critical: false → 動機・背景を補強する組み合わせ（1〜2個）
+
+### 必須の組み合わせパターン（参考）
+1. 機会を示す組み合わせ：犯人のアリバイの嘘を暴く証拠×2（例：足跡系＋目撃写真）
+2. 手段を示す組み合わせ：凶器の入手経路を繋ぐ証拠×2（例：原材料＋精製品）
+3. 動機を示す組み合わせ：犯行動機を確定させる証拠×2〜3（例：書類＋日記）
+
+### フィールド定義
+- id: ユニークな文字列（例: "combo_garden_intruder"）
+- evidence_ids: evidence配列のidから2または3個選択したタプル
+- name: 解放されるファクトの短い名前（10〜20文字）例: "深夜に庭へ出た人物が特定された"
+- description: ファクトの詳細説明（2〜4文）。なぜこの組み合わせが決定的かを明示すること
+- is_critical: boolean
+
 JSONのみを返してください。説明文は不要です。
 `
 
+// Step2 用：ベースシナリオを受け取って追及チェーンJSONを生成するプロンプトを構築する
+function buildPursuitChainPrompt(scenario: Scenario): string {
+  return `
+あなたは日本のマーダーミステリーシナリオ作家です。
+以下のシナリオデータを元に、各容疑者の evidence_reactions に追及質問チェーンを設計してください。
+
+## シナリオデータ
+${JSON.stringify(scenario, null, 2)}
+
+## 追及質問チェーンの設計ルール
+
+### 対象の選び方
+- **全容疑者**に最低1つの pursuit_questions を設計すること
+- 犯人（murderer_id: ${scenario.murderer_id}）：contradicts_statement_index が設定された evidence_reaction を2〜3個選ぶ。チェーンは有罪に繋がる方向で設計する
+- **非犯人**：contradicts_statement_index が設定された evidence_reaction を1個選ぶ。チェーンは容疑者の秘密や事情を明かすが、最終的に「殺してはいない」と証明される方向にする（フェイクリード）
+
+### 質問の構造
+- pursuit_questions は各 evidence_reaction に2個設定する（1個目がルート、2個目が連鎖）
+- 1個目（ルート質問）の unlocks_pursuit_question_ids に2個目のIDを設定する
+- 2個目（連鎖質問）は unlocks_pursuit_question_ids を設定しない
+- 質問IDの形式："{suspect_id}_pq_{evidence_id}_{番号}" （例: "shiraishi_pq_muddy_1"）
+
+### 質問文（text）の書き方
+- **必ずその容疑者が実際に言った証言（statements の文章）を直接引用すること**
+- 例：「あなたは『〇〇』と言いましたね。ではこの証拠はどう説明しますか？」という形式
+- 引用する証言は contradicts_statement_index が示す statements[index] の内容を使うこと
+- 1文で完結させ、30〜60字程度
+
+### 返答（response）の書き方
+- 容疑者の動揺・言い訳・開き直りを含む（1〜2文）
+- behavior は nervous / evasive / angry のいずれか
+- 犯人の返答：特に動揺が強く、最終的に言葉に詰まること
+- 非犯人の返答：「疑われる理由はわかるが、殺していない。なぜなら〜」という方向
+
+### wrong_testimony_response の追加
+- pursuit_questions を持つ全ての evidence_reaction に wrong_testimony_response フィールドも必ず設定すること
+- これはプレイヤーが**誤った証言**を選択したときに表示される容疑者のリアクション（1文）
+- 例：「その証言と、この証拠に直接の矛盾はない。見当違いだ。」
+
+## 出力形式
+以下のJSON構造のみを返してください。説明文は不要です。
+
+{
+  "pursuit_chains": {
+    "{suspect_id}": {
+      "{evidence_id}": {
+        "wrong_testimony_response": "...",
+        "questions": [
+          {
+            "id": "...",
+            "text": "あなたは『実際の証言文』と言いましたね。ではこの証拠はどう説明しますか？",
+            "response": "...",
+            "behavior": "nervous",
+            "unlocks_pursuit_question_ids": ["..."]
+          },
+          {
+            "id": "...",
+            "text": "...",
+            "response": "...",
+            "behavior": "angry"
+          }
+        ]
+      }
+    }
+  }
+}
+`
+}
+
+type PursuitChainEntry = {
+  wrong_testimony_response?: string
+  questions: import('../types/scenario').PursuitQuestion[]
+}
+
+// pursuit_chains をベースシナリオの evidence_reactions にマージする
+function mergePursuitChains(
+  scenario: Scenario,
+  chains: Record<string, Record<string, PursuitChainEntry>>
+): Scenario {
+  return {
+    ...scenario,
+    suspects: scenario.suspects.map((suspect) => {
+      const suspectChains = chains[suspect.id]
+      if (!suspectChains) return suspect
+      return {
+        ...suspect,
+        evidence_reactions: Object.fromEntries(
+          Object.entries(suspect.evidence_reactions).map(([evidenceId, reaction]) => {
+            const entry = suspectChains[evidenceId]
+            if (!entry?.questions?.length) return [evidenceId, reaction]
+            return [
+              evidenceId,
+              {
+                ...reaction,
+                pursuit_questions: entry.questions,
+                ...(entry.wrong_testimony_response && {
+                  wrong_testimony_response: entry.wrong_testimony_response,
+                }),
+              },
+            ]
+          })
+        ),
+      }
+    }),
+  }
+}
+
+// Gemini APIにプロンプトを送信してシナリオJSONを生成・バリデーションして返す（2ステップ生成）
 export async function generateScenario(apiKey: string): Promise<Scenario> {
   const genAI = new GoogleGenerativeAI(apiKey)
   const model = genAI.getGenerativeModel({
@@ -83,6 +234,7 @@ export async function generateScenario(apiKey: string): Promise<Scenario> {
     },
   })
 
+  // Step1: ベースシナリオ生成
   const result = await model.generateContent(PROMPT)
   const text = result.response.text()
 
@@ -93,5 +245,22 @@ export async function generateScenario(apiKey: string): Promise<Scenario> {
     throw new Error('AIの返答をJSONとして解析できませんでした')
   }
 
-  return validateScenario(parsed)
+  const baseScenario = validateScenario(parsed)
+
+  // Step2: 追及チェーン生成
+  let scenarioWithChains = baseScenario
+  try {
+    const chainResult = await model.generateContent(buildPursuitChainPrompt(baseScenario))
+    const chainText = chainResult.response.text()
+    const chainParsed = JSON.parse(chainText) as {
+      pursuit_chains: Record<string, Record<string, PursuitChainEntry>>
+    }
+    if (chainParsed.pursuit_chains) {
+      scenarioWithChains = mergePursuitChains(baseScenario, chainParsed.pursuit_chains)
+    }
+  } catch {
+    // 追及チェーン生成失敗はゲームを壊さない（チェーンなしで続行）
+  }
+
+  return scenarioWithChains
 }

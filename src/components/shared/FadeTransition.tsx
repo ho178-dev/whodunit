@@ -1,3 +1,4 @@
+// triggerKeyの変化を検知してフェードイン/アウトアニメーションを行うラッパーコンポーネント
 import { useEffect, useState, type ReactNode } from 'react'
 
 interface FadeTransitionProps {

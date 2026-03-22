@@ -1,3 +1,4 @@
+// アプリのルートコンポーネント。GameShellをレンダリングする
 import { GameShell } from './components/layout/GameShell'
 
 function App() {

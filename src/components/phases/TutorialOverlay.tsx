@@ -1,3 +1,4 @@
+// ゲームの遊び方をステップ形式で説明するチュートリアルオーバーレイ
 import { useState } from 'react'
 
 const STEPS = [

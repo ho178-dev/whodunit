@@ -1,3 +1,4 @@
+// 議論フェーズで発見済み証拠を一覧表示し、突きつける証拠を選択するコンポーネント
 import { useGameStore } from '../../stores/gameStore'
 import { EvidenceCard } from '../shared/EvidenceCard'
 import { GothicPanel } from '../layout/GothicPanel'
@@ -8,6 +9,7 @@ interface EvidenceSelectorProps {
   onSelect: (id: string) => void
 }
 
+// 発見済み証拠を一覧表示し、突きつける証拠を選択させるコンポーネント
 export function EvidenceSelector({ discoveredIds, selectedId, onSelect }: EvidenceSelectorProps) {
   const { scenario } = useGameStore()
   if (!scenario) return null

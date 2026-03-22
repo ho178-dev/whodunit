@@ -1,26 +1,27 @@
-import { useState } from 'react'
+// 選択した部屋の背景画像・説明・証拠一覧・NPCダイアログを統合表示するコンポーネント
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
 import { useRoomAsset } from '../../hooks/useAsset'
 import type { RoomTypeId } from '../../types/scenario'
 import { EvidenceList } from './EvidenceList'
 import { NpcDialog } from './NpcDialog'
+import { PixelImageWithFallback } from '../shared/PixelImage'
+import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 
 const DEFAULT_ROOM_IMG = '/assets/rooms/default.png'
 
+// 部屋タイプに応じた背景画像をドット風で表示するコンポーネント
 function RoomBackground({ typeId, name }: { typeId: RoomTypeId; name: string }) {
   const imgSrc = useRoomAsset(typeId)
-  const [src, setSrc] = useState(imgSrc)
-
   return (
-    <div className="w-full h-40 mb-4 overflow-hidden">
-      <img
-        src={src}
+    <div className="w-full h-40 mb-4 overflow-hidden opacity-70">
+      <PixelImageWithFallback
+        src={imgSrc}
         alt={name}
-        className="w-full h-full object-cover opacity-60"
-        onError={() => {
-          if (src !== DEFAULT_ROOM_IMG) setSrc(DEFAULT_ROOM_IMG)
-        }}
+        pixelSize={PIXEL_ART_CONFIG.pixelSize.room}
+        canvasWidth={PIXEL_ART_CONFIG.canvasSize.room.width}
+        canvasHeight={PIXEL_ART_CONFIG.canvasSize.room.height}
+        fallbackSrc={DEFAULT_ROOM_IMG}
       />
     </div>
   )
@@ -30,6 +31,7 @@ interface RoomViewProps {
   roomId: string
 }
 
+// 指定部屋の背景・説明・証拠一覧・NPCダイアログをまとめて表示するコンポーネント
 export function RoomView({ roomId }: RoomViewProps) {
   const { scenario } = useGameStore()
   if (!scenario) return null

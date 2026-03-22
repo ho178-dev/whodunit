@@ -1,11 +1,14 @@
+// Gemini APIキーを入力してシナリオ生成を開始する画面
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
 
+// APIキー入力フォームを表示し、入力値をストアに保存してシナリオ生成フェーズへ遷移するコンポーネント
 export function ApiKeyInput() {
   const [key, setKey] = useState('')
   const { setApiKey, setPhase } = useGameStore()
 
+  // フォーム送信時にAPIキーをストアに保存してシナリオ生成フェーズへ遷移する
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     if (key.trim()) {

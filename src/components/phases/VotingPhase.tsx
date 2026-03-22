@@ -1,8 +1,10 @@
+// 最終投票フェーズの画面。犯人候補を選んで告発を確定する
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
 import { CharacterCard } from '../shared/CharacterCard'
 
+// 容疑者選択と告発確認を行い、エンディングフェーズへ遷移する最終投票コンポーネント
 export function VotingPhase() {
   const { scenario, setVotedSuspectId, setPhase } = useGameStore()
   const [selected, setSelected] = useState<string | null>(null)
@@ -10,6 +12,7 @@ export function VotingPhase() {
 
   if (!scenario) return null
 
+  // 選択した容疑者を犯人として確定しエンディングフェーズへ遷移する
   const handleVote = () => {
     if (selected) {
       setVotedSuspectId(selected)

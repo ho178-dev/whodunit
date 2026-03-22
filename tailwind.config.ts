@@ -16,8 +16,9 @@ const config: Config = {
         },
       },
       fontFamily: {
-        serif: ['Noto Serif JP', 'Georgia', 'serif'],
+        serif: ['DotGothic16', 'Noto Serif JP', 'monospace'],
         display: ['Cinzel', 'Georgia', 'serif'],
+        pixel: ['Press Start 2P', 'monospace'],
       },
     },
   },

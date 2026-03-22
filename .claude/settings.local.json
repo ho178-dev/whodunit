@@ -20,7 +20,17 @@
       "Bash(powershell -Command \"Copy-Item -Path ''D:\\\\workspace\\\\app'' -Destination ''D:\\\\workspace\\\\whodunit'' -Recurse -Force\")",
       "Bash(\"D:\\\\workspace\\\\whodunit\\\\README.md\":*)",
       "Bash(npx tsc:*)",
-      "Bash(npx husky:*)"
+      "Bash(npx husky:*)",
+      "Bash(xargs grep:*)",
+      "Bash(npx vite:*)",
+      "Bash(find /d/workspace/whodunit/src -name *.css -o -name *.module.css)",
+      "Bash(C:UsershiroAppDataLocalTempclaudeD--workspace-whodunit7722c02a-c1cc-45ba-a689-8b951167bc0etasksb7putwia2.output)",
+      "Bash(python3:*)",
+      "Bash(node:*)",
+      "Bash(npx lint-staged:*)",
+      "Bash(git add:*)",
+      "Bash(find /d/workspace/whodunit/public/assets -type f -exec ls -lh {})",
+      "Bash(npx eslint:*)"
     ]
   }
 }

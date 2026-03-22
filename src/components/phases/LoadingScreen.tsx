@@ -1,3 +1,4 @@
+// シナリオ生成中のローディング画面。Gemini APIを呼び出してシナリオを取得する
 import { useEffect } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { generateScenario } from '../../services/geminiService'
