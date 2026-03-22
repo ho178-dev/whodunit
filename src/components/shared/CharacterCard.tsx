@@ -5,7 +5,7 @@ import type { Suspect } from '../../types/scenario'
 import { PixelImageWithFallback } from './PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 
-const DEFAULT_CHARACTER_IMG = '/assets/characters/default.png'
+const DEFAULT_CHARACTER_IMG = '/assets/characters/default_character.png'
 
 interface CharacterCardProps {
   suspect: Suspect

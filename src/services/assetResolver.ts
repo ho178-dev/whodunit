@@ -26,4 +26,4 @@ export function resolveMansionAsset(id: MansionBackgroundId): string {
   return `/assets/mansion/${id}.png`
 }
 
-export const MANSION_DEFAULT_ASSET = '/assets/mansion/default.png'
+export const MANSION_DEFAULT_ASSET = '/assets/mansion/default_mansion.png'

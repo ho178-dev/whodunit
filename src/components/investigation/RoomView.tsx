@@ -8,7 +8,7 @@ import { NpcDialog } from './NpcDialog'
 import { PixelImageWithFallback } from '../shared/PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 
-const DEFAULT_ROOM_IMG = '/assets/rooms/default.png'
+const DEFAULT_ROOM_IMG = '/assets/rooms/default_room.png'
 
 // 部屋タイプに応じた背景画像をドット風で表示するコンポーネント
 function RoomBackground({ typeId, name }: { typeId: RoomTypeId; name: string }) {
