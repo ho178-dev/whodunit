@@ -21,6 +21,7 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
     heardStatements,
     discoveredCombinationIds,
     hypotheses,
+    revealedFakeEvidenceIds,
   } = useGameStore()
   const [tab, setTab] = useState<Tab>('timeline')
   const [position, setPosition] = useState({ x: 16, y: 80 })
@@ -210,9 +211,9 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
                         <span className="text-gothic-gold font-display text-xs tracking-widest">
                           {evidence.name}
                         </span>
-                        {evidence.is_fake && (
-                          <span className="text-xs text-gothic-muted font-serif border border-gothic-muted px-1">
-                            要検討
+                        {revealedFakeEvidenceIds.includes(evidence.id) && (
+                          <span className="text-xs text-red-400/70 font-serif border border-red-800/50 px-1">
+                            偽証拠
                           </span>
                         )}
                       </div>

@@ -106,6 +106,7 @@ export interface Evidence {
   is_fake: boolean
   relevance: string
   examination_notes: string
+  first_impression?: string // 偽証拠専用：1段階目に見せる「本物っぽい」ミスリード説明
 }
 
 export interface Scenario {

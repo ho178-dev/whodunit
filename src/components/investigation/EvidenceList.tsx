@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { EvidenceCard } from '../shared/EvidenceCard'
 import type { Evidence } from '../../types/scenario'
+import { getInspectionDescription } from '../../utils/scenario'
 
 interface EvidenceListProps {
   roomId: string
@@ -86,7 +87,9 @@ export function EvidenceList({ roomId }: EvidenceListProps) {
                     <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">
                       外観
                     </p>
-                    <p className="text-gothic-text font-serif text-sm">{evidence.description}</p>
+                    <p className="text-gothic-text font-serif text-sm">
+                      {getInspectionDescription(evidence)}
+                    </p>
                   </div>
                   {examined ? (
                     <div className="border-t border-gothic-border pt-3">

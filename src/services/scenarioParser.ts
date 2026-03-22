@@ -44,6 +44,8 @@ export function validateScenario(data: unknown): Scenario {
   for (const evidence of s.evidence) {
     if (!evidence.examination_notes)
       throw new Error(`証拠 ${evidence.id} にexamination_notesが設定されていません`)
+    if (evidence.is_fake && !evidence.first_impression)
+      throw new Error(`偽証拠 ${evidence.id} にfirst_impressionが設定されていません`)
   }
 
   const evidenceIds = new Set(s.evidence.map((e) => e.id))

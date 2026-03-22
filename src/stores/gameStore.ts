@@ -45,6 +45,8 @@ export interface GameState {
   examinedEvidenceIds: string[] // 2段階目：論理的示唆開示済み
   discoveredCombinationIds: string[] // 発見済み証拠組み合わせID
   pendingCombinationIds: string[] // 通知待ち組み合わせIDキュー（先頭を表示）
+  revealedFakeEvidenceIds: string[] // 偽と判明した証拠IDリスト（2段階目調査後に追加）
+  pendingFakeRevealId: string | null // 「欺瞞を見破った！」演出待ち偽証拠ID
   talkedSuspectIds: string[]
   heardStatements: HeardStatement[]
   confrontationLog: ConfrontationEntry[]
@@ -63,6 +65,7 @@ export interface GameState {
   inspectEvidence: (evidenceId: string) => void
   examineEvidence: (evidenceId: string) => void
   clearPendingCombination: () => void
+  clearFakeReveal: () => void
   talkToSuspect: (suspectId: string) => void
   consumeAction: () => void
   hearStatement: (entry: HeardStatement) => void
@@ -94,6 +97,8 @@ const initialState = {
   examinedEvidenceIds: [],
   discoveredCombinationIds: [],
   pendingCombinationIds: [],
+  revealedFakeEvidenceIds: [],
+  pendingFakeRevealId: null,
   talkedSuspectIds: [],
   heardStatements: [],
   confrontationLog: [],
@@ -141,7 +146,7 @@ export const useGameStore = create<GameState>((set) => ({
       const next = addId(state.inspectedEvidenceIds, evidenceId)
       return next ? { inspectedEvidenceIds: next } : {}
     }),
-  // 証拠を論理的示唆開示済みリストに追加し、組み合わせ発見をチェックする（2段階目）
+  // 証拠を論理的示唆開示済みリストに追加し、組み合わせ発見・偽証拠発覚をチェックする（2段階目）
   examineEvidence: (evidenceId) =>
     set((state) => {
       const next = addId(state.examinedEvidenceIds, evidenceId)
@@ -151,16 +156,25 @@ export const useGameStore = create<GameState>((set) => ({
         next,
         state.discoveredCombinationIds
       )
-      if (newlyDiscovered.length === 0) return { examinedEvidenceIds: next }
+      const isFake = state.scenario?.evidence.find((e) => e.id === evidenceId)?.is_fake ?? false
+      const isNewFakeReveal = isFake && !state.revealedFakeEvidenceIds.includes(evidenceId)
       return {
         examinedEvidenceIds: next,
-        discoveredCombinationIds: [...state.discoveredCombinationIds, ...newlyDiscovered],
-        pendingCombinationIds: [...state.pendingCombinationIds, ...newlyDiscovered],
+        ...(newlyDiscovered.length > 0 && {
+          discoveredCombinationIds: [...state.discoveredCombinationIds, ...newlyDiscovered],
+          pendingCombinationIds: [...state.pendingCombinationIds, ...newlyDiscovered],
+        }),
+        ...(isNewFakeReveal && {
+          revealedFakeEvidenceIds: [...state.revealedFakeEvidenceIds, evidenceId],
+          pendingFakeRevealId: state.pendingFakeRevealId ?? evidenceId,
+        }),
       }
     }),
   // 通知済みの先頭組み合わせをキューから取り除く
   clearPendingCombination: () =>
     set((state) => ({ pendingCombinationIds: state.pendingCombinationIds.slice(1) })),
+  // 偽証拠発覚演出を閉じる
+  clearFakeReveal: () => set({ pendingFakeRevealId: null }),
   // 容疑者を会話済みリストに追加する（重複追加しない）
   talkToSuspect: (suspectId) =>
     set((state) => {
