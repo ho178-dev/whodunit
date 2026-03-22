@@ -30,7 +30,10 @@
       "Bash(npx lint-staged:*)",
       "Bash(git add:*)",
       "Bash(find /d/workspace/whodunit/public/assets -type f -exec ls -lh {})",
-      "Bash(npx eslint:*)"
+      "Bash(npx eslint:*)",
+      "Bash(grep -r \"1024\\\\|512\\\\|768\\\\|256\\\\|width.*height\" /d/workspace/whodunit/src --include=*.ts --include=*.tsx --include=*.json)",
+      "Bash(grep -r \"fetch.*image\\\\|axios.*image\\\\|POST.*image\\\\|generate.*image\" /d/workspace/whodunit/src --include=*.ts --include=*.tsx -i)",
+      "Bash(grep -r \"256\\\\|320\\\\|128\\\\|800\\\\|500\\\\|1200\\\\|600\" /d/workspace/whodunit/src --include=*.ts --include=*.tsx --include=*.json)"
     ]
   }
 }
