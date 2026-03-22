@@ -1,15 +1,46 @@
 // ゲーム終了画面。投票結果の正否と真相（犯人・動機・真実）を表示する
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
+import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
+import { getEvidenceNames } from '../../utils/scenario'
 
 export function EndingScreen() {
-  const { scenario, votedSuspectId, setPhase, resetGame } = useGameStore()
+  const {
+    scenario,
+    votedSuspectId,
+    discoveredCombinationIds,
+    examinedEvidenceIds,
+    actionsRemaining,
+    talkActionsRemaining,
+    difficulty,
+    setPhase,
+    resetGame,
+  } = useGameStore()
 
   if (!scenario || !votedSuspectId) return null
 
   const isCorrect = votedSuspectId === scenario.murderer_id
   const murderer = scenario.suspects.find((s) => s.id === scenario.murderer_id)!
   const voted = scenario.suspects.find((s) => s.id === votedSuspectId)!
+
+  // 不正解時：is_critical な組み合わせのうち未発見のものが「見逃した決定的事実」
+  const missedCombinations = isCorrect
+    ? []
+    : (scenario.evidence_combinations ?? []).filter(
+        (c) => c.is_critical && !discoveredCombinationIds.includes(c.id)
+      )
+
+  // 正解時：プレイヤーが発見した組み合わせ（発見順を保持）
+  const discoveredCombinations = isCorrect
+    ? discoveredCombinationIds
+        .map((id) => scenario.evidence_combinations?.find((c) => c.id === id))
+        .filter((c): c is NonNullable<typeof c> => c !== undefined)
+    : []
+
+  // スコア計算
+  const config = DIFFICULTY_CONFIG[difficulty]
+  const usedActions = config.actions - actionsRemaining
+  const usedTalkActions = config.talkActions - talkActionsRemaining
 
   return (
     <div className="min-h-screen px-4 py-8">
@@ -35,6 +66,117 @@ export function EndingScreen() {
             <p className="text-gothic-muted font-serif text-sm">
               あなたが告発したのは <span className="text-gothic-text">{voted.name}</span> でしたが…
             </p>
+          </GothicPanel>
+        )}
+
+        {!isCorrect && (
+          <GothicPanel className="mb-4 border-red-900/60">
+            {missedCombinations.length === 0 ? (
+              <p className="text-gothic-muted font-serif text-sm leading-relaxed">
+                決定的証拠はすべて揃えていた——それでも、真犯人を見誤った。
+              </p>
+            ) : (
+              <>
+                <p className="text-red-400/80 font-display text-xs tracking-widest mb-4">
+                  ── 見逃した決定的事実 ──
+                </p>
+                <div className="space-y-4">
+                  {missedCombinations.map((combo) => (
+                    <div key={combo.id} className="border border-red-900/40 bg-red-950/10 p-3">
+                      <p className="text-gothic-text font-serif text-sm mb-2">{combo.name}</p>
+                      <div className="space-y-1">
+                        {combo.evidence_ids.map((eid) => {
+                          const evidence = scenario.evidence.find((e) => e.id === eid)
+                          if (!evidence) return null
+                          const examined = examinedEvidenceIds.includes(eid)
+                          return (
+                            <div key={eid} className="flex items-center gap-2">
+                              <span className={examined ? 'text-gothic-muted' : 'text-red-400/70'}>
+                                {examined ? '◦' : '✕'}
+                              </span>
+                              <span
+                                className={`font-serif text-xs ${examined ? 'text-gothic-muted' : 'text-red-400/70'}`}
+                              >
+                                {evidence.name}
+                                {!examined && (
+                                  <span className="ml-1 text-red-400/50">（未調査）</span>
+                                )}
+                              </span>
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </>
+            )}
+          </GothicPanel>
+        )}
+
+        {isCorrect && discoveredCombinations.length > 0 && (
+          <GothicPanel className="mb-4">
+            <p className="text-gothic-gold/70 font-display text-xs tracking-widest mb-4">
+              ── 推理の軌跡 ──
+            </p>
+            <div className="space-y-3 mb-4">
+              {discoveredCombinations.map((combo) => {
+                const evidenceNames = getEvidenceNames(combo.evidence_ids, scenario.evidence)
+                return (
+                  <div key={combo.id}>
+                    <div className="flex flex-wrap items-center gap-1 mb-1">
+                      {evidenceNames.map((name, i) => (
+                        <span key={i} className="flex items-center gap-1">
+                          <span className="border border-gothic-border bg-stone-900/60 text-gothic-text font-serif text-xs px-2 py-0.5">
+                            {name}
+                          </span>
+                          {i < evidenceNames.length - 1 && (
+                            <span className="text-gothic-muted text-xs">＋</span>
+                          )}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-gothic-gold font-serif text-xs pl-1">→ {combo.name}</p>
+                  </div>
+                )
+              })}
+            </div>
+            <div className="border-t border-gothic-border pt-3 flex items-center gap-2">
+              <span className="text-gothic-muted text-xs">↓</span>
+              <span className="text-gothic-gold font-display text-sm tracking-widest">
+                犯人確定：{murderer.name}
+              </span>
+            </div>
+          </GothicPanel>
+        )}
+
+        {isCorrect && (
+          <GothicPanel className="mb-4">
+            <p className="text-gothic-gold/70 font-display text-xs tracking-widest mb-3">
+              ── 捜査記録 ──
+            </p>
+            <div className="space-y-1.5">
+              <div className="flex justify-between items-center">
+                <span className="text-gothic-muted font-serif text-xs">証拠調査</span>
+                <span className="text-gothic-text font-display text-sm">
+                  {usedActions}
+                  <span className="text-gothic-muted text-xs">
+                    {' '}
+                    / {config.actions} アクション使用
+                  </span>
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-gothic-muted font-serif text-xs">聞き込み</span>
+                <span className="text-gothic-text font-display text-sm">
+                  {usedTalkActions}
+                  <span className="text-gothic-muted text-xs">
+                    {' '}
+                    / {config.talkActions} アクション使用
+                  </span>
+                </span>
+              </div>
+            </div>
           </GothicPanel>
         )}
 
