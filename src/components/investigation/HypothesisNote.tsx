@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import type { SuspectHypothesis } from '../../types/game'
 import { isHypothesisFilled } from '../../types/game'
+import { SuspectProfileFields } from '../shared/SuspectProfileFields'
 
 // フォームフィールドの定義（テンプレート行）
 const TEMPLATE_FIELDS: {
@@ -39,7 +40,7 @@ const TEMPLATE_FIELDS: {
 
 // 容疑者選択と仮説フォームを提供する推理ノートコンポーネント
 export function HypothesisNote() {
-  const { scenario, hypotheses, updateHypothesis } = useGameStore()
+  const { scenario, hypotheses, updateHypothesis, viewedSuspectProfileIds } = useGameStore()
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null)
 
   if (!scenario) return null
@@ -85,14 +86,23 @@ export function HypothesisNote() {
       {/* 仮説フォーム */}
       {selectedSuspect ? (
         <div className="border border-gothic-border p-3 space-y-3">
-          {/* 容疑者ヘッダー */}
-          <div className="flex items-baseline gap-2 pb-2 border-b border-gothic-border">
-            <span className="text-gothic-gold font-display text-xs tracking-widest">
-              {selectedSuspect.name}
-            </span>
-            <span className="text-gothic-muted font-serif text-xs">
-              {selectedSuspect.occupation}
-            </span>
+          {/* 容疑者ヘッダー + プロフィール（閲覧済みの場合のみ表示） */}
+          <div className="pb-2 border-b border-gothic-border space-y-2">
+            <div className="flex items-baseline gap-2">
+              <span className="text-gothic-gold font-display text-xs tracking-widest">
+                {selectedSuspect.name}
+              </span>
+              <span className="text-gothic-muted font-serif text-xs">
+                {selectedSuspect.age}歳・{selectedSuspect.occupation}
+              </span>
+            </div>
+            {viewedSuspectProfileIds.includes(selectedSuspect.id) ? (
+              <SuspectProfileFields suspect={selectedSuspect} />
+            ) : (
+              <p className="text-gothic-muted/60 font-serif text-xs italic">
+                人物の名前をクリックするとプロフィールが記録されます
+              </p>
+            )}
           </div>
 
           {/* テンプレート行 + 自由メモ */}

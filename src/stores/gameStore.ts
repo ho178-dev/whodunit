@@ -63,6 +63,7 @@ export interface GameState {
   askedPursuitQuestionIds: string[] // 既に質問済みの追及質問ID
   pendingPursuitActivation: PendingPursuitActivation | null // 証言選択待ち状態
   pursuitWrongResult: PursuitWrongResult | null // 誤った証言を選択したときのフィードバック
+  viewedSuspectProfileIds: string[] // プロフィール閲覧済みの容疑者ID
   votedSuspectId: string | null
   hypotheses: SuspectHypothesis[] // 容疑者ごとの仮説メモ
 
@@ -88,6 +89,7 @@ export interface GameState {
   clearPursuitActivation: () => void
   clearPursuitWrongResult: () => void
   askPursuitQuestion: (suspectId: string, evidenceId: string, questionId: string) => void
+  viewSuspectProfile: (suspectId: string) => void
   setVotedSuspectId: (id: string) => void
   updateHypothesis: (
     suspectId: string,
@@ -139,6 +141,7 @@ const initialState = {
   askedPursuitQuestionIds: [],
   pendingPursuitActivation: null,
   pursuitWrongResult: null,
+  viewedSuspectProfileIds: [],
   votedSuspectId: null,
   hypotheses: [],
 }
@@ -240,7 +243,7 @@ export const useGameStore = create<GameState>((set) => ({
     set((state) => ({
       confrontationLog: [...state.confrontationLog, { ...entry, timestamp: Date.now() }],
     })),
-  // 証言選択モードを開始する（操作メモの証言タブが自動オープンされる）
+  // 証言選択モードを開始する（捜査メモの証言タブが自動オープンされる）
   initiatePursuitActivation: (suspectId, evidenceId) =>
     set({ pendingPursuitActivation: { suspectId, evidenceId }, pursuitWrongResult: null }),
   // 証言を選択して追及質問を試みる：正解ならルート質問をアンロック、不正解なら wrong リアクションを表示
@@ -305,6 +308,12 @@ export const useGameStore = create<GameState>((set) => ({
           unlockedPursuitQuestions: [...state.unlockedPursuitQuestions, ...newUnlocked],
         }),
       }
+    }),
+  // 容疑者プロフィールを閲覧済みにする（重複追加しない）
+  viewSuspectProfile: (suspectId) =>
+    set((state) => {
+      const next = addId(state.viewedSuspectProfileIds, suspectId)
+      return next ? { viewedSuspectProfileIds: next } : {}
     }),
   // 投票した容疑者IDを設定する
   setVotedSuspectId: (id) => set({ votedSuspectId: id }),

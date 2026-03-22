@@ -111,7 +111,7 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
         onMouseDown={handleMouseDown}
       >
         <div className="flex items-center gap-3">
-          <h2 className="font-display text-gothic-gold tracking-widest text-sm">操作メモ</h2>
+          <h2 className="font-display text-gothic-gold tracking-widest text-sm">捜査メモ</h2>
           {pursuitMode && (
             <span className="text-yellow-400 font-serif text-xs border border-yellow-700 px-2 py-0.5 animate-pulse">
               ⚑ 矛盾する証言を選択してください

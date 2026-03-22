@@ -5,7 +5,7 @@ import type { Evidence } from '../../types/scenario'
 import { PixelImageWithFallback } from './PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 
-const DEFAULT_EVIDENCE_IMG = '/assets/evidence/default.png'
+const DEFAULT_EVIDENCE_IMG = '/assets/evidence/default_evidence.png'
 
 interface EvidenceCardProps {
   evidence: Evidence

@@ -38,7 +38,7 @@ export function DiscussionPhase() {
               onClick={() => setShowNotesManual(true)}
               className="border border-stone-600 bg-gothic-panel hover:bg-stone-800 text-stone-400 font-display tracking-[0.1em] py-2 px-4 transition-all text-sm"
             >
-              📋 操作メモを開く
+              📋 捜査メモを開く
             </button>
             <button
               onClick={() => setPhase('voting')}
