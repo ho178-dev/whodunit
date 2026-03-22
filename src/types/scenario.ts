@@ -86,6 +86,7 @@ export interface Suspect {
     [evidence_id: string]: {
       reaction: string
       behavior: NpcBehavior
+      contradicts_statement_index?: number // この証拠が矛盾する statements[] のインデックス（0-4）
     }
   }
 }

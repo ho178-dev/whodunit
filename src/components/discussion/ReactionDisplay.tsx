@@ -6,6 +6,7 @@ interface ReactionDisplayProps {
   reaction: string
   behavior: NpcBehavior
   suspectName: string
+  hasContradiction?: boolean // この証拠がプレイヤーが聞いた証言と矛盾するか
 }
 
 const behaviorColors: Record<NpcBehavior, string> = {
@@ -24,7 +25,12 @@ const behaviorLabel: Record<NpcBehavior, string> = {
   evasive: '回避',
 }
 
-export function ReactionDisplay({ reaction, behavior, suspectName }: ReactionDisplayProps) {
+export function ReactionDisplay({
+  reaction,
+  behavior,
+  suspectName,
+  hasContradiction,
+}: ReactionDisplayProps) {
   return (
     <div className={cn('border p-4 mt-4', behaviorColors[behavior])}>
       <div className="flex items-center justify-between mb-2">
@@ -34,6 +40,11 @@ export function ReactionDisplay({ reaction, behavior, suspectName }: ReactionDis
         </span>
       </div>
       <p className="font-serif text-gothic-text text-sm">「{reaction}」</p>
+      {hasContradiction && (
+        <p className="mt-3 border-t border-yellow-700/50 pt-2 text-yellow-400 font-serif text-xs">
+          ⚠ この証拠はあなたが聞いたある証言と矛盾している
+        </p>
+      )}
     </div>
   )
 }

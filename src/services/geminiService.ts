@@ -8,6 +8,7 @@ import {
   MANSION_BACKGROUND_IDS,
 } from '../constants/assetIds'
 import { validateScenario } from './scenarioParser'
+import { SUSPECT_CONTRADICTION_COUNT, MURDERER_CONTRADICTION_COUNT } from '../constants/gameConfig'
 
 const PROMPT = `
 あなたは日本のマーダーミステリーシナリオ作家です。
@@ -62,6 +63,13 @@ const PROMPT = `
 - 少なくとも1つは他の容疑者の行動についての証言を含むこと
 - 犯人は1つの矛盾する証言を含むこと（後で他の証拠で反証できる内容）
 - 容疑者同士の証言が相互に補強・矛盾するよう設計すること
+
+## contradicts_statement_index の設計（矛盾インジケーター）
+- ある証拠が容疑者の発言（statements[]の0〜4のいずれか）と直接矛盾する場合、その evidence_reaction に contradicts_statement_index を設定すること
+- 犯人には必ず ${MURDERER_CONTRADICTION_COUNT} 件の evidence_reaction に contradicts_statement_index を設定すること
+- 犯人以外の各容疑者には ${SUSPECT_CONTRADICTION_COUNT} 件の evidence_reaction に contradicts_statement_index を設定すること
+- 矛盾の定義：証拠の存在が「その容疑者が当該 statements で語った内容を嘘または不正確と示す」場合のみ設定すること
+- 値は矛盾する statements[] のインデックス（0〜4の整数）
 
 ## murder_time_range の設計（シナリオに必須）
 - 推定犯行時刻の範囲を記述すること（例: "22:00〜01:00（推定）"）

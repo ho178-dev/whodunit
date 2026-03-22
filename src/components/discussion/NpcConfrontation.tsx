@@ -16,7 +16,7 @@ export function NpcConfrontation({
   selectedSuspectId,
   onSelectSuspect,
 }: NpcConfrontationProps) {
-  const { scenario, addConfrontation, confrontationLog } = useGameStore()
+  const { scenario, addConfrontation, confrontationLog, heardStatements } = useGameStore()
   if (!scenario) return null
 
   const selectedEvidence = selectedEvidenceId
@@ -32,6 +32,15 @@ export function NpcConfrontation({
           .filter((c) => c.suspectId === selectedSuspectId && c.evidenceId === selectedEvidenceId)
           .slice(-1)[0]
       : null
+
+  // 選択中の証拠がプレイヤーの聴取済み証言と矛盾するか（矛盾インジケーター表示判定）
+  const contradictIdx =
+    selectedSuspect && selectedEvidence
+      ? selectedSuspect.evidence_reactions[selectedEvidence.id]?.contradicts_statement_index
+      : undefined
+  const hasContradiction =
+    contradictIdx !== undefined &&
+    heardStatements.some((s) => s.suspectId === selectedSuspectId && s.index === contradictIdx)
 
   // 選択中の容疑者に証拠を突きつけてリアクションを対話ログへ追加する
   const handleConfront = () => {
@@ -86,11 +95,12 @@ export function NpcConfrontation({
           </div>
         )}
 
-        {latestReaction && (
+        {latestReaction && selectedSuspect && (
           <ReactionDisplay
             reaction={latestReaction.reaction}
             behavior={latestReaction.behavior}
-            suspectName={selectedSuspect?.name ?? ''}
+            suspectName={selectedSuspect.name}
+            hasContradiction={hasContradiction}
           />
         )}
       </div>

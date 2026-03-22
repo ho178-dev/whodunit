@@ -60,6 +60,7 @@ export const FIXED_SCENARIO: Scenario = {
         muddy_shoes: {
           reaction: '泥…？これは関係ない。庭には誰でも出られる。',
           behavior: 'evasive',
+          contradicts_statement_index: 2,
         },
         note_paper: { reaction: 'そのメモは私には関係ない。', behavior: 'calm' },
         torn_letter: { reaction: 'その手紙は見たことがない。', behavior: 'calm' },
@@ -70,6 +71,7 @@ export const FIXED_SCENARIO: Scenario = {
         photo_garden: {
           reaction: '写真？不鮮明で誰だかわからないじゃないか。',
           behavior: 'nervous',
+          contradicts_statement_index: 3,
         },
         safe_key: { reaction: '金庫の鍵…それがどうしたんだ。', behavior: 'angry' },
         handkerchief: {
@@ -120,7 +122,11 @@ export const FIXED_SCENARIO: Scenario = {
           behavior: 'sad',
         },
         muddy_shoes: { reaction: '泥のついた靴？昨晩誰かが外に出たのね。', behavior: 'calm' },
-        note_paper: { reaction: 'このメモの字…見覚えがある気がする。', behavior: 'nervous' },
+        note_paper: {
+          reaction: 'このメモの字…見覚えがある気がする。',
+          behavior: 'nervous',
+          contradicts_statement_index: 1,
+        },
         torn_letter: { reaction: '破られた手紙。誰かが証拠を隠滅しようとした？', behavior: 'calm' },
         kitchen_knife: { reaction: '包丁…でも叔父は毒で亡くなったんでしょ？', behavior: 'calm' },
         photo_garden: {
@@ -165,7 +171,11 @@ export const FIXED_SCENARIO: Scenario = {
         wine_glass: { reaction: 'ワイングラスで毒を？用意周到な犯人だな。', behavior: 'calm' },
         muddy_shoes: { reaction: '泥だと？私は昨晩外に出ていない。', behavior: 'calm' },
         note_paper: { reaction: 'このメモ…黒崎の筆跡だな。何が書いてある？', behavior: 'nervous' },
-        torn_letter: { reaction: 'これは…まずい。私宛の手紙じゃないか。', behavior: 'nervous' },
+        torn_letter: {
+          reaction: 'これは…まずい。私宛の手紙じゃないか。',
+          behavior: 'nervous',
+          contradicts_statement_index: 2,
+        },
         kitchen_knife: { reaction: '刃物か。毒殺とは関係ないだろう。', behavior: 'calm' },
         photo_garden: { reaction: 'この写真は関係ない。', behavior: 'calm' },
         safe_key: { reaction: '金庫の鍵か。中身が気になるが私には関係ない。', behavior: 'nervous' },
@@ -220,6 +230,7 @@ export const FIXED_SCENARIO: Scenario = {
         note_paper: {
           reaction: 'このメモ…薬物の計算式？医学的な知識がある人が書いたわね。',
           behavior: 'nervous',
+          contradicts_statement_index: 1,
         },
         torn_letter: {
           reaction: 'この手紙は…患者の情報が含まれているようね。',
@@ -295,6 +306,7 @@ export const FIXED_SCENARIO: Scenario = {
         safe_key: {
           reaction: '金庫の鍵！これは書斎の金庫に保管されているはずの…なぜここに？',
           behavior: 'angry',
+          contradicts_statement_index: 1,
         },
         handkerchief: {
           reaction: '誰かの所有物ですね。持ち主を特定すれば手がかりになります。',
@@ -378,6 +390,7 @@ export const FIXED_SCENARIO: Scenario = {
         diary_entry: {
           reaction: '旦那様の日記。最後のページに白石様のことが書かれていたはずです。',
           behavior: 'sad',
+          contradicts_statement_index: 4,
         },
       },
     },

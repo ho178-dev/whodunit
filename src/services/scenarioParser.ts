@@ -6,6 +6,9 @@ import {
   ROOM_COUNT,
   EVIDENCE_COUNT,
   FAKE_EVIDENCE_COUNT,
+  STATEMENT_COUNT,
+  SUSPECT_CONTRADICTION_COUNT,
+  MURDERER_CONTRADICTION_COUNT,
 } from '../constants/gameConfig'
 
 // AIが生成したシナリオの構造・整合性をバリデーションしてScenario型を返す
@@ -46,6 +49,28 @@ export function validateScenario(data: unknown): Scenario {
       throw new Error(`証拠 ${evidence.id} にexamination_notesが設定されていません`)
     if (evidence.is_fake && !evidence.first_impression)
       throw new Error(`偽証拠 ${evidence.id} にfirst_impressionが設定されていません`)
+  }
+
+  // 各容疑者の evidence_reactions における contradicts_statement_index の件数を検証する
+  for (const suspect of s.suspects) {
+    const contradictions = Object.values(suspect.evidence_reactions).filter(
+      (r): r is typeof r & { contradicts_statement_index: number } =>
+        r.contradicts_statement_index !== undefined
+    )
+    const expectedCount =
+      suspect.id === s.murderer_id ? MURDERER_CONTRADICTION_COUNT : SUSPECT_CONTRADICTION_COUNT
+    if (contradictions.length !== expectedCount) {
+      throw new Error(
+        `容疑者 ${suspect.id} の contradicts_statement_index は ${expectedCount} 件必要です（現在: ${contradictions.length} 件）`
+      )
+    }
+    for (const r of contradictions) {
+      if (r.contradicts_statement_index < 0 || r.contradicts_statement_index >= STATEMENT_COUNT) {
+        throw new Error(
+          `容疑者 ${suspect.id} の contradicts_statement_index が範囲外です（0〜${STATEMENT_COUNT - 1}）`
+        )
+      }
+    }
   }
 
   const evidenceIds = new Set(s.evidence.map((e) => e.id))
