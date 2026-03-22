@@ -77,7 +77,10 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
   // 話しかけた容疑者のtimeline
   const talkedSuspects = scenario.suspects.filter((s) => talkedSuspectIds.includes(s.id))
 
-  const statementsById = Map.groupBy(heardStatements, (h) => h.suspectId)
+  const statementsById = heardStatements.reduce<Map<string, typeof heardStatements>>(
+    (acc, h) => acc.set(h.suspectId, [...(acc.get(h.suspectId) ?? []), h]),
+    new Map()
+  )
   const testimonyBySuspect = scenario.suspects
     .map((s) => ({
       suspect: s,
