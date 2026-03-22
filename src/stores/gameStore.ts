@@ -14,18 +14,36 @@ import { DIFFICULTY_CONFIG } from '../constants/gameConfig'
 import { getRootQuestionIds } from '../utils/scenario'
 
 // 詳細調査済みの証拠IDリストとシナリオを元に、新たに発見すべき組み合わせIDを返すヘルパー
+// required_suspect_ids が設定されている場合は、プロフィール閲覧＋全証言聴取も条件に含める
 function checkCombinations(
   scenario: Scenario | null,
   examinedIds: string[],
-  alreadyDiscovered: string[]
+  alreadyDiscovered: string[],
+  viewedSuspectProfileIds: string[],
+  heardStatements: HeardStatement[]
 ): string[] {
   if (!scenario?.evidence_combinations) return []
   return scenario.evidence_combinations
-    .filter(
-      (c) =>
-        !alreadyDiscovered.includes(c.id) &&
-        c.evidence_ids.every((eid) => examinedIds.includes(eid))
-    )
+    .filter((c) => {
+      if (alreadyDiscovered.includes(c.id)) return false
+      if (!c.evidence_ids.every((eid) => examinedIds.includes(eid))) return false
+
+      // required_suspect_ids が未設定の場合は証拠条件のみで発火（後方互換）
+      if (!c.required_suspect_ids || c.required_suspect_ids.length === 0) return true
+
+      return c.required_suspect_ids.every((suspectId) => {
+        // プロフィール閲覧済みか
+        if (!viewedSuspectProfileIds.includes(suspectId)) return false
+        // 全証言（greeting含まず statements のみ）を聴取済みか
+        const suspect = scenario.suspects.find((s) => s.id === suspectId)
+        if (!suspect) return false
+        const statementCount = suspect.investigation_dialog.statements.length
+        for (let i = 0; i < statementCount; i++) {
+          if (!heardStatements.some((h) => h.suspectId === suspectId && h.index === i)) return false
+        }
+        return true
+      })
+    })
     .map((c) => c.id)
 }
 
@@ -194,7 +212,9 @@ export const useGameStore = create<GameState>((set) => ({
       const newlyDiscovered = checkCombinations(
         state.scenario,
         next,
-        state.discoveredCombinationIds
+        state.discoveredCombinationIds,
+        state.viewedSuspectProfileIds,
+        state.heardStatements
       )
       const isFake = state.scenario?.evidence.find((e) => e.id === evidenceId)?.is_fake ?? false
       const isNewFakeReveal = isFake && !state.revealedFakeEvidenceIds.includes(evidenceId)
@@ -227,15 +247,28 @@ export const useGameStore = create<GameState>((set) => ({
       actionsRemaining: Math.max(0, state.actionsRemaining - 1),
     })),
   // 証言を記録してトーク回数を消費する（既聴の場合は消費しない）
+  // 証言追加後、証拠＋人物条件が揃った組み合わせがあれば pending に積む
   hearStatement: (entry) =>
     set((state) => {
       const alreadyHeard = state.heardStatements.some(
         (s) => s.suspectId === entry.suspectId && s.index === entry.index
       )
       if (alreadyHeard) return {}
+      const newHeardStatements = [...state.heardStatements, entry]
+      const newlyDiscovered = checkCombinations(
+        state.scenario,
+        state.examinedEvidenceIds,
+        state.discoveredCombinationIds,
+        state.viewedSuspectProfileIds,
+        newHeardStatements
+      )
       return {
         talkActionsRemaining: Math.max(0, state.talkActionsRemaining - 1),
-        heardStatements: [...state.heardStatements, entry],
+        heardStatements: newHeardStatements,
+        ...(newlyDiscovered.length > 0 && {
+          discoveredCombinationIds: [...state.discoveredCombinationIds, ...newlyDiscovered],
+          pendingCombinationIds: [...state.pendingCombinationIds, ...newlyDiscovered],
+        }),
       }
     }),
   // 容疑者への証拠突きつけ記録をタイムスタンプ付きで追加する（追及質問のアンロックは証言選択後）
@@ -310,10 +343,25 @@ export const useGameStore = create<GameState>((set) => ({
       }
     }),
   // 容疑者プロフィールを閲覧済みにする（重複追加しない）
+  // プロフィール追加後、証拠＋人物条件が揃った組み合わせがあれば pending に積む
   viewSuspectProfile: (suspectId) =>
     set((state) => {
       const next = addId(state.viewedSuspectProfileIds, suspectId)
-      return next ? { viewedSuspectProfileIds: next } : {}
+      if (!next) return {}
+      const newlyDiscovered = checkCombinations(
+        state.scenario,
+        state.examinedEvidenceIds,
+        state.discoveredCombinationIds,
+        next,
+        state.heardStatements
+      )
+      return {
+        viewedSuspectProfileIds: next,
+        ...(newlyDiscovered.length > 0 && {
+          discoveredCombinationIds: [...state.discoveredCombinationIds, ...newlyDiscovered],
+          pendingCombinationIds: [...state.pendingCombinationIds, ...newlyDiscovered],
+        }),
+      }
     }),
   // 投票した容疑者IDを設定する
   setVotedSuspectId: (id) => set({ votedSuspectId: id }),

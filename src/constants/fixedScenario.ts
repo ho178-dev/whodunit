@@ -720,7 +720,8 @@ export const FIXED_SCENARIO: Scenario = {
       name: '深夜に庭へ出た人物が特定された',
       description:
         '泥靴の足跡サイズと庭園の写真に映り込んだ人物の輪郭が一致する。深夜0時頃、白石誠が庭園へ出て何かを採取していたことが明らかになった。アリバイ「部屋にいた」と矛盾する。',
-      is_critical: false,
+      is_critical: true,
+      required_suspect_ids: ['shiraishi_makoto'],
     },
     {
       id: 'combo_poison_origin',
@@ -729,6 +730,7 @@ export const FIXED_SCENARIO: Scenario = {
       description:
         '庭で採取されたトリカブトの葉片と小瓶の毒成分が同一種由来と確認された。犯人は庭園からトリカブトを採取し、キッチンで毒を精製していた。市販品でなく自家製である点が、館内の人物による犯行を強く示唆する。',
       is_critical: true,
+      required_suspect_ids: ['shiraishi_makoto'],
     },
     {
       id: 'combo_motive_confirmed',
@@ -737,6 +739,7 @@ export const FIXED_SCENARIO: Scenario = {
       description:
         '遺言書の写しと日記の記述が合致し、黒崎源一郎が先月密かに遺言書を書き換えていた事実が確定した。相続分を削除された人物には3000万円超の損失が生じる。この事実を知っていた者が最有力の動機を持つ。',
       is_critical: true,
+      required_suspect_ids: ['shiraishi_makoto'],
     },
     {
       id: 'combo_study_intrusion',
@@ -745,6 +748,7 @@ export const FIXED_SCENARIO: Scenario = {
       description:
         '「S.M.」イニシャルのハンカチ・金庫の鍵・遺言書の写しが一つの行動を示す。白石誠が金庫の鍵を用いて書斎に侵入し、遺言書の内容を確認した上でコピーを残した。動機・機会・現場の三点が交差する決定的な証拠連鎖だ。',
       is_critical: true,
+      required_suspect_ids: ['shiraishi_makoto'],
     },
   ],
 }

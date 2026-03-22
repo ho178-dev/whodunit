@@ -72,6 +72,7 @@ export interface EvidenceCombination {
   name: string // 解放されるファクト名（例: "深夜に庭へ出た人物が特定"）
   description: string // ファクトの詳細説明
   is_critical: boolean // true = 犯人特定に必須の決定的証拠
+  required_suspect_ids?: string[] // 省略可：発火に必要な容疑者のプロフィール閲覧＋全証言聴取の条件
 }
 
 export interface Suspect {
