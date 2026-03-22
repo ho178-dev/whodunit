@@ -1,18 +1,25 @@
 // 捜査中に収集したタイムライン・証拠品・証言・発見・仮説を閲覧・記述できるメモパネル
 import { useState, useRef, useEffect, useCallback } from 'react'
 import { useGameStore } from '../../stores/gameStore'
-import { getEvidenceNames } from '../../utils/scenario'
+import { getEvidenceNames, getInspectionDescription } from '../../utils/scenario'
 import { HypothesisNote } from './HypothesisNote'
 import { isHypothesisFilled } from '../../types/game'
 
 type Tab = 'timeline' | 'evidence' | 'testimony' | 'discovery' | 'hypothesis'
 
+interface PursuitSelectionMode {
+  suspectId: string // 追及対象の容疑者ID
+  onSelect: (suspectId: string, statementIndex: number) => void
+  onCancel: () => void
+}
+
 interface InvestigationNotesProps {
   onClose: () => void
+  pursuitMode?: PursuitSelectionMode // 証言選択モード（追及質問の証言ゲート）
 }
 
 // タイムライン・証拠・証言・発見をタブ切り替えで表示するメモパネルコンポーネント
-export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
+export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesProps) {
   const {
     scenario,
     talkedSuspectIds,
@@ -23,7 +30,7 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
     hypotheses,
     revealedFakeEvidenceIds,
   } = useGameStore()
-  const [tab, setTab] = useState<Tab>('timeline')
+  const [tab, setTab] = useState<Tab>(pursuitMode ? 'testimony' : 'timeline')
   const [position, setPosition] = useState({ x: 16, y: 80 })
   const dragRef = useRef({ isDragging: false, startX: 0, startY: 0, originX: 0, originY: 0 })
 
@@ -70,13 +77,11 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
   // 話しかけた容疑者のtimeline
   const talkedSuspects = scenario.suspects.filter((s) => talkedSuspectIds.includes(s.id))
 
-  // 聞き込み記録：容疑者ごとにグルーピング
+  const statementsById = Map.groupBy(heardStatements, (h) => h.suspectId)
   const testimonyBySuspect = scenario.suspects
     .map((s) => ({
       suspect: s,
-      statements: heardStatements
-        .filter((h) => h.suspectId === s.id)
-        .sort((a, b) => a.index - b.index),
+      statements: (statementsById.get(s.id) ?? []).slice().sort((a, b) => a.index - b.index),
     }))
     .filter((g) => g.statements.length > 0)
 
@@ -90,6 +95,8 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
         : 'text-gothic-muted hover:text-gothic-text'
     }`
 
+  const handleClose = () => onClose()
+
   return (
     <div
       className="fixed z-50 w-full max-w-lg max-h-[80vh] flex flex-col border border-gothic-gold bg-gothic-panel shadow-[0_0_30px_rgba(0,0,0,0.8)]"
@@ -100,13 +107,30 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
         className="flex items-center justify-between px-4 py-3 border-b border-gothic-border cursor-move select-none"
         onMouseDown={handleMouseDown}
       >
-        <h2 className="font-display text-gothic-gold tracking-widest text-sm">操作メモ</h2>
-        <button
-          onClick={onClose}
-          className="text-gothic-muted hover:text-gothic-text font-serif text-lg leading-none"
-        >
-          ×
-        </button>
+        <div className="flex items-center gap-3">
+          <h2 className="font-display text-gothic-gold tracking-widest text-sm">操作メモ</h2>
+          {pursuitMode && (
+            <span className="text-yellow-400 font-serif text-xs border border-yellow-700 px-2 py-0.5 animate-pulse">
+              ⚑ 矛盾する証言を選択してください
+            </span>
+          )}
+        </div>
+        <div className="flex items-center gap-2">
+          {pursuitMode && (
+            <button
+              onClick={() => pursuitMode.onCancel()}
+              className="text-stone-500 hover:text-stone-300 font-serif text-xs border border-stone-700 px-2 py-0.5 transition-colors"
+            >
+              キャンセル
+            </button>
+          )}
+          <button
+            onClick={handleClose}
+            className="text-gothic-muted hover:text-gothic-text font-serif text-lg leading-none"
+          >
+            ×
+          </button>
+        </div>
       </div>
 
       {/* 被害者情報（常時表示） */}
@@ -134,8 +158,12 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
         <button onClick={() => setTab('evidence')} className={tabClass('evidence')}>
           証拠品 {discoveredEvidence.length > 0 && `(${discoveredEvidence.length})`}
         </button>
-        <button onClick={() => setTab('testimony')} className={tabClass('testimony')}>
+        <button
+          onClick={() => setTab('testimony')}
+          className={`${tabClass('testimony')} ${pursuitMode ? 'text-yellow-400' : ''}`}
+        >
           証言 {heardStatements.length > 0 && `(${heardStatements.length})`}
+          {pursuitMode && ' ◀'}
         </button>
         <button onClick={() => setTab('discovery')} className={tabClass('discovery')}>
           発見
@@ -218,7 +246,7 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
                         )}
                       </div>
                       <p className="text-gothic-text font-serif text-xs mb-2">
-                        {evidence.description}
+                        {getInspectionDescription(evidence)}
                       </p>
                       {examined ? (
                         <div className="border-t border-gothic-border pt-2">
@@ -251,25 +279,65 @@ export function InvestigationNotes({ onClose }: InvestigationNotesProps) {
               </p>
             ) : (
               <div className="space-y-4">
-                {testimonyBySuspect.map(({ suspect, statements }) => (
-                  <div key={suspect.id} className="border border-gothic-border p-3">
-                    <p className="text-gothic-gold font-display text-xs tracking-widest mb-2">
-                      {suspect.name}
-                    </p>
-                    <div className="space-y-2">
-                      {statements.map((s) => (
-                        <div key={s.index} className="flex gap-2">
-                          <span className="text-gothic-muted text-xs font-serif shrink-0">
-                            {s.index === -1 ? '挨拶' : `証言${s.index + 1}`}
+                {pursuitMode && (
+                  <p className="text-yellow-400/80 font-serif text-xs border border-yellow-800/50 bg-yellow-950/30 px-3 py-2">
+                    この証拠と矛盾する証言を選んでください。間違えた場合は容疑者が反応します。
+                  </p>
+                )}
+                {testimonyBySuspect.map(({ suspect, statements }) => {
+                  const isTargetSuspect = pursuitMode?.suspectId === suspect.id
+                  return (
+                    <div
+                      key={suspect.id}
+                      className={`border p-3 ${
+                        pursuitMode && !isTargetSuspect
+                          ? 'border-stone-800 opacity-40'
+                          : 'border-gothic-border'
+                      }`}
+                    >
+                      <p
+                        className={`font-display text-xs tracking-widest mb-2 ${
+                          isTargetSuspect ? 'text-yellow-400' : 'text-gothic-gold'
+                        }`}
+                      >
+                        {suspect.name}
+                        {isTargetSuspect && pursuitMode && (
+                          <span className="ml-2 text-yellow-600 font-serif normal-case tracking-normal">
+                            — 証言を選択
                           </span>
-                          <p className="text-gothic-text font-serif text-xs leading-relaxed">
-                            {s.text}
-                          </p>
-                        </div>
-                      ))}
+                        )}
+                      </p>
+                      <div className="space-y-2">
+                        {statements.map((s) => {
+                          // greeting（index -1）は追及対象外
+                          const isSelectable = pursuitMode && isTargetSuspect && s.index >= 0
+                          return (
+                            <div
+                              key={s.index}
+                              className={`flex gap-2 ${isSelectable ? 'group' : ''}`}
+                            >
+                              <span className="text-gothic-muted text-xs font-serif shrink-0">
+                                {s.index === -1 ? '挨拶' : `証言${s.index + 1}`}
+                              </span>
+                              {isSelectable ? (
+                                <button
+                                  onClick={() => pursuitMode.onSelect(suspect.id, s.index)}
+                                  className="text-left text-gothic-text font-serif text-xs leading-relaxed hover:text-yellow-200 hover:bg-yellow-900/20 px-1 -mx-1 rounded transition-colors border border-transparent hover:border-yellow-800/50 w-full"
+                                >
+                                  {s.text}
+                                </button>
+                              ) : (
+                                <p className="text-gothic-text font-serif text-xs leading-relaxed">
+                                  {s.text}
+                                </p>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  )
+                })}
               </div>
             )}
           </div>

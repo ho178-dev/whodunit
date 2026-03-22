@@ -1,8 +1,17 @@
 // Zustandによるゲーム全体の状態管理ストア（フェーズ・証拠・会話履歴・仮説など）
 import { create } from 'zustand'
-import type { GamePhase, ConfrontationEntry, Difficulty, SuspectHypothesis } from '../types/game'
+import type {
+  GamePhase,
+  ConfrontationEntry,
+  Difficulty,
+  SuspectHypothesis,
+  UnlockedPursuitQuestion,
+  PendingPursuitActivation,
+  PursuitWrongResult,
+} from '../types/game'
 import type { Scenario } from '../types/scenario'
 import { DIFFICULTY_CONFIG } from '../constants/gameConfig'
+import { getRootQuestionIds } from '../utils/scenario'
 
 // 詳細調査済みの証拠IDリストとシナリオを元に、新たに発見すべき組み合わせIDを返すヘルパー
 function checkCombinations(
@@ -50,6 +59,10 @@ export interface GameState {
   talkedSuspectIds: string[]
   heardStatements: HeardStatement[]
   confrontationLog: ConfrontationEntry[]
+  unlockedPursuitQuestions: UnlockedPursuitQuestion[] // 証言選択成功後にアンロックされた追及質問
+  askedPursuitQuestionIds: string[] // 既に質問済みの追及質問ID
+  pendingPursuitActivation: PendingPursuitActivation | null // 証言選択待ち状態
+  pursuitWrongResult: PursuitWrongResult | null // 誤った証言を選択したときのフィードバック
   votedSuspectId: string | null
   hypotheses: SuspectHypothesis[] // 容疑者ごとの仮説メモ
 
@@ -70,6 +83,11 @@ export interface GameState {
   consumeAction: () => void
   hearStatement: (entry: HeardStatement) => void
   addConfrontation: (entry: Omit<ConfrontationEntry, 'timestamp'>) => void
+  initiatePursuitActivation: (suspectId: string, evidenceId: string) => void
+  selectTestimonyForPursuit: (suspectId: string, statementIndex: number) => void
+  clearPursuitActivation: () => void
+  clearPursuitWrongResult: () => void
+  askPursuitQuestion: (suspectId: string, evidenceId: string, questionId: string) => void
   setVotedSuspectId: (id: string) => void
   updateHypothesis: (
     suspectId: string,
@@ -81,6 +99,21 @@ export interface GameState {
 
 // IDリストへの重複なし追加ヘルパー（既存の場合はearly returnでno-op）
 const addId = (arr: string[], id: string) => (arr.includes(id) ? null : [...arr, id])
+
+// 追及質問のルートQをアンロックする内部ヘルパー
+function buildRootUnlocks(
+  scenario: Scenario,
+  suspectId: string,
+  evidenceId: string,
+  alreadyUnlocked: UnlockedPursuitQuestion[]
+): UnlockedPursuitQuestion[] {
+  const pqs =
+    scenario.suspects.find((s) => s.id === suspectId)?.evidence_reactions[evidenceId]
+      ?.pursuit_questions ?? []
+  return getRootQuestionIds(pqs)
+    .filter((id) => !alreadyUnlocked.some((u) => u.questionId === id))
+    .map((id) => ({ suspectId, evidenceId, questionId: id }))
+}
 
 const initialState = {
   phase: 'title' as GamePhase,
@@ -102,6 +135,10 @@ const initialState = {
   talkedSuspectIds: [],
   heardStatements: [],
   confrontationLog: [],
+  unlockedPursuitQuestions: [],
+  askedPursuitQuestionIds: [],
+  pendingPursuitActivation: null,
+  pursuitWrongResult: null,
   votedSuspectId: null,
   hypotheses: [],
 }
@@ -198,11 +235,77 @@ export const useGameStore = create<GameState>((set) => ({
         heardStatements: [...state.heardStatements, entry],
       }
     }),
-  // 容疑者への証拠突きつけ記録をタイムスタンプ付きで追加する
+  // 容疑者への証拠突きつけ記録をタイムスタンプ付きで追加する（追及質問のアンロックは証言選択後）
   addConfrontation: (entry) =>
     set((state) => ({
       confrontationLog: [...state.confrontationLog, { ...entry, timestamp: Date.now() }],
     })),
+  // 証言選択モードを開始する（操作メモの証言タブが自動オープンされる）
+  initiatePursuitActivation: (suspectId, evidenceId) =>
+    set({ pendingPursuitActivation: { suspectId, evidenceId }, pursuitWrongResult: null }),
+  // 証言を選択して追及質問を試みる：正解ならルート質問をアンロック、不正解なら wrong リアクションを表示
+  selectTestimonyForPursuit: (suspectId, statementIndex) =>
+    set((state) => {
+      if (!state.pendingPursuitActivation || !state.scenario) return {}
+      const { suspectId: pendingSuspectId, evidenceId } = state.pendingPursuitActivation
+      const suspect = state.scenario.suspects.find((s) => s.id === pendingSuspectId)
+      if (!suspect) return {}
+
+      const reaction = suspect.evidence_reactions[evidenceId]
+      const isCorrect =
+        reaction?.contradicts_statement_index !== undefined &&
+        reaction.contradicts_statement_index === statementIndex &&
+        suspectId === pendingSuspectId
+
+      if (isCorrect) {
+        const newUnlocked = buildRootUnlocks(
+          state.scenario,
+          pendingSuspectId,
+          evidenceId,
+          state.unlockedPursuitQuestions
+        )
+        return {
+          pendingPursuitActivation: null,
+          pursuitWrongResult: null,
+          ...(newUnlocked.length > 0 && {
+            unlockedPursuitQuestions: [...state.unlockedPursuitQuestions, ...newUnlocked],
+          }),
+        }
+      }
+
+      // 不正解：evidence固有 → 容疑者デフォルト の優先順で使用
+      const wrongResponse =
+        reaction?.wrong_testimony_response ?? suspect.default_wrong_pursuit_response
+      return {
+        pendingPursuitActivation: null,
+        pursuitWrongResult: { suspectId: suspect.id, response: wrongResponse },
+      }
+    }),
+  // 証言選択モードをキャンセルする
+  clearPursuitActivation: () => set({ pendingPursuitActivation: null }),
+  // 誤り選択フィードバックを消去する
+  clearPursuitWrongResult: () => set({ pursuitWrongResult: null }),
+  // 追及質問を既読にし、連鎖する次の質問をアンロックする
+  askPursuitQuestion: (suspectId, evidenceId, questionId) =>
+    set((state) => {
+      if (state.askedPursuitQuestionIds.includes(questionId)) return {}
+
+      const pqs =
+        state.scenario?.suspects.find((s) => s.id === suspectId)?.evidence_reactions[evidenceId]
+          ?.pursuit_questions ?? []
+      const question = pqs.find((q) => q.id === questionId)
+
+      const newUnlocked: UnlockedPursuitQuestion[] = (question?.unlocks_pursuit_question_ids ?? [])
+        .filter((id) => !state.unlockedPursuitQuestions.some((u) => u.questionId === id))
+        .map((id) => ({ suspectId, evidenceId, questionId: id }))
+
+      return {
+        askedPursuitQuestionIds: [...state.askedPursuitQuestionIds, questionId],
+        ...(newUnlocked.length > 0 && {
+          unlockedPursuitQuestions: [...state.unlockedPursuitQuestions, ...newUnlocked],
+        }),
+      }
+    }),
   // 投票した容疑者IDを設定する
   setVotedSuspectId: (id) => set({ votedSuspectId: id }),
   // 容疑者の仮説フィールドを更新し、localStorage に保存する

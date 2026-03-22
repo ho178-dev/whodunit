@@ -56,6 +56,15 @@ export type EvidenceCategoryId =
 
 export type NpcBehavior = 'calm' | 'nervous' | 'angry' | 'sad' | 'evasive'
 
+// 矛盾を突いた後にアンロックされる追及質問
+export interface PursuitQuestion {
+  id: string
+  text: string // プレイヤーが投げる質問文
+  response: string // 容疑者の返答
+  behavior: NpcBehavior
+  unlocks_pursuit_question_ids?: string[] // 回答後に連鎖解放するID（同じevidence_reaction内）
+}
+
 // 複数証拠の組み合わせで解放される決定的事実
 export interface EvidenceCombination {
   id: string
@@ -82,11 +91,14 @@ export interface Suspect {
     greeting: string
     statements: string[]
   }
+  default_wrong_pursuit_response: string // 見当違いの証言で追及したときの汎用リアクション（容疑者ごと）
   evidence_reactions: {
     [evidence_id: string]: {
       reaction: string
       behavior: NpcBehavior
       contradicts_statement_index?: number // この証拠が矛盾する statements[] のインデックス（0-4）
+      pursuit_questions?: PursuitQuestion[] // 矛盾発覚後にアンロックされる追及質問チェーン
+      wrong_testimony_response?: string // 誤った証言を選択したときの容疑者リアクション（設定があれば default より優先）
     }
   }
 }

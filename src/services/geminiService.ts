@@ -34,6 +34,7 @@ const PROMPT = `
 - descriptionおよびexamination_notesに「〇〇（容疑者名）の指紋と一致」「〇〇が犯人」「〇〇のサイズと一致」のような特定人物を犯人と断定・示唆する記述を含めないこと。物証の客観的な特徴のみを記述し、プレイヤー自身が推理できる余地を残すこと
 - 日本語の館ミステリーとして成立するストーリーにすること
 - 各容疑者のstatementsは必ず5個設定すること
+- 各容疑者にdefault_wrong_pursuit_responseを設定すること（見当違いの証言で矛盾を追及されたときの容疑者ごとの反応。性格に合った1文）
 - 各容疑者にroom_idを設定し、5部屋に6人を割り当てること（1部屋に1〜2人）
 - 各証拠にexamination_notesを設定すること
 - シナリオにmurder_time_rangeを設定すること（例: "22:00〜01:00（推定）"）
@@ -114,7 +115,114 @@ const PROMPT = `
 JSONのみを返してください。説明文は不要です。
 `
 
-// Gemini APIにプロンプトを送信してシナリオJSONを生成・バリデーションして返す
+// Step2 用：ベースシナリオを受け取って追及チェーンJSONを生成するプロンプトを構築する
+function buildPursuitChainPrompt(scenario: Scenario): string {
+  return `
+あなたは日本のマーダーミステリーシナリオ作家です。
+以下のシナリオデータを元に、各容疑者の evidence_reactions に追及質問チェーンを設計してください。
+
+## シナリオデータ
+${JSON.stringify(scenario, null, 2)}
+
+## 追及質問チェーンの設計ルール
+
+### 対象の選び方
+- **全容疑者**に最低1つの pursuit_questions を設計すること
+- 犯人（murderer_id: ${scenario.murderer_id}）：contradicts_statement_index が設定された evidence_reaction を2〜3個選ぶ。チェーンは有罪に繋がる方向で設計する
+- **非犯人**：contradicts_statement_index が設定された evidence_reaction を1個選ぶ。チェーンは容疑者の秘密や事情を明かすが、最終的に「殺してはいない」と証明される方向にする（フェイクリード）
+
+### 質問の構造
+- pursuit_questions は各 evidence_reaction に2個設定する（1個目がルート、2個目が連鎖）
+- 1個目（ルート質問）の unlocks_pursuit_question_ids に2個目のIDを設定する
+- 2個目（連鎖質問）は unlocks_pursuit_question_ids を設定しない
+- 質問IDの形式："{suspect_id}_pq_{evidence_id}_{番号}" （例: "shiraishi_pq_muddy_1"）
+
+### 質問文（text）の書き方
+- **必ずその容疑者が実際に言った証言（statements の文章）を直接引用すること**
+- 例：「あなたは『〇〇』と言いましたね。ではこの証拠はどう説明しますか？」という形式
+- 引用する証言は contradicts_statement_index が示す statements[index] の内容を使うこと
+- 1文で完結させ、30〜60字程度
+
+### 返答（response）の書き方
+- 容疑者の動揺・言い訳・開き直りを含む（1〜2文）
+- behavior は nervous / evasive / angry のいずれか
+- 犯人の返答：特に動揺が強く、最終的に言葉に詰まること
+- 非犯人の返答：「疑われる理由はわかるが、殺していない。なぜなら〜」という方向
+
+### wrong_testimony_response の追加
+- pursuit_questions を持つ全ての evidence_reaction に wrong_testimony_response フィールドも必ず設定すること
+- これはプレイヤーが**誤った証言**を選択したときに表示される容疑者のリアクション（1文）
+- 例：「その証言と、この証拠に直接の矛盾はない。見当違いだ。」
+
+## 出力形式
+以下のJSON構造のみを返してください。説明文は不要です。
+
+{
+  "pursuit_chains": {
+    "{suspect_id}": {
+      "{evidence_id}": {
+        "wrong_testimony_response": "...",
+        "questions": [
+          {
+            "id": "...",
+            "text": "あなたは『実際の証言文』と言いましたね。ではこの証拠はどう説明しますか？",
+            "response": "...",
+            "behavior": "nervous",
+            "unlocks_pursuit_question_ids": ["..."]
+          },
+          {
+            "id": "...",
+            "text": "...",
+            "response": "...",
+            "behavior": "angry"
+          }
+        ]
+      }
+    }
+  }
+}
+`
+}
+
+type PursuitChainEntry = {
+  wrong_testimony_response?: string
+  questions: import('../types/scenario').PursuitQuestion[]
+}
+
+// pursuit_chains をベースシナリオの evidence_reactions にマージする
+function mergePursuitChains(
+  scenario: Scenario,
+  chains: Record<string, Record<string, PursuitChainEntry>>
+): Scenario {
+  return {
+    ...scenario,
+    suspects: scenario.suspects.map((suspect) => {
+      const suspectChains = chains[suspect.id]
+      if (!suspectChains) return suspect
+      return {
+        ...suspect,
+        evidence_reactions: Object.fromEntries(
+          Object.entries(suspect.evidence_reactions).map(([evidenceId, reaction]) => {
+            const entry = suspectChains[evidenceId]
+            if (!entry?.questions?.length) return [evidenceId, reaction]
+            return [
+              evidenceId,
+              {
+                ...reaction,
+                pursuit_questions: entry.questions,
+                ...(entry.wrong_testimony_response && {
+                  wrong_testimony_response: entry.wrong_testimony_response,
+                }),
+              },
+            ]
+          })
+        ),
+      }
+    }),
+  }
+}
+
+// Gemini APIにプロンプトを送信してシナリオJSONを生成・バリデーションして返す（2ステップ生成）
 export async function generateScenario(apiKey: string): Promise<Scenario> {
   const genAI = new GoogleGenerativeAI(apiKey)
   const model = genAI.getGenerativeModel({
@@ -126,6 +234,7 @@ export async function generateScenario(apiKey: string): Promise<Scenario> {
     },
   })
 
+  // Step1: ベースシナリオ生成
   const result = await model.generateContent(PROMPT)
   const text = result.response.text()
 
@@ -136,5 +245,22 @@ export async function generateScenario(apiKey: string): Promise<Scenario> {
     throw new Error('AIの返答をJSONとして解析できませんでした')
   }
 
-  return validateScenario(parsed)
+  const baseScenario = validateScenario(parsed)
+
+  // Step2: 追及チェーン生成
+  let scenarioWithChains = baseScenario
+  try {
+    const chainResult = await model.generateContent(buildPursuitChainPrompt(baseScenario))
+    const chainText = chainResult.response.text()
+    const chainParsed = JSON.parse(chainText) as {
+      pursuit_chains: Record<string, Record<string, PursuitChainEntry>>
+    }
+    if (chainParsed.pursuit_chains) {
+      scenarioWithChains = mergePursuitChains(baseScenario, chainParsed.pursuit_chains)
+    }
+  } catch {
+    // 追及チェーン生成失敗はゲームを壊さない（チェーンなしで続行）
+  }
+
+  return scenarioWithChains
 }

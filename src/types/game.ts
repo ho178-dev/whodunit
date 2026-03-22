@@ -28,6 +28,25 @@ export interface SuspectHypothesis {
   notes: string
 }
 
+// アンロック済み追及質問（容疑者・証拠・質問IDの三点で一意に識別）
+export interface UnlockedPursuitQuestion {
+  suspectId: string
+  evidenceId: string
+  questionId: string
+}
+
+// 証言選択待ち状態（追及質問の証言ゲート）
+export interface PendingPursuitActivation {
+  suspectId: string
+  evidenceId: string
+}
+
+// 誤った証言を選択したときのフィードバック
+export interface PursuitWrongResult {
+  suspectId: string
+  response: string
+}
+
 // 仮説エントリに1文字以上の入力があるか判定する
 export function isHypothesisFilled(h: SuspectHypothesis): boolean {
   return !!(h.motive || h.opportunity || h.means || h.notes)
