@@ -1,20 +1,57 @@
 // 捜査フェーズで部屋内の容疑者に話しかけ、証言を順番に聞き出すコンポーネント
+// アドベンチャーゲーム風に、キャラクターを左右に配置しダイアログを下部に表示する
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { DialogBox } from '../shared/DialogBox'
 import { CharacterCard } from '../shared/CharacterCard'
 import { cn } from '../../utils/cn'
+import { SuspectProfileFields } from '../shared/SuspectProfileFields'
+import type { Suspect } from '../../types/scenario'
 
 interface NpcDialogProps {
   roomId: string
 }
 
-// 部屋内の容疑者一覧表示と会話進行を管理するコンポーネント
+// 容疑者の詳細情報をモーダル表示するコンポーネント
+function SuspectDetailModal({ suspect, onClose }: { suspect: Suspect; onClose: () => void }) {
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+      <div className="w-full max-w-sm border border-gothic-gold bg-gothic-panel shadow-[0_0_40px_rgba(217,119,6,0.4)] animate-fade-in">
+        <div className="border-b border-gothic-gold px-6 py-4 text-center">
+          <h2 className="font-display text-gothic-gold text-lg tracking-widest">{suspect.name}</h2>
+          <p className="text-gothic-muted font-serif text-xs mt-1">
+            {suspect.age}歳・{suspect.occupation}
+          </p>
+        </div>
+        <div className="px-6 py-4">
+          <SuspectProfileFields suspect={suspect} />
+        </div>
+        <div className="px-6 pb-5 flex justify-end border-t border-gothic-border pt-4">
+          <button
+            onClick={onClose}
+            className="border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-2 px-6 text-sm transition-all hover:shadow-[0_0_15px_rgba(217,119,6,0.3)]"
+          >
+            閉じる
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// 部屋内のキャラクター配置（最大2名左右）とダイアログを統合表示するコンポーネント
 export function NpcDialog({ roomId }: NpcDialogProps) {
-  const { scenario, talkedSuspectIds, talkToSuspect, talkActionsRemaining, hearStatement } =
-    useGameStore()
+  const {
+    scenario,
+    talkedSuspectIds,
+    talkToSuspect,
+    talkActionsRemaining,
+    hearStatement,
+    viewSuspectProfile,
+  } = useGameStore()
   const [selectedSuspect, setSelectedSuspect] = useState<string | null>(null)
   const [dialogIndex, setDialogIndex] = useState(0)
+  const [detailSuspect, setDetailSuspect] = useState<Suspect | null>(null)
 
   if (!scenario) return null
 
@@ -28,11 +65,9 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
     if (talkActionsRemaining <= 0) return
     setSelectedSuspect(suspect.id)
     setDialogIndex(0)
-    // 初回のみ talkedSuspectIds に記録（調査アクションは消費しない）
     if (!talkedSuspectIds.includes(suspect.id)) {
       talkToSuspect(suspect.id)
     }
-    // 挨拶が未聴なら消費・記録（既聴なら no-op）
     hearStatement({
       suspectId: suspect.id,
       suspectName: suspect.name,
@@ -45,12 +80,11 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
   const handleNext = () => {
     if (!currentSuspect) return
     const nextIndex = dialogIndex + 1
-    const statementIndex = nextIndex - 1 // statements配列のインデックス（dialogIndex 0 = 挨拶）
+    const statementIndex = nextIndex - 1
     if (statementIndex >= currentSuspect.investigation_dialog.statements.length) return
     if (talkActionsRemaining <= 0) return
 
     setDialogIndex(nextIndex)
-    // 未聴なら消費・記録（既聴なら no-op）
     hearStatement({
       suspectId: currentSuspect.id,
       suspectName: currentSuspect.name,
@@ -63,7 +97,7 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
     ? dialogIndex === 0
       ? currentSuspect.investigation_dialog.greeting
       : (currentSuspect.investigation_dialog.statements[dialogIndex - 1] ??
-        currentSuspect.investigation_dialog.greeting) // dialogIndex 1以上 = statements[dialogIndex-1]
+        currentSuspect.investigation_dialog.greeting)
     : null
 
   const canTalkMore = talkActionsRemaining > 0
@@ -72,60 +106,79 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
     : false
 
   return (
-    <div>
-      <h4 className="font-display text-gothic-muted text-xs tracking-widest mb-3">
-        この場所にいる人物
-      </h4>
-      {suspectsHere.length === 0 ? (
-        <p className="text-gothic-muted font-serif text-sm">この場所には誰もいない</p>
-      ) : (
-        <div className="flex gap-2 mb-4">
+    <>
+      {/* 容疑者詳細モーダル */}
+      {detailSuspect && (
+        <SuspectDetailModal suspect={detailSuspect} onClose={() => setDetailSuspect(null)} />
+      )}
+
+      {/* キャラクター配置エリア（背景前面、1名は中央・2名は左右） */}
+      {suspectsHere.length > 0 && (
+        <div
+          className={cn(
+            'absolute inset-x-0 bottom-32 flex items-end px-6 sm:px-12 gap-4',
+            suspectsHere.length === 1 ? 'justify-center' : 'justify-between'
+          )}
+        >
           {suspectsHere.map((suspect) => (
-            <button
-              key={suspect.id}
-              onClick={() => handleTalk(suspect)}
-              disabled={!canTalkMore && !talkedSuspectIds.includes(suspect.id)}
-              className={cn(
-                'text-left border transition-all disabled:opacity-40',
-                suspect.id === selectedSuspect
-                  ? 'border-gothic-gold'
-                  : 'border-gothic-border hover:border-gothic-accent'
-              )}
-            >
-              <CharacterCard suspect={suspect} small />
-            </button>
+            <div key={suspect.id} className="transition-all duration-300">
+              <CharacterCard
+                suspect={suspect}
+                portrait
+                selected={suspect.id === selectedSuspect}
+                onClick={
+                  canTalkMore || talkedSuspectIds.includes(suspect.id)
+                    ? () => handleTalk(suspect)
+                    : undefined
+                }
+                onNameClick={() => {
+                  setDetailSuspect(suspect)
+                  viewSuspectProfile(suspect.id)
+                }}
+              />
+            </div>
           ))}
         </div>
       )}
 
-      {currentSuspect && currentDialog && (
-        <div>
-          <div className="mb-3 p-3 bg-stone-900 border border-gothic-border text-xs font-serif space-y-1">
-            <p className="text-gothic-muted">
-              <span className="text-gothic-gold">関係：</span>
-              {currentSuspect.relationship_to_victim}
-            </p>
-            <p className="text-gothic-muted">
-              <span className="text-gothic-gold">アリバイ：</span>
-              {currentSuspect.alibi}
-            </p>
+      {/* ダイアログエリア（背景下部オーバーレイ） */}
+      <div className="absolute inset-x-0 bottom-0 p-3">
+        {currentSuspect && currentDialog ? (
+          <div className="relative">
+            <DialogBox
+              text={currentDialog}
+              speakerName={currentSuspect.name}
+              className="bg-gothic-panel/85 backdrop-blur-sm"
+              onComplete={() => {}}
+            />
+            {/* 続きを聞くボタン（ダイアログ内側右下） */}
+            {hasMoreDialog && (
+              <button
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleNext()
+                }}
+                disabled={!canTalkMore}
+                className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors disabled:opacity-40"
+              >
+                続きを聞く →{!canTalkMore && '（会話回数上限）'}
+              </button>
+            )}
           </div>
-          <DialogBox text={currentDialog} speakerName={currentSuspect.name} onComplete={() => {}} />
-          {hasMoreDialog && (
-            <button
-              onClick={handleNext}
-              disabled={!canTalkMore}
-              className="mt-2 text-gothic-muted text-xs font-serif hover:text-gothic-text transition-colors disabled:opacity-40"
-            >
-              続きを聞く → {!canTalkMore && '（会話回数上限）'}
-            </button>
-          )}
-        </div>
-      )}
-
-      {!canTalkMore && suspectsHere.length > 0 && !currentSuspect && (
-        <p className="text-gothic-muted font-serif text-xs mt-2">会話回数の上限に達しました</p>
-      )}
-    </div>
+        ) : (
+          <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border p-4">
+            {suspectsHere.length > 0 ? (
+              <p className="text-gothic-muted font-serif text-sm text-center">
+                {canTalkMore ? '人物をクリックして話しかける' : '会話回数の上限に達しました'}
+              </p>
+            ) : (
+              <p className="text-gothic-muted font-serif text-sm text-center">
+                この場所には誰もいない
+              </p>
+            )}
+          </div>
+        )}
+      </div>
+    </>
   )
 }
