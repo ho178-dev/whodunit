@@ -13,10 +13,10 @@ export const PIXEL_ART_CONFIG = {
 
   // 各コンテキストのCanvas内部解像度（実際の画像サイズに合わせる）
   canvasSize: {
-    character: { width: 256, height: 320 },
-    evidence: { width: 128, height: 128 },
-    room: { width: 800, height: 500 },
-    mansion: { width: 1200, height: 600 },
+    character: { width: 640, height: 768 },
+    evidence: { width: 1024, height: 1024 },
+    room: { width: 1024, height: 576 },
+    mansion: { width: 1216, height: 576 },
   },
 } as const
 
