@@ -731,7 +731,6 @@ export const FIXED_SCENARIO: Scenario = {
       description:
         '庭で採取されたトリカブトの葉片と小瓶の毒成分が同一種由来と確認された。犯人は庭園からトリカブトを採取し、キッチンで毒を精製していた。市販品でなく自家製である点が、館内の人物による犯行を強く示唆する。',
       is_critical: true,
-      required_suspect_ids: ['shiraishi_makoto'],
     },
     {
       id: 'combo_motive_confirmed',
@@ -740,7 +739,6 @@ export const FIXED_SCENARIO: Scenario = {
       description:
         '遺言書の写しと日記の記述が合致し、黒崎源一郎が先月密かに遺言書を書き換えていた事実が確定した。相続分を削除された人物には3000万円超の損失が生じる。この事実を知っていた者が最有力の動機を持つ。',
       is_critical: true,
-      required_suspect_ids: ['shiraishi_makoto'],
     },
     {
       id: 'combo_study_intrusion',
