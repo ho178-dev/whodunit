@@ -322,6 +322,7 @@ export function AccusationPhase() {
 
   // 不正解ルート: 無実の人物の困惑
   if (step === 'confusion') {
+    if (!incorrectData) return null
     return (
       <AccusationLayout label="告発" title={`${votedSuspect.name}への告発`}>
         <GothicPanel className="mb-6 animate-fade-in">
@@ -349,6 +350,7 @@ export function AccusationPhase() {
 
   // 不正解ルート: アリバイ提示
   if (step === 'alibi_reveal') {
+    if (!incorrectData) return null
     return (
       <AccusationLayout
         label="誤謬"
