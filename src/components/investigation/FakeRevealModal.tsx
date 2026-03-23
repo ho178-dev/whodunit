@@ -11,7 +11,7 @@ export function FakeRevealModal() {
   if (!evidence) return null
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80">
+    <div className="fixed inset-0 z-60 flex items-center justify-center p-4 bg-black/80">
       <div className="w-full max-w-md border border-red-800/60 bg-gothic-panel shadow-[0_0_40px_rgba(185,28,28,0.35)] animate-fade-in">
         {/* ヘッダー */}
         <div className="border-b border-red-800/60 px-6 py-4 text-center">

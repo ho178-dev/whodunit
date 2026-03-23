@@ -48,7 +48,7 @@ export function CharacterCard({
         >
           {/* 内側の装飾線 */}
           <div className="border border-gothic-border/40 bg-stone-800">
-            <div className="h-44 w-36 sm:h-52 sm:w-40 overflow-hidden">
+            <div className="h-52 sm:h-60 aspect-[832/1216] overflow-hidden">
               <PixelImageWithFallback
                 src={imgSrc}
                 alt={suspect.name}
@@ -96,7 +96,7 @@ export function CharacterCard({
       <div
         className={cn(
           'bg-stone-800 flex items-center justify-center overflow-hidden',
-          small ? 'h-16 w-16 mx-auto' : 'h-32 w-full mb-3'
+          small ? 'h-16 w-16 mx-auto' : 'h-40 w-full mb-3'
         )}
       >
         <PixelImageWithFallback

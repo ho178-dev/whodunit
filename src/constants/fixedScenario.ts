@@ -1,4 +1,5 @@
 import type { Scenario } from '../types/scenario'
+import { FIXED_ACCUSATION_DATA } from './accusationData'
 
 export const FIXED_SCENARIO: Scenario = {
   title: '黄昏の晩餐会',
@@ -720,7 +721,8 @@ export const FIXED_SCENARIO: Scenario = {
       name: '深夜に庭へ出た人物が特定された',
       description:
         '泥靴の足跡サイズと庭園の写真に映り込んだ人物の輪郭が一致する。深夜0時頃、白石誠が庭園へ出て何かを採取していたことが明らかになった。アリバイ「部屋にいた」と矛盾する。',
-      is_critical: false,
+      is_critical: true,
+      required_suspect_ids: ['shiraishi_makoto'],
     },
     {
       id: 'combo_poison_origin',
@@ -745,6 +747,8 @@ export const FIXED_SCENARIO: Scenario = {
       description:
         '「S.M.」イニシャルのハンカチ・金庫の鍵・遺言書の写しが一つの行動を示す。白石誠が金庫の鍵を用いて書斎に侵入し、遺言書の内容を確認した上でコピーを残した。動機・機会・現場の三点が交差する決定的な証拠連鎖だ。',
       is_critical: true,
+      required_suspect_ids: ['shiraishi_makoto'],
     },
   ],
+  accusation_data: FIXED_ACCUSATION_DATA,
 }

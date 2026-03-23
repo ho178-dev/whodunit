@@ -85,6 +85,7 @@ export function validateScenario(data: unknown): Scenario {
   if (s.evidence_combinations !== undefined) {
     if (!Array.isArray(s.evidence_combinations))
       throw new Error('evidence_combinationsは配列である必要があります')
+    const suspectIds = new Set(s.suspects.map((sus) => sus.id))
     for (const combo of s.evidence_combinations) {
       if (!combo.id || !combo.name || !combo.description)
         throw new Error(`evidence_combination "${combo.id}" の必須フィールドが不正です`)
@@ -99,6 +100,19 @@ export function validateScenario(data: unknown): Scenario {
           throw new Error(
             `evidence_combination "${combo.id}" の証拠ID "${eid}" が証拠リストに存在しません`
           )
+      }
+      // required_suspect_ids は省略可。存在する場合は各IDが容疑者リストに含まれることを確認
+      if (combo.required_suspect_ids !== undefined) {
+        if (!Array.isArray(combo.required_suspect_ids))
+          throw new Error(
+            `evidence_combination "${combo.id}" のrequired_suspect_idsは配列である必要があります`
+          )
+        for (const sid of combo.required_suspect_ids) {
+          if (!suspectIds.has(sid))
+            throw new Error(
+              `evidence_combination "${combo.id}" の容疑者ID "${sid}" が容疑者リストに存在しません`
+            )
+        }
       }
     }
   }

@@ -8,6 +8,7 @@ import { ScenarioBriefing } from '../phases/ScenarioBriefing'
 import { InvestigationPhase } from '../phases/InvestigationPhase'
 import { DiscussionPhase } from '../phases/DiscussionPhase'
 import { VotingPhase } from '../phases/VotingPhase'
+import { AccusationPhase } from '../phases/AccusationPhase'
 import { EndingScreen } from '../phases/EndingScreen'
 
 // ゲームのルートレイアウト。フェーズに応じた画面を切り替えてレンダリングする
@@ -31,6 +32,8 @@ export function GameShell() {
         return <DiscussionPhase />
       case 'voting':
         return <VotingPhase />
+      case 'accusation':
+        return <AccusationPhase />
       case 'ending':
         return <EndingScreen />
       default:
