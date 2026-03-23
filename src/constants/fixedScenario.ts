@@ -1,4 +1,5 @@
 import type { Scenario } from '../types/scenario'
+import { FIXED_ACCUSATION_DATA } from './accusationData'
 
 export const FIXED_SCENARIO: Scenario = {
   title: '黄昏の晩餐会',
@@ -751,4 +752,5 @@ export const FIXED_SCENARIO: Scenario = {
       required_suspect_ids: ['shiraishi_makoto'],
     },
   ],
+  accusation_data: FIXED_ACCUSATION_DATA,
 }

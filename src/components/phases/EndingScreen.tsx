@@ -8,6 +8,7 @@ export function EndingScreen() {
   const {
     scenario,
     votedSuspectId,
+    murdererEscaped,
     discoveredCombinationIds,
     examinedEvidenceIds,
     actionsRemaining,
@@ -20,18 +21,20 @@ export function EndingScreen() {
   if (!scenario || !votedSuspectId) return null
 
   const isCorrect = votedSuspectId === scenario.murderer_id
+  // 犯人を正しく特定できたか（完全正解 or 証拠不足で逃亡）
+  const isMurdererIdentified = isCorrect || murdererEscaped
   const murderer = scenario.suspects.find((s) => s.id === scenario.murderer_id)!
   const voted = scenario.suspects.find((s) => s.id === votedSuspectId)!
 
   // 不正解時：is_critical な組み合わせのうち未発見のものが「見逃した決定的事実」
-  const missedCombinations = isCorrect
+  const missedCombinations = isMurdererIdentified
     ? []
     : (scenario.evidence_combinations ?? []).filter(
         (c) => c.is_critical && !discoveredCombinationIds.includes(c.id)
       )
 
-  // 正解時：プレイヤーが発見した組み合わせ（発見順を保持）
-  const discoveredCombinations = isCorrect
+  // 犯人特定時：プレイヤーが発見した組み合わせ（発見順を保持）
+  const discoveredCombinations = isMurdererIdentified
     ? discoveredCombinationIds
         .map((id) => scenario.evidence_combinations?.find((c) => c.id === id))
         .filter((c): c is NonNullable<typeof c> => c !== undefined)
@@ -46,10 +49,17 @@ export function EndingScreen() {
     <div className="min-h-screen px-4 py-8">
       <div className="max-w-2xl mx-auto">
         <div className="text-center mb-8">
-          {isCorrect ? (
+          {isCorrect && !murdererEscaped ? (
             <>
               <div className="text-gothic-gold font-display text-5xl mb-4">真実</div>
               <h1 className="font-display text-2xl text-gothic-gold tracking-widest">謎は解けた</h1>
+            </>
+          ) : murdererEscaped ? (
+            <>
+              <div className="text-amber-500 font-display text-5xl mb-4">惜敗</div>
+              <h1 className="font-display text-2xl text-amber-500 tracking-widest">
+                あと一歩及ばなかった
+              </h1>
             </>
           ) : (
             <>
@@ -61,7 +71,18 @@ export function EndingScreen() {
           )}
         </div>
 
-        {!isCorrect && (
+        {murdererEscaped && (
+          <GothicPanel className="mb-4 border-amber-900/60">
+            <p className="text-gothic-muted font-serif text-sm leading-relaxed">
+              犯人は <span className="text-amber-500">{murderer.name}</span>
+              ——あなたの推理は正しかった。
+              <br />
+              しかし、決定的な証拠を突きつけることができず、犯人は逃げ切った。
+            </p>
+          </GothicPanel>
+        )}
+
+        {!isMurdererIdentified && (
           <GothicPanel className="mb-4 border-red-900">
             <p className="text-gothic-muted font-serif text-sm">
               あなたが告発したのは <span className="text-gothic-text">{voted.name}</span> でしたが…
@@ -69,7 +90,7 @@ export function EndingScreen() {
           </GothicPanel>
         )}
 
-        {!isCorrect && (
+        {!isMurdererIdentified && (
           <GothicPanel className="mb-4 border-red-900/60">
             {missedCombinations.length === 0 ? (
               <p className="text-gothic-muted font-serif text-sm leading-relaxed">
@@ -114,7 +135,7 @@ export function EndingScreen() {
           </GothicPanel>
         )}
 
-        {isCorrect && discoveredCombinations.length > 0 && (
+        {isMurdererIdentified && discoveredCombinations.length > 0 && (
           <GothicPanel className="mb-4">
             <p className="text-gothic-gold/70 font-display text-xs tracking-widest mb-4">
               ── 推理の軌跡 ──
@@ -150,7 +171,7 @@ export function EndingScreen() {
           </GothicPanel>
         )}
 
-        {isCorrect && (
+        {isMurdererIdentified && (
           <GothicPanel className="mb-4">
             <p className="text-gothic-gold/70 font-display text-xs tracking-widest mb-3">
               ── 捜査記録 ──

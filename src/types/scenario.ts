@@ -1,4 +1,5 @@
 // シナリオデータ全体の型定義（容疑者・部屋・証拠・シナリオ構造など）
+import type { AccusationScenarioData } from './accusation'
 export type MansionBackgroundId =
   | 'mansion_gothic'
   | 'mansion_japanese'
@@ -142,4 +143,5 @@ export interface Scenario {
   rooms: Room[]
   evidence: Evidence[]
   evidence_combinations?: EvidenceCombination[] // 証拠クロス参照システム（省略可）
+  accusation_data?: AccusationScenarioData // 告発シーン用データ（省略時はスキップ）
 }

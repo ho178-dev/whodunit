@@ -16,7 +16,7 @@ export function VotingPhase() {
   const handleVote = () => {
     if (selected) {
       setVotedSuspectId(selected)
-      setPhase('ending')
+      setPhase('accusation')
     }
   }
 

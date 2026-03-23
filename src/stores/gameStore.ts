@@ -83,6 +83,7 @@ export interface GameState {
   pursuitWrongResult: PursuitWrongResult | null // 誤った証言を選択したときのフィードバック
   viewedSuspectProfileIds: string[] // プロフィール閲覧済みの容疑者ID
   votedSuspectId: string | null
+  murdererEscaped: boolean // 犯人特定したが証拠不足で逃亡したか
   hypotheses: SuspectHypothesis[] // 容疑者ごとの仮説メモ
 
   // Actions
@@ -109,6 +110,7 @@ export interface GameState {
   askPursuitQuestion: (suspectId: string, evidenceId: string, questionId: string) => void
   viewSuspectProfile: (suspectId: string) => void
   setVotedSuspectId: (id: string) => void
+  setMurdererEscaped: (escaped: boolean) => void
   updateHypothesis: (
     suspectId: string,
     field: keyof Omit<SuspectHypothesis, 'suspectId'>,
@@ -161,6 +163,7 @@ const initialState = {
   pursuitWrongResult: null,
   viewedSuspectProfileIds: [],
   votedSuspectId: null,
+  murdererEscaped: false,
   hypotheses: [],
 }
 
@@ -365,6 +368,8 @@ export const useGameStore = create<GameState>((set) => ({
     }),
   // 投票した容疑者IDを設定する
   setVotedSuspectId: (id) => set({ votedSuspectId: id }),
+  // 犯人逃亡フラグを設定する（証拠不足で逃げ切った場合にtrue）
+  setMurdererEscaped: (escaped) => set({ murdererEscaped: escaped }),
   // 容疑者の仮説フィールドを更新し、localStorage に保存する
   updateHypothesis: (suspectId, field, value) =>
     set((state) => {

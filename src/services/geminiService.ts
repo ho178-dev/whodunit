@@ -227,7 +227,66 @@ function mergePursuitChains(
   }
 }
 
-// Gemini APIにプロンプトを送信してシナリオJSONを生成・バリデーションして返す（2ステップ生成）
+// Step3 用：ベースシナリオを受け取って告発シーンJSONを生成するプロンプトを構築する
+function buildAccusationPrompt(scenario: Scenario): string {
+  const suspectList = scenario.suspects.map((s) => `- ${s.id}: ${s.name}`).join('\n')
+  const evidenceList = scenario.evidence
+    .filter((e) => !e.is_fake)
+    .map((e) => `- ${e.id}: ${e.name}`)
+    .join('\n')
+
+  return `
+あなたは日本のマーダーミステリーシナリオ作家です。
+以下のシナリオデータを元に、告発シーン（犯人指名後の対決演出）のデータを生成してください。
+
+## シナリオ概要
+- タイトル: ${scenario.title}
+- 犯人: ${scenario.murderer_id}
+- 動機: ${scenario.motive}
+- 真相: ${scenario.truth}
+
+## 容疑者一覧
+${suspectList}
+
+## 本物の証拠一覧
+${evidenceList}
+
+## 告発シーンの設計ルール
+
+### 正解ルート（犯人を正しく指名した場合）
+- defense_statement: 犯人の最終弁明（3〜5文）。アリバイを主張し無実を訴える。ただし微かな動揺を含めること。最後に「証拠があるなら見せてみろ」と挑発で締める
+- decisive_evidence_id: 犯人の弁明を最も効果的に覆せる証拠1つのID。動機を直接証明する証拠を優先する
+- wrong_evidence_reaction: 誤った証拠を選んだ時の犯人の反応（1〜2文）。余裕を見せつつ再挑戦を促す
+- refutation_text: 正しい証拠を突き付けた時のナレーション（3〜4文）。なぜこの証拠が弁明を覆すかを論理的に説明する
+- breakdown_statement: 犯人の崩壊・告白（3〜5文）。動揺→観念→犯行の動機を自白する流れ。改行で段落を分けること
+
+### 不正解ルート（無実の人物を指名した場合）
+犯人以外の全容疑者について以下を設定する：
+- confusion_statement: 困惑の第一声（2〜3文）。キャラの性格を反映した反応
+- alibi_reveal: アリバイ・動機不在の説明（2〜3文）。なぜこの人物が犯人ではないかを客観的に示す。最後に「真犯人は——別にいる。」で締める
+
+## 出力形式
+以下のJSON構造のみを返してください。説明文は不要です。
+
+{
+  "correct": {
+    "defense_statement": "...",
+    "decisive_evidence_id": "...",
+    "wrong_evidence_reaction": "...",
+    "refutation_text": "...",
+    "breakdown_statement": "..."
+  },
+  "incorrect": {
+${scenario.suspects
+  .filter((s) => s.id !== scenario.murderer_id)
+  .map((s) => `    "${s.id}": { "confusion_statement": "...", "alibi_reveal": "..." }`)
+  .join(',\n')}
+  }
+}
+`
+}
+
+// Gemini APIにプロンプトを送信してシナリオJSONを生成・バリデーションして返す（3ステップ生成）
 export async function generateScenario(apiKey: string): Promise<Scenario> {
   const genAI = new GoogleGenerativeAI(apiKey)
   const model = genAI.getGenerativeModel({
@@ -252,20 +311,43 @@ export async function generateScenario(apiKey: string): Promise<Scenario> {
 
   const baseScenario = validateScenario(parsed)
 
-  // Step2: 追及チェーン生成
-  let scenarioWithChains = baseScenario
-  try {
-    const chainResult = await model.generateContent(buildPursuitChainPrompt(baseScenario))
-    const chainText = chainResult.response.text()
-    const chainParsed = JSON.parse(chainText) as {
-      pursuit_chains: Record<string, Record<string, PursuitChainEntry>>
+  // Step2（追及チェーン）とStep3（告発データ）は互いに独立のため並列実行
+  const [chainResult, accusationResult] = await Promise.allSettled([
+    model.generateContent(buildPursuitChainPrompt(baseScenario)),
+    model.generateContent(buildAccusationPrompt(baseScenario)),
+  ])
+
+  let scenario = baseScenario
+
+  // Step2 結果マージ
+  if (chainResult.status === 'fulfilled') {
+    try {
+      const chainText = chainResult.value.response.text()
+      const chainParsed = JSON.parse(chainText) as {
+        pursuit_chains: Record<string, Record<string, PursuitChainEntry>>
+      }
+      if (chainParsed.pursuit_chains) {
+        scenario = mergePursuitChains(scenario, chainParsed.pursuit_chains)
+      }
+    } catch {
+      // 追及チェーンのパース失敗はゲームを壊さない
     }
-    if (chainParsed.pursuit_chains) {
-      scenarioWithChains = mergePursuitChains(baseScenario, chainParsed.pursuit_chains)
-    }
-  } catch {
-    // 追及チェーン生成失敗はゲームを壊さない（チェーンなしで続行）
   }
 
-  return scenarioWithChains
+  // Step3 結果マージ
+  if (accusationResult.status === 'fulfilled') {
+    try {
+      const accusationText = accusationResult.value.response.text()
+      const accusationParsed = JSON.parse(
+        accusationText
+      ) as import('../types/accusation').AccusationScenarioData
+      if (accusationParsed.correct?.decisive_evidence_id) {
+        scenario = { ...scenario, accusation_data: accusationParsed }
+      }
+    } catch {
+      // 告発データのパース失敗時は告発フェーズをスキップ
+    }
+  }
+
+  return scenario
 }

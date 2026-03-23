@@ -6,18 +6,18 @@
 
 # commit message ガイドライン
 
-fix: バグ修正
-feat: 新機能の追加
-docs: ドキュメントの変更
-style: コードのスタイル変更（機能に影響なし）
-refactor: コードのリファクタリング（機能に影響なし）
-test: テストの追加・修正
-chore: その他の変更（ビルドプロセス、依存関係の変更など）
+- fix: バグ修正
+- feat: 新機能の追加
+- docs: ドキュメントの変更
+- style: コードのスタイル変更（機能に影響なし）
+- refactor: コードのリファクタリング（機能に影響なし）
+- test: テストの追加・修正
+- chore: その他の変更（ビルドプロセス、依存関係の変更など）
 
 ## アセット配置ガイド
 
-ゲームで使用する画像は `public/assets/` 以下に配置する。
-ファイルが存在しない場合は各カテゴリのデフォルト画像（`default_mansion.png` / `default_character.png` / `default_room.png` / `default_evidence.png`）が自動表示されるため、未配置でも動作する。
+- ゲームで使用する画像は `public/assets/` 以下に配置する。
+- ファイルが存在しない場合は各カテゴリのデフォルト画像（`default_mansion.png` / `default_character.png` / `default_room.png` / `default_evidence.png`）が自動表示されるため、未配置でも動作する。
 
 ## 画像生成
 
