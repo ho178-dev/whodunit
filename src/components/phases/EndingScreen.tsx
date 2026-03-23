@@ -1,4 +1,5 @@
 // ゲーム終了画面。投票結果の正否と真相（犯人・動機・真実）を表示する
+import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
 import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
@@ -17,6 +18,8 @@ export function EndingScreen() {
     setPhase,
     resetGame,
   } = useGameStore()
+
+  const [showTruth, setShowTruth] = useState(false)
 
   if (!scenario || !votedSuspectId) return null
 
@@ -90,7 +93,7 @@ export function EndingScreen() {
           </GothicPanel>
         )}
 
-        {!isMurdererIdentified && (
+        {!isMurdererIdentified && showTruth && (
           <GothicPanel className="mb-4 border-red-900/60">
             {missedCombinations.length === 0 ? (
               <p className="text-gothic-muted font-serif text-sm leading-relaxed">
@@ -201,30 +204,43 @@ export function EndingScreen() {
           </GothicPanel>
         )}
 
-        <GothicPanel title="真相" className="mb-6">
-          <div className="space-y-4">
-            <div>
-              <span className="text-gothic-gold font-display text-sm tracking-widest">真犯人</span>
-              <p className="text-gothic-text font-serif mt-1 text-lg">{murderer.name}</p>
+        {/* 正解時: 常に真相表示 / 不正解時: 「真相を見る」選択後のみ表示 */}
+        {(isMurdererIdentified || showTruth) && (
+          <GothicPanel title="真相" className="mb-6">
+            <div className="space-y-4">
+              <div>
+                <span className="text-gothic-gold font-display text-sm tracking-widest">
+                  真犯人
+                </span>
+                <p className="text-gothic-text font-serif mt-1 text-lg">{murderer.name}</p>
+              </div>
+              <div>
+                <span className="text-gothic-gold font-display text-sm tracking-widest">動機</span>
+                <p className="text-gothic-text font-serif mt-1">{scenario.motive}</p>
+              </div>
+              <div>
+                <span className="text-gothic-gold font-display text-sm tracking-widest">真相</span>
+                <p className="text-gothic-text font-serif mt-1 leading-relaxed">{scenario.truth}</p>
+              </div>
             </div>
-            <div>
-              <span className="text-gothic-gold font-display text-sm tracking-widest">動機</span>
-              <p className="text-gothic-text font-serif mt-1">{scenario.motive}</p>
-            </div>
-            <div>
-              <span className="text-gothic-gold font-display text-sm tracking-widest">真相</span>
-              <p className="text-gothic-text font-serif mt-1 leading-relaxed">{scenario.truth}</p>
-            </div>
-          </div>
-        </GothicPanel>
+          </GothicPanel>
+        )}
 
         <div className="flex flex-col gap-3">
           <button
             onClick={() => resetGame()}
             className="border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-3 transition-all"
           >
-            同じシナリオでリトライ
+            {isMurdererIdentified ? '同じシナリオでリトライ' : 'リトライ'}
           </button>
+          {!isMurdererIdentified && !showTruth && (
+            <button
+              onClick={() => setShowTruth(true)}
+              className="border border-gothic-accent bg-gothic-panel hover:bg-stone-800 text-gothic-text font-display tracking-widest py-3 transition-all"
+            >
+              真相を見る
+            </button>
+          )}
           <button
             onClick={() => setPhase('title')}
             className="border border-gothic-border text-gothic-muted font-serif py-3 hover:border-gothic-accent transition-all"

@@ -7,6 +7,7 @@ import { InvestigationNotes } from '../investigation/InvestigationNotes'
 import { CombinationDiscovery } from '../investigation/CombinationDiscovery'
 import { FakeRevealModal } from '../investigation/FakeRevealModal'
 import { CharacterCard } from '../shared/CharacterCard'
+import { CharacterSlider } from '../shared/CharacterSlider'
 import { DialogBox } from '../shared/DialogBox'
 import { PixelImageWithFallback } from '../shared/PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
@@ -14,9 +15,6 @@ import { MANSION_DEFAULT_ASSET } from '../../services/assetResolver'
 import { EvidenceSelectModal } from '../discussion/EvidenceSelectModal'
 import { behaviorBorderColors, behaviorLabel } from '../../constants/npcBehavior'
 import { cn } from '../../utils/cn'
-
-const sliderArrowClass =
-  'shrink-0 border border-gothic-border/60 bg-gothic-panel/80 backdrop-blur-sm hover:border-gothic-accent text-gothic-muted hover:text-gothic-gold w-8 h-8 flex items-center justify-center transition-all'
 
 // 議論フェーズのメインコンポーネント
 export function DiscussionPhase() {
@@ -120,16 +118,15 @@ export function DiscussionPhase() {
       ]
     : []
 
-  // 突きつけ結果が優先、なければ最後の追及質問の回答を表示
+  // 突きつけ結果 → 的外れ応答 → 追及質問回答の優先順で表示
   const dialogReaction =
     latestReaction ??
+    (currentWrongResult
+      ? { reaction: currentWrongResult.response, behavior: 'calm' as const }
+      : null) ??
     (lastAskedQuestionData
       ? { reaction: lastAskedQuestionData.response, behavior: lastAskedQuestionData.behavior }
       : null)
-
-  // スライダーで表示する3人分のインデックス（中央 + 前後1人）
-  const total = scenario.suspects.length
-  const visibleIndices = [(sliderIndex - 1 + total) % total, sliderIndex, (sliderIndex + 1) % total]
 
   // --- ハンドラ ---
   const handleSuspectClick = (suspectId: string) => {
@@ -252,56 +249,12 @@ export function DiscussionPhase() {
 
           {/* 一覧モード: スライダー */}
           {!isConversationMode && (
-            <div className="absolute inset-x-0 top-1/2 -translate-y-[60%] flex items-center justify-center gap-3 sm:gap-5 px-4">
-              <button
-                onClick={() => setSliderIndex((prev) => (prev <= 0 ? total - 1 : prev - 1))}
-                className={sliderArrowClass}
-              >
-                <span className="font-display text-sm">◀</span>
-              </button>
-
-              <div className="flex flex-col items-center gap-2">
-                <div className="flex items-end justify-center gap-3 sm:gap-5">
-                  {visibleIndices.map((idx, pos) => (
-                    <div
-                      key={scenario.suspects[idx].id}
-                      className={cn(
-                        'transition-all duration-300',
-                        pos === 1 ? 'scale-100 opacity-100' : 'scale-90 opacity-60'
-                      )}
-                    >
-                      <CharacterCard
-                        suspect={scenario.suspects[idx]}
-                        portrait
-                        selected={pos === 1}
-                        onClick={() => handleSuspectClick(scenario.suspects[idx].id)}
-                      />
-                    </div>
-                  ))}
-                </div>
-                <div className="flex gap-1.5">
-                  {scenario.suspects.map((_, i) => (
-                    <button
-                      key={i}
-                      onClick={() => setSliderIndex(i)}
-                      className={cn(
-                        'w-1.5 h-1.5 rounded-full transition-all',
-                        i === sliderIndex
-                          ? 'bg-gothic-gold'
-                          : 'bg-gothic-border/60 hover:bg-gothic-muted'
-                      )}
-                    />
-                  ))}
-                </div>
-              </div>
-
-              <button
-                onClick={() => setSliderIndex((prev) => (prev >= total - 1 ? 0 : prev + 1))}
-                className={sliderArrowClass}
-              >
-                <span className="font-display text-sm">▶</span>
-              </button>
-            </div>
+            <CharacterSlider
+              suspects={scenario.suspects}
+              sliderIndex={sliderIndex}
+              onSliderIndexChange={setSliderIndex}
+              onSuspectClick={handleSuspectClick}
+            />
           )}
 
           {/* 会話モード */}
@@ -337,9 +290,9 @@ export function DiscussionPhase() {
                 )}
               >
                 <DialogBox
-                  key={`${selectedSuspectId}-${selectedEvidenceId}-${confrontationLog.length}`}
+                  key={`${selectedSuspectId}-${selectedEvidenceId}-${confrontationLog.length}-${currentWrongResult ? 'wrong' : ''}`}
                   text={dialogReaction.reaction}
-                  speakerName={`${selectedSuspect.name} ─ ${behaviorLabel[dialogReaction.behavior]}`}
+                  speakerName={`${selectedSuspect.name} ─ ${currentWrongResult ? '的外れ' : behaviorLabel[dialogReaction.behavior]}`}
                 />
                 {hasContradiction && latestReaction && (
                   <p className="px-4 pb-3 border-t border-yellow-700/50 pt-2 text-yellow-400 font-serif text-xs">
@@ -389,22 +342,6 @@ export function DiscussionPhase() {
                 <span>⚑</span>
                 <span>矛盾を追及する</span>
               </button>
-            )}
-
-            {currentWrongResult && (
-              <div className="border border-stone-600 p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <span className="font-display text-sm text-stone-400">
-                    {selectedSuspect.name}
-                  </span>
-                  <span className="text-xs border border-stone-700 text-stone-500 px-2 py-0.5 font-serif">
-                    的外れ
-                  </span>
-                </div>
-                <p className="font-serif text-stone-400 text-sm">
-                  「{currentWrongResult.response}」
-                </p>
-              </div>
             )}
 
             {unlockedForCurrent.length > 0 && (
