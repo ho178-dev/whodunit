@@ -59,7 +59,7 @@ AIシナリオ生成時にシナリオの設定に合う `mansion_background_id`
 | `mansion_ruins.png`    | 廃墟・古城風（荒廃・呪われた）           |
 | `default_mansion.png`  | デフォルト（上記が存在しない場合に使用） |
 
-- **フォーマット**: PNG（生成サイズ: 1216×576px、横長）
+- **フォーマット**: PNG（生成サイズ: 1216×684px、横長）
 - **フォールバック**: 各IDの画像がない場合は `default_mansion.png` で表示
 
 ---
@@ -82,7 +82,7 @@ AIシナリオ生成時にシナリオの設定に合う `mansion_background_id`
 | `female_elderly.png`    | 女性・老年                         |
 | `default_character.png` | デフォルト画像(中性的)             |
 
-- **フォーマット**: PNG（生成サイズ: 640×768px、縦長）
+- **フォーマット**: PNG（生成サイズ: 832×1216px、縦長）
 - **フォールバック**: 画像なしの場合 `default_character.png` を表示
 
 ---
@@ -103,7 +103,7 @@ AIシナリオ生成時にシナリオの設定に合う `mansion_background_id`
 | `bathroom.png`     | 浴室           |
 | `default_room.png` | デフォルト画像 |
 
-- **フォーマット**: PNG（生成サイズ: 1024×576px、横長）
+- **フォーマット**: PNG（生成サイズ: 1216×684px、横長）
 - **フォールバック**: 画像なしの場合は`default_room.png`で表示
 
 ---

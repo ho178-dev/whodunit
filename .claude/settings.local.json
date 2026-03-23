@@ -37,7 +37,9 @@
       "Bash(mv \"D:/workspace/whodunit/public/assets/characters/default.png\" \"D:/workspace/whodunit/public/assets/characters/default_character.png\")",
       "Bash(mv \"D:/workspace/whodunit/public/assets/evidence/default.png\" \"D:/workspace/whodunit/public/assets/evidence/default_evidence.png\")",
       "Bash(ls:*)",
-      "Bash(grep -n \"setPhase.*accusation\\\\|setPhase.*ending\" src/**/*.tsx src/**/*.ts)"
+      "Bash(grep -n \"setPhase.*accusation\\\\|setPhase.*ending\" src/**/*.tsx src/**/*.ts)",
+      "Bash(find /d/workspace/whodunit -type f \\\\\\(-name *.png -o -name *.jpg -o -name *.jpeg -o -name *.svg -o -name *.webp \\\\\\))",
+      "Bash(taskwait bka6moje8:*)"
     ]
   }
 }
