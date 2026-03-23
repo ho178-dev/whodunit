@@ -118,15 +118,15 @@ export function DiscussionPhase() {
       ]
     : []
 
-  // 突きつけ結果 → 的外れ応答 → 追及質問回答の優先順で表示
+  // 的外れ応答 → 追及質問回答 → 突きつけ結果(latestReaction)の優先順で表示
   const dialogReaction =
-    latestReaction ??
     (currentWrongResult
       ? { reaction: currentWrongResult.response, behavior: 'calm' as const }
       : null) ??
     (lastAskedQuestionData
       ? { reaction: lastAskedQuestionData.response, behavior: lastAskedQuestionData.behavior }
-      : null)
+      : null) ??
+    latestReaction
 
   // --- ハンドラ ---
   const handleSuspectClick = (suspectId: string) => {
@@ -211,7 +211,7 @@ export function DiscussionPhase() {
         />
       )}
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
           <h1 className="font-display text-xl text-gothic-gold tracking-widest">議論フェーズ</h1>
           <div className="flex items-center gap-3">

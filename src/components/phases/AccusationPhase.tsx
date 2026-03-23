@@ -34,7 +34,7 @@ function AccusationLayout({
 }) {
   return (
     <div className="min-h-screen px-4 py-8">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           <p className={`${labelColor} font-serif text-xs tracking-widest mb-2`}>{label}</p>
           <h1 className={`font-display ${titleSize} ${titleColor} tracking-widest`}>{title}</h1>

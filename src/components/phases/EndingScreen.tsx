@@ -29,12 +29,13 @@ export function EndingScreen() {
   const murderer = scenario.suspects.find((s) => s.id === scenario.murderer_id)!
   const voted = scenario.suspects.find((s) => s.id === votedSuspectId)!
 
-  // 不正解時：is_critical な組み合わせのうち未発見のものが「見逃した決定的事実」
-  const missedCombinations = isMurdererIdentified
-    ? []
-    : (scenario.evidence_combinations ?? []).filter(
-        (c) => c.is_critical && !discoveredCombinationIds.includes(c.id)
-      )
+  // 完勝以外：is_critical な組み合わせのうち未発見のものが「見逃した決定的事実」
+  const missedCombinations =
+    isCorrect && !murdererEscaped
+      ? []
+      : (scenario.evidence_combinations ?? []).filter(
+          (c) => c.is_critical && !discoveredCombinationIds.includes(c.id)
+        )
 
   // 犯人特定時：プレイヤーが発見した組み合わせ（発見順を保持）
   const discoveredCombinations = isMurdererIdentified
@@ -43,6 +44,27 @@ export function EndingScreen() {
         .filter((c): c is NonNullable<typeof c> => c !== undefined)
     : []
 
+  // 惜敗/不正解のカラーテーマ（完勝時は使用しない）
+  const missedTheme = murdererEscaped
+    ? {
+        panel: 'border-amber-900/60',
+        header: 'text-amber-500/80',
+        border: 'border-amber-900/40',
+        bg: 'bg-amber-950/10',
+        accent: 'text-amber-500/70',
+        faded: 'text-amber-500/50',
+        emptyText: '証拠を突きつけることができなかった。',
+      }
+    : {
+        panel: 'border-red-900/60',
+        header: 'text-red-400/80',
+        border: 'border-red-900/40',
+        bg: 'bg-red-950/10',
+        accent: 'text-red-400/70',
+        faded: 'text-red-400/50',
+        emptyText: '真犯人を見誤った。',
+      }
+
   // スコア計算
   const config = DIFFICULTY_CONFIG[difficulty]
   const usedActions = config.actions - actionsRemaining
@@ -50,7 +72,7 @@ export function EndingScreen() {
 
   return (
     <div className="min-h-screen px-4 py-8">
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         <div className="text-center mb-8">
           {isCorrect && !murdererEscaped ? (
             <>
@@ -93,20 +115,23 @@ export function EndingScreen() {
           </GothicPanel>
         )}
 
-        {!isMurdererIdentified && showTruth && (
-          <GothicPanel className="mb-4 border-red-900/60">
+        {(murdererEscaped || (!isMurdererIdentified && showTruth)) && (
+          <GothicPanel className={`mb-4 ${missedTheme.panel}`}>
             {missedCombinations.length === 0 ? (
               <p className="text-gothic-muted font-serif text-sm leading-relaxed">
-                決定的証拠はすべて揃えていた——それでも、真犯人を見誤った。
+                決定的証拠はすべて揃えていた——それでも、{missedTheme.emptyText}
               </p>
             ) : (
               <>
-                <p className="text-red-400/80 font-display text-xs tracking-widest mb-4">
+                <p className={`font-display text-xs tracking-widest mb-4 ${missedTheme.header}`}>
                   ── 見逃した決定的事実 ──
                 </p>
                 <div className="space-y-4">
                   {missedCombinations.map((combo) => (
-                    <div key={combo.id} className="border border-red-900/40 bg-red-950/10 p-3">
+                    <div
+                      key={combo.id}
+                      className={`border ${missedTheme.border} ${missedTheme.bg} p-3`}
+                    >
                       <p className="text-gothic-text font-serif text-sm mb-2">{combo.name}</p>
                       <div className="space-y-1">
                         {combo.evidence_ids.map((eid) => {
@@ -115,15 +140,15 @@ export function EndingScreen() {
                           const examined = examinedEvidenceIds.includes(eid)
                           return (
                             <div key={eid} className="flex items-center gap-2">
-                              <span className={examined ? 'text-gothic-muted' : 'text-red-400/70'}>
+                              <span className={examined ? 'text-gothic-muted' : missedTheme.accent}>
                                 {examined ? '◦' : '✕'}
                               </span>
                               <span
-                                className={`font-serif text-xs ${examined ? 'text-gothic-muted' : 'text-red-400/70'}`}
+                                className={`font-serif text-xs ${examined ? 'text-gothic-muted' : missedTheme.accent}`}
                               >
                                 {evidence.name}
                                 {!examined && (
-                                  <span className="ml-1 text-red-400/50">（未調査）</span>
+                                  <span className={`ml-1 ${missedTheme.faded}`}>（未調査）</span>
                                 )}
                               </span>
                             </div>
