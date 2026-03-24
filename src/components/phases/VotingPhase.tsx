@@ -3,9 +3,7 @@ import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
 import { CharacterSlider } from '../shared/CharacterSlider'
-import { PixelImageWithFallback } from '../shared/PixelImage'
-import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
-import { MANSION_DEFAULT_ASSET } from '../../services/assetResolver'
+import { MansionSceneBackground } from '../shared/MansionBackground'
 
 // 容疑者選択と告発確認を行い、告発フェーズへ遷移する最終投票コンポーネント
 export function VotingPhase() {
@@ -52,17 +50,7 @@ export function VotingPhase() {
           className="relative w-full border border-gothic-border overflow-hidden"
           style={{ aspectRatio: '16 / 9' }}
         >
-          <div className="absolute inset-0">
-            <PixelImageWithFallback
-              src={MANSION_DEFAULT_ASSET}
-              alt="館"
-              pixelSize={PIXEL_ART_CONFIG.pixelSize.mansion}
-              canvasWidth={PIXEL_ART_CONFIG.canvasSize.mansion.width}
-              canvasHeight={PIXEL_ART_CONFIG.canvasSize.mansion.height}
-              fallbackSrc={MANSION_DEFAULT_ASSET}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          </div>
+          <MansionSceneBackground phase="voting" />
 
           <CharacterSlider
             suspects={scenario.suspects}

@@ -40,7 +40,8 @@
       "Bash(grep -n \"setPhase.*accusation\\\\|setPhase.*ending\" src/**/*.tsx src/**/*.ts)",
       "Bash(find /d/workspace/whodunit -type f \\\\\\(-name *.png -o -name *.jpg -o -name *.jpeg -o -name *.svg -o -name *.webp \\\\\\))",
       "Bash(taskwait bka6moje8:*)",
-      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")"
+      "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
+      "Bash(find /d/workspace/whodunit -name phaseConfig* -type f)"
     ]
   }
 }

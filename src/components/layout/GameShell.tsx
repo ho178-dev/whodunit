@@ -1,6 +1,7 @@
 // ゲームフェーズに応じた画面切り替えを行うルートレイアウトコンポーネント
 import { useGameStore } from '../../stores/gameStore'
 import { FadeTransition } from '../shared/FadeTransition'
+import { PHASE_LABELS } from '../../constants/phaseConfig'
 import { TitleScreen } from '../phases/TitleScreen'
 import { ApiKeyInput } from '../phases/ApiKeyInput'
 import { LoadingScreen } from '../phases/LoadingScreen'
@@ -43,7 +44,9 @@ export function GameShell() {
 
   return (
     <div className="min-h-screen bg-gothic-bg">
-      <FadeTransition triggerKey={phase}>{renderPhase()}</FadeTransition>
+      <FadeTransition triggerKey={phase} phaseLabel={PHASE_LABELS[phase]}>
+        {renderPhase()}
+      </FadeTransition>
     </div>
   )
 }

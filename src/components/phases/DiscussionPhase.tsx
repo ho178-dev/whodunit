@@ -9,9 +9,7 @@ import { FakeRevealModal } from '../investigation/FakeRevealModal'
 import { CharacterCard } from '../shared/CharacterCard'
 import { CharacterSlider } from '../shared/CharacterSlider'
 import { DialogBox } from '../shared/DialogBox'
-import { PixelImageWithFallback } from '../shared/PixelImage'
-import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
-import { MANSION_DEFAULT_ASSET } from '../../services/assetResolver'
+import { MansionSceneBackground } from '../shared/MansionBackground'
 import { EvidenceSelectModal } from '../discussion/EvidenceSelectModal'
 import { behaviorBorderColors, behaviorLabel } from '../../constants/npcBehavior'
 import { cn } from '../../utils/cn'
@@ -235,17 +233,7 @@ export function DiscussionPhase() {
           className="relative w-full border border-gothic-border overflow-hidden"
           style={{ aspectRatio: '16 / 9' }}
         >
-          <div className="absolute inset-0">
-            <PixelImageWithFallback
-              src={MANSION_DEFAULT_ASSET}
-              alt="館"
-              pixelSize={PIXEL_ART_CONFIG.pixelSize.mansion}
-              canvasWidth={PIXEL_ART_CONFIG.canvasSize.mansion.width}
-              canvasHeight={PIXEL_ART_CONFIG.canvasSize.mansion.height}
-              fallbackSrc={MANSION_DEFAULT_ASSET}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          </div>
+          <MansionSceneBackground phase="discussion" />
 
           {/* 一覧モード: スライダー */}
           {!isConversationMode && (
