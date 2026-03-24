@@ -9,9 +9,7 @@ import { FakeRevealModal } from '../investigation/FakeRevealModal'
 import { CharacterCard } from '../shared/CharacterCard'
 import { CharacterSlider } from '../shared/CharacterSlider'
 import { DialogBox } from '../shared/DialogBox'
-import { PixelImageWithFallback } from '../shared/PixelImage'
-import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
-import { MANSION_DEFAULT_ASSET } from '../../services/assetResolver'
+import { MansionSceneBackground } from '../shared/MansionBackground'
 import { EvidenceSelectModal } from '../discussion/EvidenceSelectModal'
 import { behaviorBorderColors, behaviorLabel } from '../../constants/npcBehavior'
 import { cn } from '../../utils/cn'
@@ -118,15 +116,15 @@ export function DiscussionPhase() {
       ]
     : []
 
-  // 突きつけ結果 → 的外れ応答 → 追及質問回答の優先順で表示
+  // 的外れ応答 → 追及質問回答 → 突きつけ結果(latestReaction)の優先順で表示
   const dialogReaction =
-    latestReaction ??
     (currentWrongResult
       ? { reaction: currentWrongResult.response, behavior: 'calm' as const }
       : null) ??
     (lastAskedQuestionData
       ? { reaction: lastAskedQuestionData.response, behavior: lastAskedQuestionData.behavior }
-      : null)
+      : null) ??
+    latestReaction
 
   // --- ハンドラ ---
   const handleSuspectClick = (suspectId: string) => {
@@ -211,7 +209,7 @@ export function DiscussionPhase() {
         />
       )}
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
           <h1 className="font-display text-xl text-gothic-gold tracking-widest">議論フェーズ</h1>
           <div className="flex items-center gap-3">
@@ -235,17 +233,7 @@ export function DiscussionPhase() {
           className="relative w-full border border-gothic-border overflow-hidden"
           style={{ aspectRatio: '16 / 9' }}
         >
-          <div className="absolute inset-0">
-            <PixelImageWithFallback
-              src={MANSION_DEFAULT_ASSET}
-              alt="館"
-              pixelSize={PIXEL_ART_CONFIG.pixelSize.mansion}
-              canvasWidth={PIXEL_ART_CONFIG.canvasSize.mansion.width}
-              canvasHeight={PIXEL_ART_CONFIG.canvasSize.mansion.height}
-              fallbackSrc={MANSION_DEFAULT_ASSET}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-          </div>
+          <MansionSceneBackground phase="discussion" />
 
           {/* 一覧モード: スライダー */}
           {!isConversationMode && (

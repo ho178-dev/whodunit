@@ -29,7 +29,7 @@ export function ScenarioBriefing() {
     <div className="min-h-screen px-4 py-8">
       {showTutorial && <TutorialOverlay onClose={() => setShowTutorial(false)} />}
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-4xl mx-auto">
         {/* 館背景ヘッダー */}
         <div className="relative mb-8 overflow-hidden" style={{ height: '220px' }}>
           <PixelImageWithFallback

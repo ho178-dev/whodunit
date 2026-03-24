@@ -39,7 +39,7 @@ export function InvestigationPhase() {
       {showNotes && <InvestigationNotes onClose={() => setShowNotes(false)} />}
       {showMoveModal && <RoomMoveModal onClose={() => setShowMoveModal(false)} />}
 
-      <div className="max-w-4xl mx-auto">
+      <div className="max-w-6xl mx-auto">
         {/* 上部バー: タイトル + アクション + ボタン群 */}
         <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
           <h1 className="font-display text-xl text-gothic-gold tracking-widest">探索フェーズ</h1>
