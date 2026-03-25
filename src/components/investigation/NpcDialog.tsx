@@ -10,6 +10,8 @@ import type { Suspect } from '../../types/scenario'
 
 interface NpcDialogProps {
   roomId: string
+  /** 2名表示時の左右均等パディング（ボタンパネルとの重なりを避けるために調整）。デフォルトは 'px-6 sm:px-12' */
+  twoCharInset?: string
 }
 
 // 容疑者の詳細情報をモーダル表示するコンポーネント
@@ -40,7 +42,7 @@ function SuspectDetailModal({ suspect, onClose }: { suspect: Suspect; onClose: (
 }
 
 // 部屋内のキャラクター配置（最大2名左右）とダイアログを統合表示するコンポーネント
-export function NpcDialog({ roomId }: NpcDialogProps) {
+export function NpcDialog({ roomId, twoCharInset }: NpcDialogProps) {
   const {
     scenario,
     talkedSuspectIds,
@@ -60,7 +62,6 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
     ? scenario.suspects.find((s) => s.id === selectedSuspect)
     : null
 
-  // 容疑者を選択し、挨拶を聴取してダイアログを開始する
   const handleTalk = (suspect: (typeof scenario.suspects)[number]) => {
     if (talkActionsRemaining <= 0) return
     setSelectedSuspect(suspect.id)
@@ -76,7 +77,6 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
     })
   }
 
-  // 次の証言を聴取してダイアログインデックスを進める
   const handleNext = () => {
     if (!currentSuspect) return
     const nextIndex = dialogIndex + 1
@@ -107,17 +107,17 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
 
   return (
     <>
-      {/* 容疑者詳細モーダル */}
       {detailSuspect && (
         <SuspectDetailModal suspect={detailSuspect} onClose={() => setDetailSuspect(null)} />
       )}
 
-      {/* キャラクター配置エリア（背景前面、1名は中央・2名は左右） */}
       {suspectsHere.length > 0 && (
         <div
           className={cn(
-            'absolute inset-x-0 bottom-32 flex items-end px-6 sm:px-12 gap-4',
-            suspectsHere.length === 1 ? 'justify-center' : 'justify-between'
+            'absolute inset-x-0 bottom-32 flex items-end gap-4',
+            suspectsHere.length === 1
+              ? 'justify-center px-6 sm:px-12'
+              : cn('justify-between', twoCharInset ?? 'px-6 sm:px-12')
           )}
         >
           {suspectsHere.map((suspect) => (
@@ -141,7 +141,6 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
         </div>
       )}
 
-      {/* ダイアログエリア（背景下部オーバーレイ） */}
       <div className="absolute inset-x-0 bottom-0 p-3">
         {currentSuspect && currentDialog ? (
           <div className="relative">
@@ -151,7 +150,6 @@ export function NpcDialog({ roomId }: NpcDialogProps) {
               className="bg-gothic-panel/85 backdrop-blur-sm"
               onComplete={() => {}}
             />
-            {/* 続きを聞くボタン（ダイアログ内側右下） */}
             {hasMoreDialog && (
               <button
                 onClick={(e) => {

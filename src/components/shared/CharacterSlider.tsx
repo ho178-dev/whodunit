@@ -13,6 +13,8 @@ interface CharacterSliderProps {
   onSuspectClick: (suspectId: string) => void
   /** 選択状態を示す容疑者ID（ゴールド枠で強調） */
   selectedId?: string | null
+  /** ルートdivのクラスを上書きする（右パネル幅分のオフセット調整などに使用） */
+  className?: string
 }
 
 // 左右矢印とドットインジケーター付きの3人表示スライダー
@@ -22,12 +24,18 @@ export function CharacterSlider({
   onSliderIndexChange,
   onSuspectClick,
   selectedId,
+  className,
 }: CharacterSliderProps) {
   const total = suspects.length
   const visibleIndices = [(sliderIndex - 1 + total) % total, sliderIndex, (sliderIndex + 1) % total]
 
   return (
-    <div className="absolute inset-x-0 top-1/2 -translate-y-[60%] flex items-center justify-center gap-3 sm:gap-5 px-4">
+    <div
+      className={cn(
+        'absolute inset-x-0 top-1/2 -translate-y-[60%] flex items-center justify-center gap-3 sm:gap-5 px-4',
+        className
+      )}
+    >
       <button
         onClick={() => onSliderIndexChange(sliderIndex <= 0 ? total - 1 : sliderIndex - 1)}
         className={arrowClass}

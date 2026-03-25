@@ -1,5 +1,6 @@
 // 議論フェーズの画面。館背景にキャラクターを配置し、証拠突きつけ・追及質問を管理する
 // 一覧モード（スライダー）と会話モード（選択キャラ中央表示）を切り替える
+// 会話モード時は左特別パネルに操作UIを表示し、ダイアログはフル幅で下部に配置する
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { getRootQuestionIds } from '../../utils/scenario'
@@ -13,6 +14,11 @@ import { MansionSceneBackground } from '../shared/MansionBackground'
 import { EvidenceSelectModal } from '../discussion/EvidenceSelectModal'
 import { behaviorBorderColors, behaviorLabel } from '../../constants/npcBehavior'
 import { cn } from '../../utils/cn'
+import { GamePhaseLayout } from '../layout/GamePhaseLayout'
+import { RightPanel } from '../layout/RightPanel'
+import { LeftSpecialPanel } from '../layout/LeftSpecialPanel'
+import { PanelButton } from '../layout/PanelButton'
+import { NotesIcon } from '../shared/Icons'
 
 // 議論フェーズのメインコンポーネント
 export function DiscussionPhase() {
@@ -86,7 +92,6 @@ export function DiscussionPhase() {
     !!selectedEvidenceId &&
     !!selectedSuspect.evidence_reactions[selectedEvidenceId]?.pursuit_questions?.length
 
-  // 追及質問のルートがすべてアンロック済みか（会話モード時のみ意味がある）
   const rootIds =
     isConversationMode && selectedSuspect && selectedEvidenceId
       ? getRootQuestionIds(
@@ -126,9 +131,7 @@ export function DiscussionPhase() {
       : null) ??
     latestReaction
 
-  // --- ハンドラ ---
   const handleSuspectClick = (suspectId: string) => {
-    // スライダー位置を選択した容疑者に同期
     const idx = scenario.suspects.findIndex((s) => s.id === suspectId)
     if (idx >= 0) setSliderIndex(idx)
     setSelectedSuspectId(suspectId)
@@ -172,8 +175,80 @@ export function DiscussionPhase() {
     askPursuitQuestion(selectedSuspectId, selectedEvidenceId, questionId)
   }
 
+  const leftPanel =
+    isConversationMode && selectedSuspect && selectedEvidence ? (
+      <LeftSpecialPanel>
+        <button
+          onClick={handleBackToList}
+          className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 hover:border-gothic-accent px-3 py-2 text-gothic-muted hover:text-gothic-text font-serif text-xs transition-all text-left w-full"
+        >
+          ← 容疑者一覧
+        </button>
+
+        {/* 突きつけコンテキスト */}
+        <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-2">
+          <p className="text-gothic-muted font-serif text-[10px] leading-relaxed">
+            <span className="text-gothic-text">{selectedSuspect.name}</span>
+            {'に'}
+            <br />
+            <span className="text-gothic-gold">「{selectedEvidence.name}」</span>
+            {'を突きつける'}
+          </p>
+        </div>
+
+        {/* 突きつけボタン */}
+        <PanelButton variant="primary" onClick={handleConfront}>
+          突きつける
+        </PanelButton>
+
+        {/* 矛盾を追及する */}
+        {latestReaction && (hasPursuitQuestions ? !allRootUnlocked : !currentWrongResult) && (
+          <button
+            onClick={handleInitiatePursuit}
+            className="w-full bg-yellow-950/70 backdrop-blur-sm border border-yellow-700 hover:bg-yellow-900/50 text-yellow-300 font-display tracking-widest py-2 transition-all text-[10px] flex items-center justify-center gap-1"
+          >
+            <span>⚑</span>
+            <span>矛盾を追及</span>
+          </button>
+        )}
+
+        {/* 追及質問リスト（専用コンテナでスクロール） */}
+        {unlockedForCurrent.length > 0 && (
+          <div className="bg-stone-900/80 backdrop-blur-sm border border-yellow-700/50 overflow-y-auto max-h-44">
+            <p className="font-display text-yellow-400 text-[10px] tracking-widest px-3 py-2 border-b border-yellow-700/40 flex items-center gap-1">
+              <span>⚑</span>
+              <span>追及質問</span>
+            </p>
+            <div className="px-2 py-2 space-y-1.5">
+              {unlockedForCurrent.map(({ questionId, evidenceId }) => {
+                const qData = selectedSuspect.evidence_reactions[
+                  evidenceId
+                ]?.pursuit_questions?.find((q) => q.id === questionId)
+                if (!qData) return null
+                const isAsked = askedPursuitQuestionIds.includes(questionId)
+                return (
+                  <button
+                    key={questionId}
+                    onClick={() => !isAsked && handleAskPursuit(questionId)}
+                    disabled={isAsked}
+                    className={`w-full text-left border px-2 py-1.5 font-serif text-[10px] transition-all leading-snug ${
+                      isAsked
+                        ? 'border-stone-700 text-stone-600 cursor-default'
+                        : 'border-yellow-700 text-yellow-200 hover:bg-yellow-900/20'
+                    }`}
+                  >
+                    {isAsked && <span className="text-stone-600 mr-1">✓</span>}「{qData.text}」
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        )}
+      </LeftSpecialPanel>
+    ) : null
+
   return (
-    <div className="min-h-screen px-4 py-4">
+    <>
       <CombinationDiscovery />
       <FakeRevealModal />
       {showNotes && (
@@ -201,7 +276,6 @@ export function DiscussionPhase() {
           onSelect={handleEvidenceSelect}
           onClose={() => {
             setShowEvidenceModal(false)
-            // 証拠未選択のままモーダルを閉じた場合、スライダーに戻す
             if (!selectedEvidenceId) {
               setSelectedSuspectId(null)
             }
@@ -209,33 +283,11 @@ export function DiscussionPhase() {
         />
       )}
 
-      <div className="max-w-6xl mx-auto">
-        <div className="flex items-center justify-between mb-4 gap-2 flex-wrap">
-          <h1 className="font-display text-xl text-gothic-gold tracking-widest">議論フェーズ</h1>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowNotesManual(true)}
-              className="border border-gothic-border bg-gothic-panel hover:border-gothic-accent text-gothic-muted hover:text-gothic-text font-serif text-xs py-2 px-3 transition-all"
-            >
-              捜査メモ
-            </button>
-            <button
-              onClick={() => setPhase('voting')}
-              className="border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display text-xs tracking-widest py-2 px-4 transition-all hover:shadow-[0_0_12px_rgba(217,119,6,0.3)]"
-            >
-              投票へ進む
-            </button>
-          </div>
-        </div>
-
-        {/* メインビジュアル */}
-        <div
-          className="relative w-full border border-gothic-border overflow-hidden"
-          style={{ aspectRatio: '16 / 9' }}
-        >
+      <GamePhaseLayout>
+        <div className="relative w-full aspect-video border border-gothic-border overflow-hidden">
           <MansionSceneBackground phase="discussion" />
 
-          {/* 一覧モード: スライダー */}
+          {/* 一覧モード: スライダー（フル幅） */}
           {!isConversationMode && (
             <CharacterSlider
               suspects={scenario.suspects}
@@ -245,30 +297,21 @@ export function DiscussionPhase() {
             />
           )}
 
-          {/* 会話モード */}
+          {/* 会話モード: キャラクター中央表示（フル幅） */}
           {isConversationMode && selectedSuspect && (
-            <>
-              <button
-                onClick={handleBackToList}
-                className="absolute top-3 left-3 z-10 bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border hover:border-gothic-accent text-gothic-muted hover:text-gothic-text font-serif text-xs py-1.5 px-3 transition-all"
-              >
-                ← 容疑者一覧
-              </button>
-
-              <div className="absolute inset-x-0 bottom-24 flex justify-center">
-                <div className="transition-all duration-300">
-                  <CharacterCard
-                    suspect={selectedSuspect}
-                    portrait
-                    selected
-                    onClick={() => setShowEvidenceModal(true)}
-                  />
-                </div>
+            <div className="absolute inset-x-0 bottom-24 flex justify-center">
+              <div className="transition-all duration-300">
+                <CharacterCard
+                  suspect={selectedSuspect}
+                  portrait
+                  selected
+                  onClick={() => setShowEvidenceModal(true)}
+                />
               </div>
-            </>
+            </div>
           )}
 
-          {/* ダイアログエリア */}
+          {/* ダイアログエリア（フル幅・下部固定） */}
           <div className="absolute inset-x-0 bottom-0 p-3">
             {dialogReaction && selectedSuspect ? (
               <div
@@ -296,74 +339,38 @@ export function DiscussionPhase() {
               </div>
             )}
           </div>
-        </div>
 
-        {/* 操作パネル */}
-        {selectedSuspect && selectedEvidence && (
-          <div className="mt-4 space-y-3">
-            <div className="border border-gothic-border bg-gothic-panel p-4">
-              <p className="text-gothic-muted font-serif text-sm mb-3">
-                <span className="text-gothic-text">{selectedSuspect.name}</span>に
-                <span className="text-gothic-gold">「{selectedEvidence.name}」</span>を突きつける
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={handleConfront}
-                  className="flex-1 border border-gothic-accent bg-gothic-panel hover:bg-stone-800 text-gothic-text font-display tracking-widest py-3 transition-all text-sm"
-                >
-                  突きつける
-                </button>
-                <button
-                  onClick={() => setShowEvidenceModal(true)}
-                  className="border border-gothic-border bg-gothic-panel hover:border-gothic-accent text-gothic-muted font-serif py-3 px-4 transition-all text-sm"
-                >
-                  証拠を変更
-                </button>
-              </div>
-            </div>
+          {/* 左特別パネル（会話モード時のみ） */}
+          {leftPanel}
 
-            {latestReaction && (hasPursuitQuestions ? !allRootUnlocked : !currentWrongResult) && (
-              <button
-                onClick={handleInitiatePursuit}
-                className="w-full border border-yellow-700 bg-yellow-950/20 hover:bg-yellow-900/30 text-yellow-300 font-display tracking-widest py-2 transition-all text-sm flex items-center justify-center gap-2"
+          {/* 右パネル */}
+          <RightPanel
+            slot1="議論"
+            slot3={
+              <PanelButton
+                variant="primary"
+                disabled={!selectedSuspectId}
+                onClick={() => setShowEvidenceModal(true)}
               >
-                <span>⚑</span>
-                <span>矛盾を追及する</span>
-              </button>
-            )}
-
-            {unlockedForCurrent.length > 0 && (
-              <div className="border border-yellow-700/60 bg-stone-900/60 p-3 space-y-2">
-                <h4 className="font-display text-yellow-400 text-xs tracking-widest flex items-center gap-2">
-                  <span>⚑</span>
-                  <span>追及質問</span>
-                </h4>
-                {unlockedForCurrent.map(({ questionId, evidenceId }) => {
-                  const qData = selectedSuspect.evidence_reactions[
-                    evidenceId
-                  ]?.pursuit_questions?.find((q) => q.id === questionId)
-                  if (!qData) return null
-                  const isAsked = askedPursuitQuestionIds.includes(questionId)
-                  return (
-                    <button
-                      key={questionId}
-                      onClick={() => !isAsked && handleAskPursuit(questionId)}
-                      disabled={isAsked}
-                      className={`w-full text-left border px-3 py-2 font-serif text-sm transition-all ${
-                        isAsked
-                          ? 'border-stone-700 text-stone-600 cursor-default'
-                          : 'border-yellow-700 text-yellow-200 hover:bg-yellow-900/20 hover:border-yellow-500'
-                      }`}
-                    >
-                      {isAsked && <span className="text-stone-600 mr-2">✓</span>}「{qData.text}」
-                    </button>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-        )}
-      </div>
-    </div>
+                証拠を選ぶ
+              </PanelButton>
+            }
+            slot4={
+              <PanelButton onClick={() => setShowNotesManual(true)}>
+                <span className="flex items-center justify-center gap-1.5">
+                  <NotesIcon size={13} />
+                  <span>捜査メモ</span>
+                </span>
+              </PanelButton>
+            }
+            slot5={
+              <PanelButton variant="primary" onClick={() => setPhase('voting')}>
+                投票へ進む
+              </PanelButton>
+            }
+          />
+        </div>
+      </GamePhaseLayout>
+    </>
   )
 }
