@@ -4,6 +4,21 @@ const config: Config = {
   content: ['./index.html', './src/**/*.{ts,tsx}'],
   theme: {
     extend: {
+      keyframes: {
+        'glow-pulse': {
+          '0%, 100%': {
+            boxShadow: '0 0 8px rgba(217,119,6,0.4)',
+            borderColor: '#d97706',
+          },
+          '50%': {
+            boxShadow: '0 0 22px rgba(217,119,6,0.75)',
+            borderColor: '#f59e0b',
+          },
+        },
+      },
+      animation: {
+        'glow-pulse': 'glow-pulse 2s ease-in-out infinite',
+      },
       colors: {
         gothic: {
           bg: '#0c0a09',

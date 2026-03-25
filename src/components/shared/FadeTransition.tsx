@@ -44,9 +44,9 @@ export function FadeTransition({ children, triggerKey, phaseLabel }: FadeTransit
 
   return (
     <div className="relative">
-      {/* フェーズコンテンツ（フェードイン/アウト） */}
+      {/* 幕間中はDOMをマウントせず、visible遷移後にフェードインする */}
       <div className="transition-opacity duration-500" style={{ opacity: contentVisible ? 1 : 0 }}>
-        {children}
+        {contentVisible ? children : null}
       </div>
 
       {/* 幕間オーバーレイ：phaseLabel がある場合のみ描画 */}

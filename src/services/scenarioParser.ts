@@ -34,7 +34,16 @@ export function validateScenario(data: unknown): Scenario {
   const murdererExists = s.suspects.some((sus) => sus.id === s.murderer_id)
   if (!murdererExists) throw new Error('murderer_idが容疑者リストに存在しません')
 
+  if (new Set(s.suspects.map((sus) => sus.id)).size !== s.suspects.length)
+    throw new Error('容疑者のidが重複しています')
+
+  const appearanceIds = [s.victim.appearance_id, ...s.suspects.map((sus) => sus.appearance_id)]
+  if (new Set(appearanceIds).size !== appearanceIds.length)
+    throw new Error('appearance_idが重複しています')
+
   const roomIds = new Set(s.rooms.map((r) => r.id))
+  if (roomIds.size !== s.rooms.length) throw new Error('部屋のidが重複しています')
+
   for (const suspect of s.suspects) {
     if (!suspect.room_id) throw new Error(`容疑者 ${suspect.id} にroom_idが設定されていません`)
     if (!roomIds.has(suspect.room_id))
@@ -74,6 +83,8 @@ export function validateScenario(data: unknown): Scenario {
   }
 
   const evidenceIds = new Set(s.evidence.map((e) => e.id))
+  if (evidenceIds.size !== s.evidence.length) throw new Error('証拠のidが重複しています')
+
   for (const room of s.rooms) {
     for (const eid of room.evidence_ids) {
       if (!evidenceIds.has(eid))
