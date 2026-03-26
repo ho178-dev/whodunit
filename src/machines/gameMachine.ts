@@ -24,6 +24,8 @@ export const PHASE_TRANSITIONS: PhaseTransition[] = [
   { from: 'ending', to: 'scenario_briefing' },
   { from: 'ending', to: 'api_key_input' },
   { from: 'ending', to: 'title' },
+  { from: 'ending', to: 'trial_preview' },
+  { from: 'trial_preview', to: 'title' },
 ]
 
 // 指定されたフェーズ遷移が現在のゲーム状態で許可されるか判定する

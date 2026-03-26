@@ -43,6 +43,11 @@ export const PHASE_LABELS: Partial<Record<GamePhase, PhaseLabel>> = {
     text: 'エンディング',
     textColor: 'text-yellow-400',
   },
+  trial_preview: {
+    text: '予告',
+    textColor: 'text-gothic-gold',
+    duration: 800,
+  },
 }
 
 /** セーブスロット一覧でのフェーズ表示テキスト */

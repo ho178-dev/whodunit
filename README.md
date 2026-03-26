@@ -66,24 +66,33 @@ AIシナリオ生成時にシナリオの設定に合う `mansion_background_id`
 
 ### キャラクター画像 `public/assets/characters/`
 
-| ファイル名              | 説明                               |
-| ----------------------- | ---------------------------------- |
-| `male_teen.png`         | 男性・10代                         |
-| `male_young.png`        | 男性・20〜30代                     |
-| `male_young_alt.png`    | 男性・20〜30代（別バリエーション） |
-| `male_middle.png`       | 男性・中年                         |
-| `male_middle_alt.png`   | 男性・中年（別バリエーション）     |
-| `male_elderly.png`      | 男性・老年                         |
-| `female_teen.png`       | 女性・10代                         |
-| `female_young.png`      | 女性・20〜30代                     |
-| `female_young_alt.png`  | 女性・20〜30代（別バリエーション） |
-| `female_middle.png`     | 女性・中年                         |
-| `female_middle_alt.png` | 女性・中年（別バリエーション）     |
-| `female_elderly.png`    | 女性・老年                         |
-| `default_character.png` | デフォルト画像(中性的)             |
+| ファイル名               | 説明                                     |
+| ------------------------ | ---------------------------------------- |
+| `male_teen.png`          | 男性・10代                               |
+| `male_teen_alt.png`      | 男性・10代（別バリエーション）           |
+| `male_young.png`         | 男性・20〜30代                           |
+| `male_young_alt.png`     | 男性・20〜30代（別バリエーション）       |
+| `male_young_alt2.png`    | 男性・20〜30代（メガネ・知的）           |
+| `male_middle.png`        | 男性・中年                               |
+| `male_middle_alt.png`    | 男性・中年（別バリエーション）           |
+| `male_middle_alt2.png`   | 男性・中年（禿げ・山羊髭・強面）         |
+| `male_elderly.png`       | 男性・老年                               |
+| `male_elderly_alt.png`   | 男性・老年（長い白髭・禿げ）             |
+| `female_teen.png`        | 女性・10代                               |
+| `female_teen_alt.png`    | 女性・10代（ツインテール）               |
+| `female_young.png`       | 女性・20〜30代                           |
+| `female_young_alt.png`   | 女性・20〜30代（別バリエーション）       |
+| `female_young_alt2.png`  | 女性・20〜30代（ポニーテール・凜々しい） |
+| `female_middle.png`      | 女性・中年                               |
+| `female_middle_alt.png`  | 女性・中年（髷・冷淡な印象）             |
+| `female_middle_alt2.png` | 女性・中年（短い巻き髪・威厳）           |
+| `female_elderly.png`     | 女性・老年                               |
+| `female_elderly_alt.png` | 女性・老年（長い三つ編み・白髪）         |
+| `default_character.png`  | デフォルト画像（中性的）                 |
 
 - **フォーマット**: PNG（生成サイズ: 832×1216px、縦長）
 - **フォールバック**: 画像なしの場合 `default_character.png` を表示
+- **プロンプト**: `public/assets/sd_prompts_v3_2.md` に各ファイルの生成プロンプトを記載
 
 ---
 
@@ -137,12 +146,35 @@ AIシナリオ生成時にシナリオの設定に合う `mansion_background_id`
 
 ---
 
-## 開発
+## 開発・ビルド
 
 ```bash
 npm install
-npm run dev    # 開発サーバー起動
-npm run build  # プロダクションビルド
+npm run dev          # 開発サーバー起動（有料版相当・全シナリオ表示）
+npm run build:full   # 有料版ビルド（全3シナリオ）
+npm run build:trial  # 体験版ビルド（シナリオ1本のみ・予告画面あり）
+npm run build        # build:full と同等
+```
+
+### 体験版 / 有料版の切り替え
+
+`VITE_TRIAL_MODE` 環境変数でビルド内容を制御する。
+
+| モード | コマンド      | 読み込まれる env ファイル | シナリオ数 | 予告画面 |
+| ------ | ------------- | ------------------------- | ---------- | -------- |
+| 有料版 | `build:full`  | `.env`                    | 3本        | なし     |
+| 体験版 | `build:trial` | `.env.trial`              | 1本        | あり     |
+
+- `.env.trial` には `VITE_TRIAL_MODE=true` が設定済み
+- 体験版ではタイトル画面からシナリオ選択を**スキップ**して直接ブリーフィングへ遷移する
+- エンディング後に「次のシナリオ予告を見る」ボタンが表示され、シナリオ2・3の紹介とBooth購入リンクを案内する
+
+### Booth販売URL
+
+`src/constants/salesConfig.ts` の `BOOTH_URL` 定数を差し替えること。
+
+```ts
+export const BOOTH_URL = 'https://booth.pm/ja/items/PLACEHOLDER' // ← ここをBoothのURLに変更
 ```
 
 ## ゲームデザイン方針
