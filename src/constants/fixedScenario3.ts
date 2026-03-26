@@ -62,7 +62,7 @@ export const FIXED_SCENARIO_3: Scenario = {
   murder_time_range: '23:30〜01:30（推定）',
   victim: {
     name: '青木亮',
-    appearance_id: 'male_middle_alt',
+    appearance_id: 'male_teen_alt',
     description:
       '33歳の会社員。儀式への参加は今年で2年目の比較的新しいメンバー。明るく社交的で場を盛り上げるのが得意。昨夜の儀式でも真っ先に笑い声を上げていた。',
     cause_of_death:
@@ -77,7 +77,7 @@ export const FIXED_SCENARIO_3: Scenario = {
     {
       id: 'izawa_kei',
       name: '伊沢慧',
-      appearance_id: 'male_young',
+      appearance_id: 'male_teen',
       age: 27,
       occupation: '大学院生（民俗学専攻）',
       default_wrong_pursuit_response:
@@ -296,7 +296,7 @@ export const FIXED_SCENARIO_3: Scenario = {
     {
       id: 'shiraha_seira',
       name: '白石星奈',
-      appearance_id: 'female_young_alt',
+      appearance_id: 'female_middle_alt2',
       age: 32,
       occupation: '霊媒師',
       default_wrong_pursuit_response:
@@ -496,7 +496,7 @@ export const FIXED_SCENARIO_3: Scenario = {
     {
       id: 'mizusawa_kana',
       name: '水沢加奈',
-      appearance_id: 'female_young',
+      appearance_id: 'female_teen_alt',
       age: 24,
       occupation: '大学生',
       default_wrong_pursuit_response:
@@ -596,7 +596,7 @@ export const FIXED_SCENARIO_3: Scenario = {
     {
       id: 'odo_saburo',
       name: '大堂三郎',
-      appearance_id: 'male_elderly',
+      appearance_id: 'male_middle_alt2',
       age: 62,
       occupation: '民俗学者（退職）',
       default_wrong_pursuit_response:

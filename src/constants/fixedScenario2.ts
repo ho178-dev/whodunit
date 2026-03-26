@@ -62,7 +62,7 @@ export const FIXED_SCENARIO_2: Scenario = {
   murder_time_range: '23:00〜02:00（推定）',
   victim: {
     name: '白河啓一',
-    appearance_id: 'male_elderly',
+    appearance_id: 'male_elderly_alt',
     description:
       '70代の実業家。白髪の紳士で温厚な印象だが、経営判断は冷徹。最近、社内の不正調査を進めていた。',
     cause_of_death: '絹の紐による絞殺。密室状態の奥の主寝室で発見。',
@@ -75,7 +75,7 @@ export const FIXED_SCENARIO_2: Scenario = {
     {
       id: 'nishimura_kenji',
       name: '西村健二',
-      appearance_id: 'male_middle',
+      appearance_id: 'male_middle_alt',
       age: 48,
       occupation: '白河財閥 経理部長',
       description:
@@ -194,7 +194,7 @@ export const FIXED_SCENARIO_2: Scenario = {
     {
       id: 'shirakawa_nanami',
       name: '白河七海',
-      appearance_id: 'female_young',
+      appearance_id: 'female_young_alt2',
       age: 35,
       occupation: '白河財閥 取締役（会長の娘）',
       description: '30代の知的な女性。父に似た鋭い目を持つが、今は悲しみで充血している。',
@@ -289,7 +289,7 @@ export const FIXED_SCENARIO_2: Scenario = {
     {
       id: 'ozawa_ryota',
       name: '尾崎良太',
-      appearance_id: 'male_young',
+      appearance_id: 'male_young_alt',
       age: 28,
       occupation: '白河財閥 会長秘書',
       description: '20代後半の誠実そうな青年。几帳面な性格で会長の信頼が厚かった。',
@@ -385,7 +385,7 @@ export const FIXED_SCENARIO_2: Scenario = {
     {
       id: 'fujita_nao',
       name: '藤田奈緒',
-      appearance_id: 'female_middle',
+      appearance_id: 'female_middle_alt',
       age: 42,
       occupation: '白河財閥 顧問弁護士',
       description: '40代の落ち着いた女性弁護士。鋭い観察眼を持ち、発言は常に慎重だ。',
@@ -485,7 +485,7 @@ export const FIXED_SCENARIO_2: Scenario = {
     {
       id: 'tanaka_goro',
       name: '田中吾郎',
-      appearance_id: 'male_middle_alt',
+      appearance_id: 'male_middle_alt2',
       age: 72,
       occupation: '元政治家（白河財閥顧問）',
       description: '70代の老紳士。白河会長の旧友で、この山荘に何度も招かれたことがある。',
