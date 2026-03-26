@@ -92,6 +92,13 @@ export function validateScenario(data: unknown): Scenario {
     }
   }
 
+  // 全証拠が少なくとも1部屋の evidence_ids に含まれることを確認する（未配置証拠はプレイ不能）
+  const evidenceInRooms = new Set(s.rooms.flatMap((r) => r.evidence_ids))
+  for (const ev of s.evidence) {
+    if (!evidenceInRooms.has(ev.id))
+      throw new Error(`証拠 "${ev.id}" がどの部屋にも配置されていません`)
+  }
+
   // 犯人の timeline_has_contradiction が true であることを確認する
   const murderer = s.suspects.find((sus) => sus.id === s.murderer_id)!
   if (murderer.timeline_has_contradiction !== true)
