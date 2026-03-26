@@ -12,6 +12,10 @@ import type {
 import type { Scenario } from '../types/scenario'
 import { DIFFICULTY_CONFIG } from '../constants/gameConfig'
 import { getRootQuestionIds } from '../utils/scenario'
+import { SAVE_VERSION } from '../types/save'
+import type { SaveInput } from '../types/save'
+import { saveToSlot, loadFromSlot } from '../utils/saveLoad'
+import { getFixedScenarioByTitle } from '../utils/scenarioRegistry'
 
 // 詳細調査済みの証拠IDリストとシナリオを元に、新たに発見すべき組み合わせIDを返すヘルパー
 // required_suspect_ids が設定されている場合は、プロフィール閲覧＋全証言聴取も条件に含める
@@ -85,6 +89,7 @@ export interface GameState {
   votedSuspectId: string | null
   murdererEscaped: boolean // 犯人特定したが証拠不足で逃亡したか
   hypotheses: SuspectHypothesis[] // 容疑者ごとの仮説メモ
+  activeSaveSlot: number | null // 現在書き込み先のスロット番号（null = セーブ無効）
 
   // Actions
   setPhase: (phase: GamePhase) => void
@@ -117,6 +122,9 @@ export interface GameState {
     value: string
   ) => void
   resetGame: () => void
+  setActiveSaveSlot: (slot: number | null) => void
+  loadSaveSlot: (slotIndex: number) => void
+  manualSave: (slotIndex: number) => void
 }
 
 // IDリストへの重複なし追加ヘルパー（既存の場合はearly returnでno-op）
@@ -165,13 +173,62 @@ const initialState = {
   votedSuspectId: null,
   murdererEscaped: false,
   hypotheses: [],
+  activeSaveSlot: null,
 }
 
-export const useGameStore = create<GameState>((set) => ({
+// 自動セーブ対象フェーズ（title / scenario_select / api_key_input / generating への遷移時は保存しない）
+const AUTO_SAVE_PHASES: GamePhase[] = [
+  'scenario_briefing',
+  'investigation',
+  'discussion',
+  'voting',
+  'accusation',
+  'ending',
+]
+
+// GameState と遷移先フェーズから SaveInput を構築するヘルパー（setPhase / loadSaveSlot で共用）
+function buildSaveInput(state: GameState, phase: GamePhase): SaveInput {
+  return {
+    version: SAVE_VERSION,
+    scenarioTitle: state.scenario!.title,
+    phase,
+    difficulty: state.difficulty,
+    currentRoomId: state.currentRoomId,
+    actionsRemaining: state.actionsRemaining,
+    talkActionsRemaining: state.talkActionsRemaining,
+    inspectedEvidenceIds: state.inspectedEvidenceIds,
+    examinedEvidenceIds: state.examinedEvidenceIds,
+    discoveredCombinationIds: state.discoveredCombinationIds,
+    revealedFakeEvidenceIds: state.revealedFakeEvidenceIds,
+    talkedSuspectIds: state.talkedSuspectIds,
+    viewedSuspectProfileIds: state.viewedSuspectProfileIds,
+    heardStatements: state.heardStatements,
+    confrontationLog: state.confrontationLog,
+    unlockedPursuitQuestions: state.unlockedPursuitQuestions,
+    askedPursuitQuestionIds: state.askedPursuitQuestionIds,
+    votedSuspectId: state.votedSuspectId,
+    hypotheses: state.hypotheses,
+    murdererEscaped: state.murdererEscaped,
+  }
+}
+
+export const useGameStore = create<GameState>((set, get) => ({
   ...initialState,
 
-  // ゲームフェーズを更新する
-  setPhase: (phase) => set({ phase }),
+  // ゲームフェーズを更新する。固定シナリオかつスロット設定済みの場合は自動セーブする
+  setPhase: (phase) => {
+    set((state) => {
+      if (
+        state.activeSaveSlot !== null &&
+        state.useFixedScenario &&
+        state.scenario &&
+        AUTO_SAVE_PHASES.includes(phase)
+      ) {
+        saveToSlot(state.activeSaveSlot, buildSaveInput(state, phase))
+      }
+      return { phase }
+    })
+  },
   // APIキーを更新する
   setApiKey: (key) => set({ apiKey: key }),
   // 固定シナリオ使用フラグを更新する
@@ -413,6 +470,56 @@ export const useGameStore = create<GameState>((set) => ({
         difficulty: state.difficulty,
         actionsRemaining: DIFFICULTY_CONFIG[state.difficulty].actions,
         talkActionsRemaining: DIFFICULTY_CONFIG[state.difficulty].talkActions,
+        activeSaveSlot: state.activeSaveSlot,
       }
     }),
+
+  // 自動セーブ先スロット番号を設定する（null でセーブ無効化）
+  setActiveSaveSlot: (slot) => set({ activeSaveSlot: slot }),
+
+  // 指定した手動スロット（1〜3）に現在のゲーム状態を保存する
+  manualSave: (slotIndex) => {
+    const state = get()
+    if (!state.scenario || !state.useFixedScenario) return
+    saveToSlot(slotIndex, buildSaveInput(state, state.phase))
+  },
+
+  // 指定スロットからゲーム状態を復元する。シナリオが見つからない場合は何もしない
+  loadSaveSlot: (slotIndex) => {
+    const slot = loadFromSlot(slotIndex)
+    if (!slot) return
+    const scenario = getFixedScenarioByTitle(slot.scenarioTitle)
+    if (!scenario) return
+    set({
+      // セーブデータから復元するフィールド
+      phase: slot.phase,
+      scenario,
+      useFixedScenario: true,
+      difficulty: slot.difficulty,
+      currentRoomId: slot.currentRoomId,
+      actionsRemaining: slot.actionsRemaining,
+      talkActionsRemaining: slot.talkActionsRemaining,
+      inspectedEvidenceIds: slot.inspectedEvidenceIds,
+      examinedEvidenceIds: slot.examinedEvidenceIds,
+      discoveredCombinationIds: slot.discoveredCombinationIds,
+      revealedFakeEvidenceIds: slot.revealedFakeEvidenceIds,
+      talkedSuspectIds: slot.talkedSuspectIds,
+      viewedSuspectProfileIds: slot.viewedSuspectProfileIds,
+      heardStatements: slot.heardStatements,
+      confrontationLog: slot.confrontationLog,
+      unlockedPursuitQuestions: slot.unlockedPursuitQuestions,
+      askedPursuitQuestionIds: slot.askedPursuitQuestionIds,
+      votedSuspectId: slot.votedSuspectId,
+      hypotheses: slot.hypotheses,
+      murdererEscaped: slot.murdererEscaped,
+      activeSaveSlot: 0, // ロード後のオートセーブは常にスロット0へ
+      // 一時的なUI演出状態は初期値にリセット
+      pendingCombinationIds: [],
+      pendingFakeRevealId: null,
+      pendingPursuitActivation: null,
+      pursuitWrongResult: null,
+      isGenerating: false,
+      generationError: null,
+    })
+  },
 }))

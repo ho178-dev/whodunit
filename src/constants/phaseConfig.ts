@@ -45,6 +45,16 @@ export const PHASE_LABELS: Partial<Record<GamePhase, PhaseLabel>> = {
   },
 }
 
+/** セーブスロット一覧でのフェーズ表示テキスト */
+export const PHASE_DISPLAY: Partial<Record<GamePhase, string>> = {
+  scenario_briefing: 'ブリーフィング',
+  investigation: '捜査中',
+  discussion: '議論中',
+  voting: '投票中',
+  accusation: '告発中',
+  ending: 'エンディング',
+}
+
 /** フェーズ別の背景色調オーバーレイ設定マップ */
 export const PHASE_OVERLAYS: Partial<Record<GamePhase, PhaseOverlay>> = {
   discussion: { className: 'bg-blue-900/15' },

@@ -11,7 +11,7 @@ import type { Scenario } from '../../types/scenario'
 // 固定シナリオ一覧の定義
 const ALL_SCENARIOS: { scenario: Scenario; subtitle: string }[] = [
   { scenario: FIXED_SCENARIO, subtitle: '毒殺・孤島の洋館' },
-  { scenario: FIXED_SCENARIO_2, subtitle: '絞殺・密室の古城' },
+  { scenario: FIXED_SCENARIO_2, subtitle: '絞殺・密室の山荘' },
   { scenario: FIXED_SCENARIO_3, subtitle: '刺殺・人狼の月夜' },
 ]
 
@@ -21,10 +21,11 @@ const DISPLAYED_SCENARIOS =
 
 // シナリオ選択画面。各シナリオのクリア状況とベストスコアを表示する
 export function ScenarioSelect() {
-  const { setPhase, setScenario, setUseFixedScenario } = useGameStore()
+  const { setPhase, setScenario, setUseFixedScenario, setActiveSaveSlot } = useGameStore()
 
-  // 指定した固定シナリオをセットしてシナリオブリーフィングへ遷移する
-  const startFixed = (scenario: Scenario) => {
+  // シナリオカードをクリックしたときの処理。常にオートセーブスロット（0番）を使用する
+  const handleScenarioClick = (scenario: Scenario) => {
+    setActiveSaveSlot(0)
     setScenario(scenario)
     setUseFixedScenario(true)
     setPhase('scenario_briefing')
@@ -50,7 +51,7 @@ export function ScenarioSelect() {
             return (
               <button
                 key={scenario.title}
-                onClick={() => startFixed(scenario)}
+                onClick={() => handleScenarioClick(scenario)}
                 className="w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-4 px-6 transition-all duration-200 hover:shadow-[0_0_20px_rgba(217,119,6,0.3)] text-left"
               >
                 <div className="flex items-start justify-between gap-2">

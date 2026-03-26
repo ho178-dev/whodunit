@@ -10,7 +10,7 @@ describe('固定シナリオ論理整合性チェック', () => {
     expect(() => validateScenario(FIXED_SCENARIO)).not.toThrow()
   })
 
-  it('fixedScenario2 (霧の密室) が validateScenario を通過する', () => {
+  it('fixedScenario2 (白銀の密室) が validateScenario を通過する', () => {
     expect(() => validateScenario(FIXED_SCENARIO_2)).not.toThrow()
   })
 

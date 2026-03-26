@@ -13,9 +13,16 @@ function updateBest(
   return prev !== undefined ? Math.min(prev, current) : current
 }
 
+// タイトル変更時の後方互換フォールバック（旧タイトル → 新タイトル）
+const TITLE_FALLBACKS: Record<string, string> = {
+  白銀の密室: '霧の密室',
+}
+
 export function loadScoreData(title: string): ScenarioScoreData {
   try {
-    const stored = localStorage.getItem(scoreKey(title))
+    const stored =
+      localStorage.getItem(scoreKey(title)) ??
+      (TITLE_FALLBACKS[title] ? localStorage.getItem(scoreKey(TITLE_FALLBACKS[title])) : null)
     if (stored) return JSON.parse(stored) as ScenarioScoreData
   } catch {
     /* localStorage が使えない環境では空を返す */
