@@ -43,7 +43,9 @@
       "Bash(grep -E \"\\\\.\\(ts|tsx\\)$\")",
       "Bash(find /d/workspace/whodunit -name phaseConfig* -type f)",
       "Bash(find /d/workspace/whodunit/src -name \"*.tsx\" -exec grep -l \"button.*absolute\\\\|absolute.*button\" {})",
-      "Bash(grep -n \"inlin comment\" D:/workspace/whodunit/src/components/shared/*.tsx)"
+      "Bash(grep -n \"inlin comment\" D:/workspace/whodunit/src/components/shared/*.tsx)",
+      "Bash(npx vitest:*)",
+      "Bash(git commit:*)"
     ]
   }
 }

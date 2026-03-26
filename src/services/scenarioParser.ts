@@ -92,6 +92,18 @@ export function validateScenario(data: unknown): Scenario {
     }
   }
 
+  // 全証拠が少なくとも1部屋の evidence_ids に含まれることを確認する（未配置証拠はプレイ不能）
+  const evidenceInRooms = new Set(s.rooms.flatMap((r) => r.evidence_ids))
+  for (const ev of s.evidence) {
+    if (!evidenceInRooms.has(ev.id))
+      throw new Error(`証拠 "${ev.id}" がどの部屋にも配置されていません`)
+  }
+
+  // 犯人の timeline_has_contradiction が true であることを確認する
+  const murderer = s.suspects.find((sus) => sus.id === s.murderer_id)!
+  if (murderer.timeline_has_contradiction !== true)
+    throw new Error('犯人の timeline_has_contradiction が true である必要があります')
+
   // evidence_combinations は省略可。存在する場合のみバリデーション
   if (s.evidence_combinations !== undefined) {
     if (!Array.isArray(s.evidence_combinations))
@@ -126,6 +138,20 @@ export function validateScenario(data: unknown): Scenario {
         }
       }
     }
+
+    // is_critical な組み合わせが2個以上存在するか確認する
+    const criticalCount = s.evidence_combinations.filter((c) => c.is_critical).length
+    if (criticalCount < 2)
+      throw new Error(
+        `is_critical な evidence_combinations は2個以上必要です（現在: ${criticalCount} 個）`
+      )
+  }
+
+  // accusation_data が存在する場合、decisive_evidence_id が証拠リストに含まれるか確認する
+  if (s.accusation_data !== undefined) {
+    const decId = s.accusation_data.correct?.decisive_evidence_id
+    if (decId && !evidenceIds.has(decId))
+      throw new Error(`accusation_data.decisive_evidence_id "${decId}" が証拠リストに存在しません`)
   }
 
   return s

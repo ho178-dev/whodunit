@@ -85,10 +85,17 @@ const PROMPT = `
 - 犯人のtimelineは1箇所に矛盾または空白を含むこと
 - 無実の容疑者のtimelineはアリバイとして機能すること（時刻が証言と一致）
 - statementsの証言に含まれる時刻とtimelineの時刻を一致させること
+- **timeline_has_contradiction フィールド（必須）**: 犯人は true、無実の容疑者は全員 false を設定すること
 
 ## room_id の設計（各容疑者に必須）
 - 6人を5部屋に割り当てること（1部屋に2人まで）
-- 容疑者のroom_idはrooms配列のいずれかのidと一致すること
+- **容疑者のroom_idはrooms配列のいずれかのidと完全一致すること**（rooms配列に存在しないIDを容疑者に設定すると、その容疑者がゲームに表示されなくなる致命的バグになる）
+- rooms配列を定義した後に各容疑者のroom_idを設定し、必ず一致を確認すること
+
+## 証拠の部屋配置（必須ルール）
+- **全12個の証拠IDが、rooms配列のいずれかの evidence_ids に必ず含まれること**（どの部屋にも配置されていない証拠はプレイヤーが調査できず、ゲームが解けなくなる致命的バグになる）
+- 各部屋のevidence_idsには必ずevidence配列に存在するidのみを記載すること（存在しないIDを参照すると表示バグになる）
+- 12個の証拠IDをevidence_ids合計でちょうど12回参照すること（1証拠が複数部屋に重複配置されることは禁止）
 
 ## evidence_combinations の設計（必須・3〜5個）
 証拠クロス参照システム。単体では意味が薄い証拠が2〜3個組み合わさって初めて「決定的事実」が解放される仕組み。
@@ -289,6 +296,79 @@ ${scenario.suspects
   }
 }
 `
+}
+
+// プレイ可能性チェックのプロンプトを構築する（粗め判定・3点のみ）
+function buildPlayabilityPrompt(scenario: Scenario): string {
+  const murdererId = scenario.murderer_id
+  const murderer = scenario.suspects.find((s) => s.id === murdererId)
+  const evidenceNames = scenario.evidence
+    .filter((e) => !e.is_fake)
+    .map((e) => `- ${e.id}: ${e.name}`)
+    .join('\n')
+  const suspectNames = scenario.suspects.map((s) => `- ${s.id}: ${s.name}`).join('\n')
+
+  return `
+以下のマーダーミステリーシナリオを評価してください。
+判定は「明らかに解けないケース」のみNGとする粗めの基準で行うこと。
+
+## シナリオ概要
+タイトル: ${scenario.title}
+犯人: ${murdererId}（${murderer?.name ?? ''}）
+動機: ${scenario.motive}
+
+## 本物の証拠一覧
+${evidenceNames}
+
+## 容疑者一覧
+${suspectNames}
+
+## 判定する質問（3点）
+Q1: 犯人（${murdererId}）を特定できる証拠が最低1つ存在するか。evidence_combinationsまたは単体証拠のどちらでも可。
+Q2: 無実の容疑者が全員、アリバイまたは動機なしのいずれかの理由で排除できるか。
+Q3: 犯人のアリバイの嘘を暴ける証拠が存在するか（timeline_has_contradictionがtrueの犯人について）。
+
+## 出力形式
+JSONのみを返してください。説明文は不要です。
+{
+  "results": [
+    { "question": "Q1", "ok": true, "reason": "..." },
+    { "question": "Q2", "ok": true, "reason": "..." },
+    { "question": "Q3", "ok": true, "reason": "..." }
+  ]
+}
+`
+}
+
+// 生成済みシナリオのプレイ可能性を自己評価させる（3点チェック・粗め判定）
+export async function validatePlayability(
+  scenario: Scenario,
+  apiKey: string
+): Promise<{ ok: boolean; failedChecks: string[] }> {
+  const genAI = new GoogleGenerativeAI(apiKey)
+  const model = genAI.getGenerativeModel({
+    model: 'gemini-2.0-flash',
+    generationConfig: {
+      responseMimeType: 'application/json',
+      temperature: 0.2,
+      maxOutputTokens: 1024,
+    },
+  })
+
+  const result = await model.generateContent(buildPlayabilityPrompt(scenario))
+  const text = result.response.text()
+
+  let parsed: { results: { question: string; ok: boolean; reason: string }[] }
+  try {
+    parsed = JSON.parse(text)
+  } catch {
+    // パース失敗時は通過させる（過剰なリトライ防止）
+    return { ok: true, failedChecks: [] }
+  }
+
+  const failedChecks = parsed.results.filter((r) => !r.ok).map((r) => `${r.question}: ${r.reason}`)
+
+  return { ok: failedChecks.length === 0, failedChecks }
 }
 
 // Gemini APIにプロンプトを送信してシナリオJSONを生成・バリデーションして返す（3ステップ生成）

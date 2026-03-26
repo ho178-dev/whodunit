@@ -14,6 +14,11 @@ export interface PhaseOverlay {
 }
 
 export const PHASE_LABELS: Partial<Record<GamePhase, PhaseLabel>> = {
+  scenario_select: {
+    text: 'シナリオ選択',
+    textColor: 'text-gothic-muted',
+    duration: 800,
+  },
   investigation: {
     text: '捜査フェーズ',
     subText: '手がかりを集めよ',
@@ -38,6 +43,16 @@ export const PHASE_LABELS: Partial<Record<GamePhase, PhaseLabel>> = {
     text: 'エンディング',
     textColor: 'text-yellow-400',
   },
+}
+
+/** セーブスロット一覧でのフェーズ表示テキスト */
+export const PHASE_DISPLAY: Partial<Record<GamePhase, string>> = {
+  scenario_briefing: 'ブリーフィング',
+  investigation: '捜査中',
+  discussion: '議論中',
+  voting: '投票中',
+  accusation: '告発中',
+  ending: 'エンディング',
 }
 
 /** フェーズ別の背景色調オーバーレイ設定マップ */
