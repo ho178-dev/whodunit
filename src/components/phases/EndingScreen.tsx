@@ -1,6 +1,7 @@
 // ゲーム終了画面。投票結果の正否と真相（犯人・動機・真実）を表示する。固定シナリオのみスコアを保存する
 import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
+import { isTrialMode } from '../../constants/salesConfig'
 import { GothicPanel } from '../layout/GothicPanel'
 import { MansionSceneBackground } from '../shared/MansionBackground'
 import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
@@ -29,6 +30,7 @@ export function EndingScreen() {
   const [bestFlags, setBestFlags] = useState({ actions: false, talkActions: false })
   const [savedScore, setSavedScore] = useState<DifficultyScore | null>(null)
 
+  const trial = isTrialMode()
   const config = DIFFICULTY_CONFIG[difficulty]
   const usedActions = config.actions - actionsRemaining
   const usedTalkActions = config.talkActions - talkActionsRemaining
@@ -320,6 +322,18 @@ export function EndingScreen() {
                 className="border border-gothic-accent bg-gothic-panel hover:bg-stone-800 text-gothic-text font-display tracking-widest py-3 transition-all"
               >
                 真相を見る
+              </button>
+            )}
+            {/* 体験版エンディング後のみ予告画面への導線を表示 */}
+            {trial && useFixedScenario && (
+              <button
+                onClick={() => setPhase('trial_preview')}
+                className="border border-gothic-gold bg-gothic-gold/10 hover:bg-gothic-gold/20 text-gothic-gold font-display tracking-widest py-3 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
+              >
+                次のシナリオ予告を見る
+                <span className="block text-xs text-gothic-muted mt-1 font-serif">
+                  有料版の2シナリオを紹介
+                </span>
               </button>
             )}
             <button

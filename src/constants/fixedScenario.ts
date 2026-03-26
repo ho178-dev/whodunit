@@ -364,7 +364,7 @@ export const FIXED_SCENARIO: Scenario = {
     {
       id: 'todo_shinichi',
       name: '藤堂慎一',
-      appearance_id: 'male_young_alt',
+      appearance_id: 'male_young_alt2',
       age: 35,
       occupation: '弁護士',
       default_wrong_pursuit_response:

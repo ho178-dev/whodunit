@@ -10,6 +10,7 @@ export type GamePhase =
   | 'voting'
   | 'accusation'
   | 'ending'
+  | 'trial_preview'
 
 export type Difficulty = 'easy' | 'normal' | 'hard'
 

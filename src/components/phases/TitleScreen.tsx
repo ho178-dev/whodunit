@@ -1,17 +1,21 @@
-// ゲームのタイトル画面。固定シナリオ選択またはAI生成シナリオへの起動経路を分岐するコンポーネント
+// タイトル画面。シナリオ選択・続きから・設定への起動経路を提供するコンポーネント
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { getAllSlots, deleteSlot } from '../../utils/saveLoad'
 import { SaveSlotList } from '../shared/SaveSlotList'
 import type { SaveSlot } from '../../types/save'
+import { isTrialMode } from '../../constants/salesConfig'
+import { FIXED_SCENARIO } from '../../constants/fixedScenario'
 
-// タイトル画面を表示し、固定シナリオ選択またはAI生成シナリオへの起動経路を分岐するコンポーネント
+// タイトル画面を表示し、シナリオ選択・続きから・設定への経路を分岐するコンポーネント
 export function TitleScreen() {
-  const { setPhase, loadSaveSlot } = useGameStore()
+  const { setPhase, loadSaveSlot, setScenario, setUseFixedScenario, setActiveSaveSlot } =
+    useGameStore()
   const [showContinue, setShowContinue] = useState(false)
   const [slots, setSlots] = useState<SaveSlot[]>(() => getAllSlots())
 
   const hasSave = slots.some((s) => s !== null)
+  const trial = isTrialMode()
 
   // スロットを選択してゲームを復元する（loadSaveSlot が activeSaveSlot も設定する）
   const handleSelectSlot = (index: number) => {
@@ -23,6 +27,14 @@ export function TitleScreen() {
   const handleDeleteSlot = (index: number) => {
     deleteSlot(index)
     setSlots((prev) => prev.map((s, i) => (i === index ? null : s)))
+  }
+
+  // 体験版：シナリオ選択をスキップして固定シナリオ1へ直接遷移する
+  const handleStartTrial = () => {
+    setActiveSaveSlot(0)
+    setScenario(FIXED_SCENARIO)
+    setUseFixedScenario(true)
+    setPhase('scenario_briefing')
   }
 
   return (
@@ -69,21 +81,21 @@ export function TitleScreen() {
             )}
 
             <button
-              onClick={() => setPhase('scenario_select')}
+              onClick={trial ? handleStartTrial : () => setPhase('scenario_select')}
               className="w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-4 px-8 transition-all duration-200 hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
             >
-              固定シナリオを選ぶ
+              シナリオを選ぶ
               <span className="block text-xs text-gothic-muted mt-1 font-serif">
-                全3本・ネタバレなし
+                {trial ? '体験版シナリオ・ネタバレなし' : '全3本・ネタバレなし'}
               </span>
             </button>
 
+            {/* 設定（AI生成の導線）：体験版でも設定画面からアクセス可能 */}
             <button
               onClick={() => setPhase('api_key_input')}
-              className="w-full border border-gothic-border bg-gothic-panel hover:border-gothic-accent text-gothic-muted font-display tracking-widest py-3 px-8 transition-all duration-200 text-sm"
+              className="w-full border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 px-8 transition-all duration-200 hover:border-gothic-accent"
             >
-              AIでシナリオ生成
-              <span className="block text-xs mt-1 font-serif">Gemini APIキーが必要</span>
+              設定
             </button>
           </div>
         ) : (

@@ -23,7 +23,7 @@ const PROMPT = `
 ## 制約
 - mansion_background_id: 館背景IDカタログからシナリオの舞台・雰囲気に最も合う1つを選択すること
 - suspects: 6名固定（全員にユニークなidを付与）
-- suspects 6名と victim のappearance_idは全員異なる値を選択すること（12種類から7種類を重複なしで選ぶ）
+- suspects 6名と victim のappearance_idは全員異なる値を選択すること（20種類から7種類を重複なしで選ぶ）
 - rooms: 5室固定（各部屋に証拠IDを1-3個配置）
 - evidence: 12個固定（うちis_fake: trueが3個）
 - murderer_id: suspects内のidと一致すること

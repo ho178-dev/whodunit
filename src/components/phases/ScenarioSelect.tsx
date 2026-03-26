@@ -5,6 +5,7 @@ import { FIXED_SCENARIO } from '../../constants/fixedScenario'
 import { FIXED_SCENARIO_2 } from '../../constants/fixedScenario2'
 import { FIXED_SCENARIO_3 } from '../../constants/fixedScenario3'
 import { loadScoreData } from '../../utils/score'
+import { isTrialMode } from '../../constants/salesConfig'
 import type { Difficulty } from '../../types/game'
 import type { Scenario } from '../../types/scenario'
 
@@ -16,8 +17,7 @@ const ALL_SCENARIOS: { scenario: Scenario; subtitle: string }[] = [
 ]
 
 // トライアルモードでは1本のみ表示する
-const DISPLAYED_SCENARIOS =
-  import.meta.env.VITE_TRIAL_MODE === 'true' ? ALL_SCENARIOS.slice(0, 1) : ALL_SCENARIOS
+const DISPLAYED_SCENARIOS = isTrialMode() ? ALL_SCENARIOS.slice(0, 1) : ALL_SCENARIOS
 
 // シナリオ選択画面。各シナリオのクリア状況とベストスコアを表示する
 export function ScenarioSelect() {

@@ -18,17 +18,25 @@ export const MANSION_BACKGROUND_IDS: MansionBackgroundId[] = [
 
 export const CHARACTER_APPEARANCE_IDS: CharacterAppearanceId[] = [
   'male_teen',
+  'male_teen_alt',
   'male_young',
   'male_young_alt',
+  'male_young_alt2',
   'male_middle',
   'male_middle_alt',
+  'male_middle_alt2',
   'male_elderly',
+  'male_elderly_alt',
   'female_teen',
+  'female_teen_alt',
   'female_young',
   'female_young_alt',
+  'female_young_alt2',
   'female_middle',
   'female_middle_alt',
+  'female_middle_alt2',
   'female_elderly',
+  'female_elderly_alt',
 ]
 
 export const ROOM_TYPE_IDS: RoomTypeId[] = [

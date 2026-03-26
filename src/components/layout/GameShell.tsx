@@ -13,6 +13,7 @@ import { VotingPhase } from '../phases/VotingPhase'
 import { AccusationPhase } from '../phases/AccusationPhase'
 import { EndingScreen } from '../phases/EndingScreen'
 import { ScenarioSelect } from '../phases/ScenarioSelect'
+import { TrialPreview } from '../phases/TrialPreview'
 import { ManualSaveModal } from '../shared/ManualSaveModal'
 
 // 手動セーブボタンを表示するフェーズ
@@ -55,6 +56,8 @@ export function GameShell() {
         return <AccusationPhase />
       case 'ending':
         return <EndingScreen />
+      case 'trial_preview':
+        return <TrialPreview />
       default:
         return <TitleScreen />
     }
