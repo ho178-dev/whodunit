@@ -89,6 +89,7 @@ export interface Suspect {
   relationship_to_victim: string
   room_id: string
   timeline: string
+  timeline_has_contradiction: boolean
   investigation_dialog: {
     greeting: string
     statements: string[]

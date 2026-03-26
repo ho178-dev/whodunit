@@ -11,6 +11,7 @@ import { DiscussionPhase } from '../phases/DiscussionPhase'
 import { VotingPhase } from '../phases/VotingPhase'
 import { AccusationPhase } from '../phases/AccusationPhase'
 import { EndingScreen } from '../phases/EndingScreen'
+import { ScenarioSelect } from '../phases/ScenarioSelect'
 
 // ゲームのルートレイアウト。フェーズに応じた画面を切り替えてレンダリングする
 export function GameShell() {
@@ -21,6 +22,8 @@ export function GameShell() {
     switch (phase) {
       case 'title':
         return <TitleScreen />
+      case 'scenario_select':
+        return <ScenarioSelect />
       case 'api_key_input':
         return <ApiKeyInput />
       case 'generating':

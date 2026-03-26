@@ -14,6 +14,11 @@ export interface PhaseOverlay {
 }
 
 export const PHASE_LABELS: Partial<Record<GamePhase, PhaseLabel>> = {
+  scenario_select: {
+    text: 'シナリオ選択',
+    textColor: 'text-gothic-muted',
+    duration: 800,
+  },
   investigation: {
     text: '捜査フェーズ',
     subText: '手がかりを集めよ',

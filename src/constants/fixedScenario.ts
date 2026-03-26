@@ -36,6 +36,7 @@ export const FIXED_SCENARIO: Scenario = {
       room_id: 'room_library',
       timeline:
         '20:00 晩餐会開始 → 終始ダイニングで他の参加者と歓談 → 22:30頃 自室へ退室 → 就寝（深夜は部屋を出ていないと主張）',
+      timeline_has_contradiction: true,
       investigation_dialog: {
         greeting: '…やあ、何か用かな。私はただの参加者に過ぎないよ。',
         statements: [
@@ -157,6 +158,7 @@ export const FIXED_SCENARIO: Scenario = {
       relationship_to_victim: '姪。かつては溺愛されていたが、最近は関係が冷え込んでいた。',
       room_id: 'room_dining',
       timeline: '20:00 晩餐会参加 → 21:30頃 気分が優れず自室へ → 就寝',
+      timeline_has_contradiction: false,
       investigation_dialog: {
         greeting: 'あなたも調べているの？叔父の死の真相を…私も知りたい。',
         statements: [
@@ -236,6 +238,7 @@ export const FIXED_SCENARIO: Scenario = {
       relationship_to_victim: 'ビジネスパートナー。表向きは友好的だが実際は脅迫関係。',
       room_id: 'room_study',
       timeline: '20:00 晩餐会 → 21:00頃 バーラウンジへ移動 → 翌02:00頃まで飲酒',
+      timeline_has_contradiction: false,
       investigation_dialog: {
         greeting: 'なんだ、君か。私は忙しい。手短に頼む。',
         statements: [
@@ -298,6 +301,7 @@ export const FIXED_SCENARIO: Scenario = {
       relationship_to_victim: '主治医。20年来の付き合い。',
       room_id: 'room_garden',
       timeline: '20:00 晩餐会 → 21:30頃 図書室へ移動・読書 → 23:00頃 就寝',
+      timeline_has_contradiction: false,
       investigation_dialog: {
         greeting: 'あなたも真相を探っているの？医師として、死因については気になることがあって。',
         statements: [
@@ -388,6 +392,7 @@ export const FIXED_SCENARIO: Scenario = {
       relationship_to_victim: '顧問弁護士。遺言書の作成と管理を担当。',
       room_id: 'room_study',
       timeline: '20:00 晩餐会 → 21:00頃 自室へ → 深夜まで書類仕事',
+      timeline_has_contradiction: false,
       investigation_dialog: {
         greeting: '調査ですか。弁護士として、法的な観点から協力できることがあれば。',
         statements: [
@@ -478,6 +483,7 @@ export const FIXED_SCENARIO: Scenario = {
       relationship_to_victim: '長年仕える家政婦。館の全てを知り尽くしている。',
       room_id: 'room_kitchen',
       timeline: '20:00 晩餐会給仕・後片付け → 22:00頃 片付け開始 → 01:00頃 就寝',
+      timeline_has_contradiction: false,
       investigation_dialog: {
         greeting: '…何かお手伝いできることがあれば。私は目立たない存在ですが、見ています。',
         statements: [

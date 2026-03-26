@@ -1,10 +1,12 @@
-// ゲーム終了画面。投票結果の正否と真相（犯人・動機・真実）を表示する
-import { useState } from 'react'
+// ゲーム終了画面。投票結果の正否と真相（犯人・動機・真実）を表示する。固定シナリオのみスコアを保存する
+import { useEffect, useRef, useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { GothicPanel } from '../layout/GothicPanel'
 import { MansionSceneBackground } from '../shared/MansionBackground'
 import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
 import { getEvidenceNames } from '../../utils/scenario'
+import { loadScoreData, saveScore } from '../../utils/score'
+import type { DifficultyScore } from '../../types/game'
 
 export function EndingScreen() {
   const {
@@ -16,11 +18,39 @@ export function EndingScreen() {
     actionsRemaining,
     talkActionsRemaining,
     difficulty,
+    useFixedScenario,
     setPhase,
     resetGame,
   } = useGameStore()
 
   const [showTruth, setShowTruth] = useState(false)
+  // スコア保存済みフラグ（StrictModeの二重発火防止）
+  const scoreSaved = useRef(false)
+  const [bestFlags, setBestFlags] = useState({ actions: false, talkActions: false })
+  const [savedScore, setSavedScore] = useState<DifficultyScore | null>(null)
+
+  const config = DIFFICULTY_CONFIG[difficulty]
+  const usedActions = config.actions - actionsRemaining
+  const usedTalkActions = config.talkActions - talkActionsRemaining
+
+  // 固定シナリオかつエンディング到達時にスコアを保存する（1回のみ・early return の前に配置）
+  useEffect(() => {
+    if (!useFixedScenario || !scenario || !votedSuspectId || scoreSaved.current) return
+    scoreSaved.current = true
+
+    const prev = loadScoreData(scenario.title)[difficulty]
+    const cleared = votedSuspectId === scenario.murderer_id && !murdererEscaped
+
+    if (cleared) {
+      setBestFlags({
+        actions: prev?.bestActions === undefined || usedActions < prev.bestActions,
+        talkActions: prev?.bestTalkActions === undefined || usedTalkActions < prev.bestTalkActions,
+      })
+    }
+
+    setSavedScore(saveScore(scenario.title, difficulty, { cleared, usedActions, usedTalkActions }))
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []) // 意図的にマウント時1回のみ実行
 
   if (!scenario || !votedSuspectId) return null
 
@@ -65,11 +95,6 @@ export function EndingScreen() {
         faded: 'text-red-400/50',
         emptyText: '真犯人を見誤った。',
       }
-
-  // スコア計算
-  const config = DIFFICULTY_CONFIG[difficulty]
-  const usedActions = config.actions - actionsRemaining
-  const usedTalkActions = config.talkActions - talkActionsRemaining
 
   return (
     <div className="min-h-screen">
@@ -215,24 +240,41 @@ export function EndingScreen() {
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
                   <span className="text-gothic-muted font-serif text-xs">証拠調査</span>
-                  <span className="text-gothic-text font-display text-sm">
+                  <span className="text-gothic-text font-display text-sm flex items-center gap-1.5">
                     {usedActions}
                     <span className="text-gothic-muted text-xs">
-                      {' '}
                       / {config.actions} アクション使用
                     </span>
+                    {bestFlags.actions && (
+                      <span className="text-gothic-gold text-xs font-serif">★ベスト</span>
+                    )}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gothic-muted font-serif text-xs">聞き込み</span>
-                  <span className="text-gothic-text font-display text-sm">
+                  <span className="text-gothic-text font-display text-sm flex items-center gap-1.5">
                     {usedTalkActions}
                     <span className="text-gothic-muted text-xs">
-                      {' '}
                       / {config.talkActions} アクション使用
                     </span>
+                    {bestFlags.talkActions && (
+                      <span className="text-gothic-gold text-xs font-serif">★ベスト</span>
+                    )}
                   </span>
                 </div>
+                {/* 自己ベスト表示（クリア済みスコアがある場合） */}
+                {savedScore?.bestActions !== undefined && useFixedScenario && (
+                  <div className="border-t border-gothic-border/30 pt-1.5 mt-1">
+                    <p className="text-gothic-muted font-serif text-xs mb-1">
+                      自己ベスト（クリア時）
+                    </p>
+                    <div className="flex gap-4">
+                      <span className="text-gothic-muted font-serif text-xs">
+                        調査 {savedScore.bestActions} / 聞込 {savedScore.bestTalkActions ?? '―'}
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </GothicPanel>
           )}
