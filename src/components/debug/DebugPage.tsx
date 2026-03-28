@@ -1,4 +1,4 @@
-// デバッグページ: 画像・BGMアセットの確認用（開発環境限定）
+// デバッグページ: 画像・BGMアセットおよびシナリオテキストの確認用（開発環境限定）
 // URL: http://localhost:5173/?debug=true
 // 画像はゲーム内と同じピクセル化・配色（ゴシックパレット）・解像度で表示する
 
@@ -14,8 +14,9 @@ import {
   type ImageAsset,
   type BgmAsset,
 } from './assetList'
+import { ScenarioDebug } from './ScenarioDebug'
 
-type Tab = 'images' | 'bgm'
+type Tab = 'images' | 'bgm' | 'scenario'
 type ImageCategory = 'characters' | 'rooms' | 'mansion' | 'evidence'
 
 const IMAGE_CATEGORY_CONFIG: Record<
@@ -382,13 +383,13 @@ export function DebugPage() {
             DEV
           </span>
           <h1 className="text-base font-bold text-gray-100">デバッグページ</h1>
-          <span className="text-xs text-gray-500">館ミステリー</span>
+          <span className="text-xs text-gray-500">WhoDuNit</span>
         </div>
       </header>
 
       <div className="border-b border-gray-800 bg-gray-900 px-6">
         <nav className="flex gap-0">
-          {(['images', 'bgm'] as Tab[]).map((t) => (
+          {(['images', 'bgm', 'scenario'] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -398,7 +399,7 @@ export function DebugPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-300'
               }`}
             >
-              {t === 'images' ? '画像' : 'BGM'}
+              {t === 'images' ? '画像' : t === 'bgm' ? 'BGM' : 'シナリオ'}
             </button>
           ))}
         </nav>
@@ -440,6 +441,15 @@ export function DebugPage() {
               <span className="ml-2 font-normal text-gray-500">{BGM_ASSETS.length}件</span>
             </h2>
             <BgmSection />
+          </>
+        )}
+
+        {tab === 'scenario' && (
+          <>
+            <h2 className="mb-4 border-b border-gray-700 pb-1 text-sm font-bold text-gray-200">
+              シナリオ
+            </h2>
+            <ScenarioDebug />
           </>
         )}
       </main>
