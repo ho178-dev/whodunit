@@ -43,9 +43,12 @@ export function FadeTransition({ children, triggerKey, phaseLabel }: FadeTransit
   const labelVisible = state === 'label' && !!phaseLabel
 
   return (
-    <div className="relative">
+    <div className="relative h-full">
       {/* 幕間中はDOMをマウントせず、visible遷移後にフェードインする */}
-      <div className="transition-opacity duration-500" style={{ opacity: contentVisible ? 1 : 0 }}>
+      <div
+        className="h-full transition-opacity duration-500"
+        style={{ opacity: contentVisible ? 1 : 0 }}
+      >
         {contentVisible ? children : null}
       </div>
 
@@ -53,7 +56,7 @@ export function FadeTransition({ children, triggerKey, phaseLabel }: FadeTransit
       {phaseLabel && (
         <div
           className={cn(
-            'fixed inset-0 z-50 flex flex-col items-center justify-center bg-black cursor-pointer',
+            'absolute inset-0 z-50 flex flex-col items-center justify-center bg-black cursor-pointer',
             'transition-opacity duration-300',
             labelVisible ? 'opacity-100' : 'opacity-0 pointer-events-none'
           )}

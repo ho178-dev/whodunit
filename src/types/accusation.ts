@@ -6,7 +6,8 @@ export interface CorrectAccusationData {
   decisive_evidence_id: string // 決定的証拠のID
   wrong_evidence_reaction: string // 誤った証拠を選んだ時の犯人の反応
   refutation_text: string // プレイヤーが正しい証拠を突き付けた時のナレーション
-  breakdown_statement: string // 犯人の動揺・告白
+  breakdown_statement: string // 犯人の動揺・独白
+  epilogue_text?: string // 正解エンディングの地の文（ナレーション）。独白後に表示するカタルシス演出（省略可）
   escape_statement?: string // 証拠不足で逃げ切る時の犯人セリフ
 }
 

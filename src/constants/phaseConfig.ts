@@ -62,6 +62,7 @@ export const PHASE_DISPLAY: Partial<Record<GamePhase, string>> = {
 
 /** フェーズ別の背景色調オーバーレイ設定マップ */
 export const PHASE_OVERLAYS: Partial<Record<GamePhase, PhaseOverlay>> = {
+  title: { className: 'bg-black/40' }, // ロゴ・ボタンの視認性確保のため暗め
   discussion: { className: 'bg-blue-900/15' },
   voting: { className: 'bg-green-900/15' },
   accusation: { className: 'bg-red-900/20' },

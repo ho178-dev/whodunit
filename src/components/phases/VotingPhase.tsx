@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { CharacterSlider } from '../shared/CharacterSlider'
 import { MansionSceneBackground } from '../shared/MansionBackground'
-import { GamePhaseLayout } from '../layout/GamePhaseLayout'
 import { RightPanel } from '../layout/RightPanel'
 import { PanelButton } from '../layout/PanelButton'
 
@@ -34,72 +33,66 @@ export function VotingPhase() {
   }
 
   return (
-    <GamePhaseLayout>
-      <div className="relative w-full aspect-video border border-gothic-border overflow-hidden">
-        <MansionSceneBackground phase="voting" />
+    <div className="relative h-full overflow-hidden">
+      <MansionSceneBackground phase="voting" />
 
-        {/* スライダー（フル幅） */}
-        <CharacterSlider
-          suspects={scenario.suspects}
-          sliderIndex={sliderIndex}
-          onSliderIndexChange={setSliderIndex}
-          onSuspectClick={handleSuspectClick}
-          selectedId={selected}
-        />
+      {/* スライダー（フル幅） */}
+      <CharacterSlider
+        suspects={scenario.suspects}
+        sliderIndex={sliderIndex}
+        onSliderIndexChange={setSliderIndex}
+        onSuspectClick={handleSuspectClick}
+        selectedId={selected}
+      />
 
-        {/* 下部ダイアログ（フル幅） */}
-        <div className="absolute inset-x-0 bottom-0 p-3">
-          {confirming && selectedSuspect ? (
-            <div className="bg-gothic-panel/85 backdrop-blur-sm border-2 border-gothic-gold p-4 text-center">
-              <p className="text-gothic-text font-serif text-sm">
-                本当に
-                <span className="text-gothic-gold font-semibold">{selectedSuspect.name}</span>
-                を犯人として告発しますか？
-              </p>
-            </div>
-          ) : selectedSuspect ? (
-            <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-gold p-4 text-center">
-              <p className="text-gothic-text font-serif text-sm">
-                <span className="text-gothic-gold font-semibold">{selectedSuspect.name}</span>
-                を犯人として告発しますか？
-              </p>
-            </div>
-          ) : (
-            <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border p-4">
-              <p className="text-gothic-muted font-serif text-sm text-center">
-                犯人と思われる人物を選んでください
-              </p>
-            </div>
-          )}
-        </div>
-
-        {/* 右パネル */}
-        <RightPanel
-          slot1="投票"
-          slot3={
-            confirming ? (
-              <PanelButton variant="danger" onClick={handleVote}>
-                告発確定
-              </PanelButton>
-            ) : (
-              <PanelButton
-                variant="primary"
-                disabled={!selected}
-                onClick={() => setConfirming(true)}
-              >
-                告発する
-              </PanelButton>
-            )
-          }
-          slot4={
-            confirming ? (
-              <PanelButton onClick={() => setConfirming(false)}>考え直す</PanelButton>
-            ) : (
-              <PanelButton onClick={() => setPhase('discussion')}>議論に戻る</PanelButton>
-            )
-          }
-        />
+      {/* 下部ダイアログ（フル幅） */}
+      <div className="absolute inset-x-0 bottom-0 p-3">
+        {confirming && selectedSuspect ? (
+          <div className="bg-gothic-panel/85 backdrop-blur-sm border-2 border-gothic-gold p-4 text-center">
+            <p className="text-gothic-text font-serif text-sm">
+              本当に
+              <span className="text-gothic-gold font-semibold">{selectedSuspect.name}</span>
+              を犯人として告発しますか？
+            </p>
+          </div>
+        ) : selectedSuspect ? (
+          <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-gold p-4 text-center">
+            <p className="text-gothic-text font-serif text-sm">
+              <span className="text-gothic-gold font-semibold">{selectedSuspect.name}</span>
+              を犯人として告発しますか？
+            </p>
+          </div>
+        ) : (
+          <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border p-4">
+            <p className="text-gothic-muted font-serif text-sm text-center">
+              犯人と思われる人物を選んでください
+            </p>
+          </div>
+        )}
       </div>
-    </GamePhaseLayout>
+
+      {/* 右パネル */}
+      <RightPanel
+        slot1="投票"
+        slot3={
+          confirming ? (
+            <PanelButton variant="danger" onClick={handleVote}>
+              告発確定
+            </PanelButton>
+          ) : (
+            <PanelButton variant="primary" disabled={!selected} onClick={() => setConfirming(true)}>
+              告発する
+            </PanelButton>
+          )
+        }
+        slot4={
+          confirming ? (
+            <PanelButton onClick={() => setConfirming(false)}>考え直す</PanelButton>
+          ) : (
+            <PanelButton onClick={() => setPhase('discussion')}>議論に戻る</PanelButton>
+          )
+        }
+      />
+    </div>
   )
 }

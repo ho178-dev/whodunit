@@ -60,7 +60,7 @@ export function RoomView({ roomId, hideEvidenceIcon = false, rightPanel }: RoomV
         <EvidenceModal roomId={roomId} onClose={() => setShowEvidence(false)} />
       )}
 
-      <div className="relative w-full aspect-video border border-gothic-border overflow-hidden">
+      <div className="relative h-full overflow-hidden">
         <RoomBackground key={room.type_id} typeId={room.type_id} name={room.name} />
 
         <div className="absolute top-0 left-0 p-3">

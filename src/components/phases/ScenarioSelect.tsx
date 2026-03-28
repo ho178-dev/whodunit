@@ -32,7 +32,7 @@ export function ScenarioSelect() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 py-8">
+    <div className="h-full overflow-y-auto flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
           <p className="text-gothic-muted font-serif text-xs tracking-widest">

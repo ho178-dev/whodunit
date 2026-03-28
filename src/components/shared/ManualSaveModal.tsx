@@ -30,7 +30,7 @@ export function ManualSaveModal({ onClose }: Props) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70">
       <div className="w-full max-w-md mx-4 border border-gothic-gold/50 bg-gothic-bg px-6 py-6">
         <div className="text-center mb-5">
           <p className="text-gothic-muted font-serif text-xs tracking-widest">

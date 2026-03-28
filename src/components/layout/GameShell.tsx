@@ -64,22 +64,32 @@ export function GameShell() {
   }
 
   return (
-    <div className="min-h-screen bg-gothic-bg">
-      <FadeTransition triggerKey={phase} phaseLabel={PHASE_LABELS[phase]}>
-        {renderPhase()}
-      </FadeTransition>
+    // 外層: ウィンドウ全体を覆い、16:9コンテナをレターボックス形式で中央配置する
+    <div className="w-screen h-screen bg-gothic-bg flex items-center justify-center overflow-hidden">
+      {/* 16:9固定コンテナ: min(100vw, 100vh*16/9) × min(100vh, 100vw*9/16) */}
+      <div
+        className="relative overflow-hidden border border-gothic-border"
+        style={{
+          width: 'min(100vw, calc(100vh * 16 / 9))',
+          height: 'min(100vh, calc(100vw * 9 / 16))',
+        }}
+      >
+        <FadeTransition triggerKey={phase} phaseLabel={PHASE_LABELS[phase]}>
+          {renderPhase()}
+        </FadeTransition>
 
-      {/* 手動セーブボタン：ゲームプレイ中の固定シナリオのみ表示 */}
-      {showSaveButton && (
-        <button
-          onClick={() => setShowSaveModal(true)}
-          className="fixed top-2 right-2 z-40 border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-3 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200"
-        >
-          セーブ
-        </button>
-      )}
+        {/* 手動セーブボタン：コンテナ内 absolute に変更 */}
+        {showSaveButton && (
+          <button
+            onClick={() => setShowSaveModal(true)}
+            className="absolute top-2 right-2 z-40 border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-3 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200"
+          >
+            セーブ
+          </button>
+        )}
 
-      {showSaveModal && <ManualSaveModal onClose={() => setShowSaveModal(false)} />}
+        {showSaveModal && <ManualSaveModal onClose={() => setShowSaveModal(false)} />}
+      </div>
     </div>
   )
 }

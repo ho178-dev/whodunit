@@ -10,8 +10,9 @@ import type { GamePhase } from '../../types/game'
 interface MansionSceneBackgroundProps {
   phase: GamePhase
   /**
-   * true  : fixed inset-0（AccusationPhase/EndingScreen 全画面スクロール用）
-   * false : absolute inset-0（Discussion/VotingPhase 16:9 コンテナ内用）
+   * true  : グラデーションを濃くする（テキストパネルの可読性確保）
+   * false : グラデーションを薄くする（部屋背景的な使用）
+   * ※ CSS の fixed ポジショニングは使用しない（16:9 コンテナ内で absolute に統一）
    */
   fixed?: boolean
 }
@@ -22,8 +23,9 @@ export const MansionSceneBackground = memo(function MansionSceneBackground({
   fixed = false,
 }: MansionSceneBackgroundProps) {
   const overlay = PHASE_OVERLAYS[phase]
-  const containerClass = fixed ? 'fixed inset-0 overflow-hidden' : 'absolute inset-0'
-  // fixed モードはテキストパネルの可読性を確保するため全体を若干暗くする
+  // 常に absolute inset-0 で親コンテナ内に収める（viewport固定は使用しない）
+  const containerClass = 'absolute inset-0 overflow-hidden'
+  // fixed=true のフェーズはテキストパネルの可読性を確保するため全体を若干暗くする
   const gradientClass = fixed
     ? 'absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20'
     : 'absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent'

@@ -270,7 +270,8 @@ ${evidenceList}
 - decisive_evidence_id: 犯人の弁明を最も効果的に覆せる証拠1つのID。動機を直接証明する証拠を優先する
 - wrong_evidence_reaction: 誤った証拠を選んだ時の犯人の反応（1〜2文）。余裕を見せつつ再挑戦を促す
 - refutation_text: 正しい証拠を突き付けた時のナレーション（3〜4文）。なぜこの証拠が弁明を覆すかを論理的に説明する
-- breakdown_statement: 犯人の崩壊・告白（3〜5文）。動揺→観念→犯行の動機を自白する流れ。改行で段落を分けること
+- breakdown_statement: 犯人の崩壊・独白（3〜5文）。動揺→観念→犯行の動機を自白する流れ。改行で段落を分けること
+- epilogue_text: エンディングの地の文（2〜3文）。独白直後に表示するナレーション。事件が解決した後の静寂・余韻・不可逆性をテーマにした詩的な文章。ゴシック小説の幕切れのような締まりのある表現にすること
 
 ### 不正解ルート（無実の人物を指名した場合）
 犯人以外の全容疑者について以下を設定する：
@@ -286,7 +287,8 @@ ${evidenceList}
     "decisive_evidence_id": "...",
     "wrong_evidence_reaction": "...",
     "refutation_text": "...",
-    "breakdown_statement": "..."
+    "breakdown_statement": "...",
+    "epilogue_text": "..."
   },
   "incorrect": {
 ${scenario.suspects

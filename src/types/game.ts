@@ -14,12 +14,13 @@ export type GamePhase =
 
 export type Difficulty = 'easy' | 'normal' | 'hard'
 
-// 難易度ごとのプレイ記録（クリア有無・自己ベストアクション数）
+// 難易度ごとのプレイ記録（クリア有無・自己ベストアクション数・ランク）
 export interface DifficultyScore {
   cleared: boolean
   played: boolean
   bestActions?: number
   bestTalkActions?: number
+  bestRank?: 'S' | 'A' | 'B' | 'C'
 }
 
 // シナリオタイトルをキーとしたスコアデータ（難易度ごとに保持）

@@ -107,6 +107,7 @@ export interface Suspect {
     statements: string[]
   }
   default_wrong_pursuit_response: string // 見当違いの証言で追及したときの汎用リアクション（容疑者ごと）
+  confession_statement?: string // 正解エンディングで表示する犯人の独白セリフ（省略可）
   evidence_reactions: {
     [evidence_id: string]: {
       reaction: string

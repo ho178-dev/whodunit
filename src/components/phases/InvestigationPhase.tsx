@@ -12,7 +12,6 @@ import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
 import { PixelImageWithFallback } from '../shared/PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 import { MANSION_DEFAULT_ASSET } from '../../services/assetResolver'
-import { GamePhaseLayout } from '../layout/GamePhaseLayout'
 import { RightPanel } from '../layout/RightPanel'
 import { PanelButton } from '../layout/PanelButton'
 import { SearchIcon, NotesIcon, DoorIcon } from '../shared/Icons'
@@ -119,44 +118,42 @@ export function InvestigationPhase() {
         <EvidenceModal roomId={currentRoomId} onClose={() => setShowEvidence(false)} />
       )}
 
-      <GamePhaseLayout>
-        {currentRoomId ? (
-          <RoomView
-            roomId={currentRoomId}
-            hideEvidenceIcon
-            rightPanel={
-              <>
-                {apBadge}
-                {rightButtons}
-              </>
-            }
-          />
-        ) : (
-          /* 初期状態: 館背景を表示 */
-          <div className="relative w-full aspect-video border border-gothic-border overflow-hidden">
-            <div className="absolute inset-0">
-              <PixelImageWithFallback
-                src={MANSION_DEFAULT_ASSET}
-                alt="館"
-                pixelSize={PIXEL_ART_CONFIG.pixelSize.mansion}
-                canvasWidth={PIXEL_ART_CONFIG.canvasSize.mansion.width}
-                canvasHeight={PIXEL_ART_CONFIG.canvasSize.mansion.height}
-                fallbackSrc={MANSION_DEFAULT_ASSET}
-              />
-              <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-            </div>
-            <div className="absolute inset-x-0 bottom-0 p-4">
-              <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border p-4 text-center">
-                <p className="text-gothic-text font-serif text-sm">
-                  「移動」ボタンから部屋を選択して調査を開始してください
-                </p>
-              </div>
-            </div>
-            {apBadge}
-            {rightButtons}
+      {currentRoomId ? (
+        <RoomView
+          roomId={currentRoomId}
+          hideEvidenceIcon
+          rightPanel={
+            <>
+              {apBadge}
+              {rightButtons}
+            </>
+          }
+        />
+      ) : (
+        /* 初期状態: 館背景を表示 */
+        <div className="relative h-full overflow-hidden">
+          <div className="absolute inset-0">
+            <PixelImageWithFallback
+              src={MANSION_DEFAULT_ASSET}
+              alt="館"
+              pixelSize={PIXEL_ART_CONFIG.pixelSize.mansion}
+              canvasWidth={PIXEL_ART_CONFIG.canvasSize.mansion.width}
+              canvasHeight={PIXEL_ART_CONFIG.canvasSize.mansion.height}
+              fallbackSrc={MANSION_DEFAULT_ASSET}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
           </div>
-        )}
-      </GamePhaseLayout>
+          <div className="absolute inset-x-0 bottom-0 p-4">
+            <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border p-4 text-center">
+              <p className="text-gothic-text font-serif text-sm">
+                「移動」ボタンから部屋を選択して調査を開始してください
+              </p>
+            </div>
+          </div>
+          {apBadge}
+          {rightButtons}
+        </div>
+      )}
     </>
   )
 }

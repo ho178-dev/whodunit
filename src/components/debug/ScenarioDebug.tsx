@@ -222,6 +222,9 @@ function SuspectsSection({ scenario }: { scenario: Scenario }) {
                   label="汎用追及リアクション"
                   value={suspect.default_wrong_pursuit_response}
                 />
+                {suspect.confession_statement && (
+                  <InfoRow label="独白セリフ" value={suspect.confession_statement} />
+                )}
               </div>
 
               {/* 証拠反応 */}
@@ -335,6 +338,50 @@ function EvidenceSection({ scenario }: { scenario: Scenario }) {
   )
 }
 
+/** 告発シーンセクション */
+function AccusationSection({ scenario }: { scenario: Scenario }) {
+  const data = scenario.accusation_data
+  if (!data) {
+    return (
+      <Accordion title="告発シーン" badge="なし">
+        <p className="text-sm text-gray-500">このシナリオには告発シーンデータがありません。</p>
+      </Accordion>
+    )
+  }
+  return (
+    <Accordion title="告発シーン">
+      <div className="space-y-2">
+        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">正解ルート</p>
+        <InfoRow label="最終弁明" value={data.correct.defense_statement} />
+        <InfoRow label="決定的証拠ID" value={data.correct.decisive_evidence_id} />
+        <InfoRow label="誤証拠リアクション" value={data.correct.wrong_evidence_reaction} />
+        <InfoRow label="反駁ナレーション" value={data.correct.refutation_text} />
+        <InfoRow label="犯人独白" value={data.correct.breakdown_statement} />
+        {data.correct.epilogue_text && (
+          <InfoRow label="エピローグ（地の文）" value={data.correct.epilogue_text} />
+        )}
+        {data.correct.escape_statement && (
+          <InfoRow label="逃亡セリフ" value={data.correct.escape_statement} />
+        )}
+      </div>
+      <div className="border-t border-gray-700 pt-3 space-y-2">
+        <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">
+          不正解ルート ({Object.keys(data.incorrect).length}人分)
+        </p>
+        {Object.entries(data.incorrect).map(([suspectId, inc]) => {
+          const suspect = scenario.suspects.find((s) => s.id === suspectId)
+          return (
+            <Accordion key={suspectId} title={suspect?.name ?? suspectId}>
+              <InfoRow label="困惑セリフ" value={inc.confusion_statement} />
+              <InfoRow label="アリバイ" value={inc.alibi_reveal} />
+            </Accordion>
+          )
+        })}
+      </div>
+    </Accordion>
+  )
+}
+
 /** 証拠クロス参照セクション */
 function CombinationsSection({ scenario }: { scenario: Scenario }) {
   if (!scenario.evidence_combinations || scenario.evidence_combinations.length === 0) {
@@ -431,6 +478,7 @@ export function ScenarioDebug() {
         <SuspectsSection scenario={scenario} />
         <EvidenceSection scenario={scenario} />
         <CombinationsSection scenario={scenario} />
+        <AccusationSection scenario={scenario} />
       </div>
     </div>
   )
