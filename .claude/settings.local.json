@@ -50,7 +50,8 @@
       "Bash(grep:*)",
       "Bash(wc:*)",
       "Bash(find /d/workspace/whodunit/src -name scenario.ts -path */utils/*)",
-      "Bash(find /d/workspace/whodunit/src -path */utils/*.ts)"
+      "Bash(find /d/workspace/whodunit/src -path */utils/*.ts)",
+      "Bash(xargs cat:*)"
     ]
   }
 }

@@ -297,7 +297,7 @@ export function DiscussionPhase() {
 
         {/* 会話モード: キャラクター中央表示（フル幅） */}
         {isConversationMode && selectedSuspect && (
-          <div className="absolute inset-x-0 bottom-24 flex justify-center">
+          <div className="absolute inset-x-0 bottom-[18vh] flex justify-center">
             <div className="transition-all duration-300">
               <CharacterCard
                 suspect={selectedSuspect}

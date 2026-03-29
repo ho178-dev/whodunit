@@ -207,7 +207,7 @@ export function AccusationPhase() {
     <div className="relative h-full overflow-hidden">
       <MansionSceneBackground phase="accusation" />
 
-      <div className="absolute inset-x-0 bottom-24 flex justify-center">
+      <div className="absolute inset-x-0 bottom-[18vh] flex justify-center">
         <CharacterCard suspect={votedSuspect} portrait selected />
       </div>
 
