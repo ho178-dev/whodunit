@@ -14,9 +14,9 @@ import { AccusationPhase } from '../phases/AccusationPhase'
 import { EndingScreen } from '../phases/EndingScreen'
 import { ScenarioSelect } from '../phases/ScenarioSelect'
 import { TrialPreview } from '../phases/TrialPreview'
-import { ManualSaveModal } from '../shared/ManualSaveModal'
+import { SettingsModal } from '../shared/SettingsModal'
 
-// 手動セーブボタンを表示するフェーズ
+// セーブ機能を有効にするフェーズ
 const MANUAL_SAVE_PHASES = new Set([
   'scenario_briefing',
   'investigation',
@@ -31,7 +31,7 @@ export function GameShell() {
   const useFixedScenario = useGameStore((s) => s.useFixedScenario)
   const [showSaveModal, setShowSaveModal] = useState(false)
 
-  const showSaveButton = useFixedScenario && MANUAL_SAVE_PHASES.has(phase)
+  const showSave = useFixedScenario && MANUAL_SAVE_PHASES.has(phase)
 
   // 現在のフェーズに対応するコンポーネントを返す
   const renderPhase = () => {
@@ -78,17 +78,18 @@ export function GameShell() {
           {renderPhase()}
         </FadeTransition>
 
-        {/* 手動セーブボタン：コンテナ内 absolute に変更 */}
-        {showSaveButton && (
-          <button
-            onClick={() => setShowSaveModal(true)}
-            className="absolute top-2 right-2 z-40 border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-3 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200"
-          >
-            セーブ
-          </button>
-        )}
+        {/* 設定ボタン: 全フェーズで表示（セーブ可否はSettingsModal内で制御） */}
+        <button
+          onClick={() => setShowSaveModal(true)}
+          className="absolute top-2 right-2 z-40 border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-2.5 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200"
+          title="設定"
+        >
+          ⚙
+        </button>
 
-        {showSaveModal && <ManualSaveModal onClose={() => setShowSaveModal(false)} />}
+        {showSaveModal && (
+          <SettingsModal showSave={showSave} onClose={() => setShowSaveModal(false)} />
+        )}
       </div>
     </div>
   )

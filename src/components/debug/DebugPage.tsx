@@ -88,7 +88,7 @@ function CharacterModalContent({ asset, config }: { asset: ImageAsset; config: C
             <PixelImageWithFallback
               src={asset.path}
               alt={asset.label}
-              pixelSize={PIXEL_ART_CONFIG.pixelSize.characterSmall}
+              pixelSize={PIXEL_ART_CONFIG.pixelSize.character}
               canvasWidth={config.canvasWidth}
               canvasHeight={config.canvasHeight}
               fallbackSrc={config.fallbackSrc}

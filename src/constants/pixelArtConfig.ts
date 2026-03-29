@@ -5,8 +5,7 @@ export const PIXEL_ART_CONFIG = {
   pixelSize: {
     room: 2, // 部屋背景
     mansion: 3, // 館背景（シナリオブリーフィング）
-    character: 6, // キャラクターカード（通常）
-    characterSmall: 3, // キャラクターカード（小）
+    character: 3, // キャラクター（portrait表示で全シーン共通）
     evidence: 5, // 証拠カード（通常）
     evidenceCompact: 3, // 証拠カード（コンパクト）
   },
