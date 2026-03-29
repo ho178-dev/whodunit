@@ -68,7 +68,7 @@ export function LoadingScreen() {
 
   if (generationError) {
     return (
-      <div className="min-h-screen flex flex-col items-center justify-center gap-6">
+      <div className="h-full flex flex-col items-center justify-center gap-6">
         <div className="text-red-400 font-serif text-center max-w-md">
           <div className="text-2xl mb-2">⚠</div>
           <p className="whitespace-pre-line">{generationError}</p>
@@ -87,7 +87,7 @@ export function LoadingScreen() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center gap-8">
+    <div className="h-full flex flex-col items-center justify-center gap-8">
       <div className="relative">
         <div className="w-16 h-16 border-2 border-gothic-gold/30 border-t-gothic-gold rounded-full animate-spin" />
       </div>

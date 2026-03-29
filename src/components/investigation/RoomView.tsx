@@ -60,13 +60,19 @@ export function RoomView({ roomId, hideEvidenceIcon = false, rightPanel }: RoomV
         <EvidenceModal roomId={roomId} onClose={() => setShowEvidence(false)} />
       )}
 
-      <div className="relative w-full aspect-video border border-gothic-border overflow-hidden">
+      <div className="relative h-full overflow-hidden">
         <RoomBackground key={room.type_id} typeId={room.type_id} name={room.name} />
 
-        <div className="absolute top-0 left-0 p-3">
+        {/* max-width: RightPanel幅(clamp)+right余白+間隔 分だけ右側を除外して重なりを防ぐ */}
+        <div
+          className="absolute top-0 left-0 p-3"
+          style={{ maxWidth: 'calc(100% - clamp(154px, 13vw, 202px))' }}
+        >
           <div className="inline-block bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-4 py-2">
-            <h2 className="font-display text-gothic-gold text-sm tracking-widest">{room.name}</h2>
-            <p className="text-gothic-muted font-serif text-xs mt-0.5 line-clamp-2">
+            <h2 className="font-display text-gothic-gold text-[clamp(12px,1.7vh,16px)] tracking-widest">
+              {room.name}
+            </h2>
+            <p className="text-gothic-muted font-serif text-[clamp(10px,1.3vh,13px)] mt-0.5 line-clamp-2">
               {room.description}
             </p>
           </div>

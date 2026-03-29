@@ -15,9 +15,11 @@ export type CharacterAppearanceId =
   | 'male_young'
   | 'male_young_alt'
   | 'male_young_alt2'
+  | 'male_young_alt3'
   | 'male_middle'
   | 'male_middle_alt'
   | 'male_middle_alt2'
+  | 'male_middle_alt3'
   | 'male_elderly'
   | 'male_elderly_alt'
   | 'female_teen'
@@ -25,9 +27,11 @@ export type CharacterAppearanceId =
   | 'female_young'
   | 'female_young_alt'
   | 'female_young_alt2'
+  | 'female_young_alt3'
   | 'female_middle'
   | 'female_middle_alt'
   | 'female_middle_alt2'
+  | 'female_middle_alt3'
   | 'female_elderly'
   | 'female_elderly_alt'
 
@@ -103,6 +107,7 @@ export interface Suspect {
     statements: string[]
   }
   default_wrong_pursuit_response: string // 見当違いの証言で追及したときの汎用リアクション（容疑者ごと）
+  confession_statement?: string // 正解エンディングで表示する犯人の独白セリフ（省略可）
   evidence_reactions: {
     [evidence_id: string]: {
       reaction: string

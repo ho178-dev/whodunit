@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { getAllSlots, deleteSlot } from '../../utils/saveLoad'
 import { SaveSlotList } from '../shared/SaveSlotList'
+import { MansionSceneBackground } from '../shared/MansionBackground'
 import type { SaveSlot } from '../../types/save'
 import { isTrialMode } from '../../constants/salesConfig'
 import { FIXED_SCENARIO } from '../../constants/fixedScenario'
@@ -38,9 +39,9 @@ export function TitleScreen() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center px-4 relative overflow-hidden">
-      {/* 背景装飾 */}
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_rgba(180,83,9,0.15)_0%,_transparent_70%)]" />
+    <div className="h-full flex flex-col items-center justify-center px-4 relative overflow-hidden">
+      {/* 館背景 */}
+      <MansionSceneBackground phase="title" fixed />
 
       <div className="relative z-10 text-center max-w-2xl">
         {/* ロゴ */}

@@ -16,6 +16,14 @@ export const MURDERER_CONTRADICTION_COUNT = 2
 // UIレイアウト上限（これを超えると会話ピップが折り返して見切れる）
 export const MAX_VISIBLE_TALK_PIPS = 30
 
+// 探偵ランク閾値: usedActions（証拠調査消費数）がこの値以下でそのランク、超えたら下位ランク、B超えはC
+// easy=12, normal=8, hard=5 アクションを基準に設定
+export const RANK_THRESHOLDS: Record<Difficulty, { S: number; A: number; B: number }> = {
+  easy: { S: 6, A: 9, B: 11 },
+  normal: { S: 4, A: 6, B: 7 },
+  hard: { S: 2, A: 3, B: 4 },
+}
+
 export const DIFFICULTY_CONFIG: Record<
   Difficulty,
   {

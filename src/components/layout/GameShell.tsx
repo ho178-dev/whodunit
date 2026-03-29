@@ -14,9 +14,9 @@ import { AccusationPhase } from '../phases/AccusationPhase'
 import { EndingScreen } from '../phases/EndingScreen'
 import { ScenarioSelect } from '../phases/ScenarioSelect'
 import { TrialPreview } from '../phases/TrialPreview'
-import { ManualSaveModal } from '../shared/ManualSaveModal'
+import { SettingsModal } from '../shared/SettingsModal'
 
-// 手動セーブボタンを表示するフェーズ
+// セーブ機能を有効にするフェーズ
 const MANUAL_SAVE_PHASES = new Set([
   'scenario_briefing',
   'investigation',
@@ -31,7 +31,7 @@ export function GameShell() {
   const useFixedScenario = useGameStore((s) => s.useFixedScenario)
   const [showSaveModal, setShowSaveModal] = useState(false)
 
-  const showSaveButton = useFixedScenario && MANUAL_SAVE_PHASES.has(phase)
+  const showSave = useFixedScenario && MANUAL_SAVE_PHASES.has(phase)
 
   // 現在のフェーズに対応するコンポーネントを返す
   const renderPhase = () => {
@@ -64,22 +64,33 @@ export function GameShell() {
   }
 
   return (
-    <div className="min-h-screen bg-gothic-bg">
-      <FadeTransition triggerKey={phase} phaseLabel={PHASE_LABELS[phase]}>
-        {renderPhase()}
-      </FadeTransition>
+    // 外層: ウィンドウ全体を覆い、16:9コンテナをレターボックス形式で中央配置する
+    <div className="w-screen h-screen bg-gothic-bg flex items-center justify-center overflow-hidden">
+      {/* 16:9固定コンテナ: min(100vw, 100vh*16/9) × min(100vh, 100vw*9/16) */}
+      <div
+        className="relative overflow-hidden border border-gothic-border"
+        style={{
+          width: 'min(100vw, calc(100vh * 16 / 9))',
+          height: 'min(100vh, calc(100vw * 9 / 16))',
+        }}
+      >
+        <FadeTransition triggerKey={phase} phaseLabel={PHASE_LABELS[phase]}>
+          {renderPhase()}
+        </FadeTransition>
 
-      {/* 手動セーブボタン：ゲームプレイ中の固定シナリオのみ表示 */}
-      {showSaveButton && (
+        {/* 設定ボタン: 全フェーズで表示（セーブ可否はSettingsModal内で制御） */}
         <button
           onClick={() => setShowSaveModal(true)}
-          className="fixed top-2 right-2 z-40 border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-3 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200"
+          className="absolute top-2 right-2 z-40 border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-2.5 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200"
+          title="設定"
         >
-          セーブ
+          ⚙
         </button>
-      )}
 
-      {showSaveModal && <ManualSaveModal onClose={() => setShowSaveModal(false)} />}
+        {showSaveModal && (
+          <SettingsModal showSave={showSave} onClose={() => setShowSaveModal(false)} />
+        )}
+      </div>
     </div>
   )
 }

@@ -11,7 +11,6 @@ interface CharacterCardProps {
   suspect: Suspect
   selected?: boolean
   onClick?: () => void
-  small?: boolean
   portrait?: boolean
   onNameClick?: () => void
 }
@@ -21,7 +20,6 @@ export function CharacterCard({
   suspect,
   selected,
   onClick,
-  small,
   portrait,
   onNameClick,
 }: CharacterCardProps) {
@@ -48,11 +46,11 @@ export function CharacterCard({
         >
           {/* 内側の装飾線 */}
           <div className="border border-gothic-border/40 bg-stone-800">
-            <div className="h-60 sm:h-72 aspect-[832/1216] overflow-hidden">
+            <div className="h-[34vh] aspect-[832/1216] overflow-hidden">
               <PixelImageWithFallback
                 src={imgSrc}
                 alt={suspect.name}
-                pixelSize={PIXEL_ART_CONFIG.pixelSize.characterSmall}
+                pixelSize={PIXEL_ART_CONFIG.pixelSize.character}
                 canvasWidth={PIXEL_ART_CONFIG.canvasSize.character.width}
                 canvasHeight={PIXEL_ART_CONFIG.canvasSize.character.height}
                 fallbackSrc={DEFAULT_CHARACTER_IMG}
@@ -80,47 +78,4 @@ export function CharacterCard({
       </div>
     )
   }
-
-  return (
-    <div
-      className={cn(
-        'border bg-gothic-panel transition-all duration-200 cursor-pointer',
-        selected
-          ? 'border-gothic-gold shadow-[0_0_12px_rgba(217,119,6,0.5)]'
-          : 'border-gothic-border hover:border-gothic-accent',
-        small ? 'p-2' : 'p-4',
-        onClick && 'hover:scale-105'
-      )}
-      onClick={onClick}
-    >
-      <div
-        className={cn(
-          'bg-stone-800 flex items-center justify-center overflow-hidden',
-          small ? 'h-16 w-16 mx-auto' : 'h-40 w-full mb-3'
-        )}
-      >
-        <PixelImageWithFallback
-          src={imgSrc}
-          alt={suspect.name}
-          pixelSize={
-            small ? PIXEL_ART_CONFIG.pixelSize.characterSmall : PIXEL_ART_CONFIG.pixelSize.character
-          }
-          canvasWidth={PIXEL_ART_CONFIG.canvasSize.character.width}
-          canvasHeight={PIXEL_ART_CONFIG.canvasSize.character.height}
-          fallbackSrc={DEFAULT_CHARACTER_IMG}
-        />
-      </div>
-      {!small && (
-        <>
-          <div className="text-gothic-gold font-display text-sm font-semibold">{suspect.name}</div>
-          <div className="text-gothic-muted text-xs mt-1">
-            {suspect.age}歳・{suspect.occupation}
-          </div>
-        </>
-      )}
-      {small && (
-        <div className="text-gothic-text text-xs text-center mt-1 truncate">{suspect.name}</div>
-      )}
-    </div>
-  )
 }

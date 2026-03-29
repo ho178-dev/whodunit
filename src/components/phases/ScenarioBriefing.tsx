@@ -26,7 +26,7 @@ export function ScenarioBriefing() {
   const difficultyKeys: Difficulty[] = ['easy', 'normal', 'hard']
 
   return (
-    <div className="min-h-screen px-4 py-8">
+    <div className="h-full overflow-y-auto px-4 py-8">
       {showTutorial && <TutorialOverlay onClose={() => setShowTutorial(false)} />}
 
       <div className="max-w-4xl mx-auto">

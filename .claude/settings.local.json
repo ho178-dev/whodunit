@@ -45,7 +45,13 @@
       "Bash(find /d/workspace/whodunit/src -name \"*.tsx\" -exec grep -l \"button.*absolute\\\\|absolute.*button\" {})",
       "Bash(grep -n \"inlin comment\" D:/workspace/whodunit/src/components/shared/*.tsx)",
       "Bash(npx vitest:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(find /d/workspace/whodunit/src -type f \\\\\\(-name *.tsx -o -name *.ts -o -name *.css \\\\\\))",
+      "Bash(grep:*)",
+      "Bash(wc:*)",
+      "Bash(find /d/workspace/whodunit/src -name scenario.ts -path */utils/*)",
+      "Bash(find /d/workspace/whodunit/src -path */utils/*.ts)",
+      "Bash(xargs cat:*)"
     ]
   }
 }

@@ -7,7 +7,6 @@ import { MansionSceneBackground } from '../shared/MansionBackground'
 import { CharacterCard } from '../shared/CharacterCard'
 import { DialogBox } from '../shared/DialogBox'
 import { cn } from '../../utils/cn'
-import { GamePhaseLayout } from '../layout/GamePhaseLayout'
 import { RightPanel } from '../layout/RightPanel'
 import { LeftSpecialPanel } from '../layout/LeftSpecialPanel'
 import { PanelButton } from '../layout/PanelButton'
@@ -97,7 +96,7 @@ export function AccusationPhase() {
       case 'breakdown':
         return {
           text: accusationData.correct.breakdown_statement,
-          speakerName: `${votedSuspect.name} ─ 告白`,
+          speakerName: `${votedSuspect.name} ─ 独白`,
           borderClass: 'border-gothic-gold',
         }
       case 'escape': {
@@ -205,50 +204,48 @@ export function AccusationPhase() {
   }
 
   return (
-    <GamePhaseLayout>
-      <div className="relative w-full aspect-video border border-gothic-border overflow-hidden">
-        <MansionSceneBackground phase="accusation" />
+    <div className="relative h-full overflow-hidden">
+      <MansionSceneBackground phase="accusation" />
 
-        <div className="absolute inset-x-0 bottom-24 flex justify-center">
-          <CharacterCard suspect={votedSuspect} portrait selected />
-        </div>
-
-        <div className="absolute inset-x-0 bottom-0 p-3">
-          <div className={cn('bg-gothic-panel/85 backdrop-blur-sm border-2', dialog.borderClass)}>
-            <DialogBox key={step} text={dialog.text} speakerName={dialog.speakerName} />
-          </div>
-        </div>
-
-        {hasLeftPanel && (
-          <LeftSpecialPanel>
-            <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-2 text-center">
-              <p className="font-display text-gothic-gold text-xs tracking-widest">証拠を選ぶ</p>
-            </div>
-            <div className="bg-gothic-panel/80 backdrop-blur-sm border border-gothic-border/60 overflow-y-auto max-h-64">
-              <div className="px-2 py-2 space-y-1.5">
-                {selectableEvidence.map((evidence) => (
-                  <button
-                    key={evidence.id}
-                    onClick={() => setSelectedEvidenceId(evidence.id)}
-                    className={`w-full text-left border p-2 transition-all ${
-                      selectedEvidenceId === evidence.id
-                        ? 'border-gothic-gold bg-stone-800/60 shadow-[0_0_8px_rgba(217,119,6,0.2)]'
-                        : 'border-gothic-border/60 bg-gothic-panel/60 hover:border-gothic-accent'
-                    }`}
-                  >
-                    <p className="text-gothic-text font-serif text-[11px]">{evidence.name}</p>
-                    <p className="text-gothic-muted font-serif text-[10px] mt-0.5 line-clamp-2">
-                      {evidence.description}
-                    </p>
-                  </button>
-                ))}
-              </div>
-            </div>
-          </LeftSpecialPanel>
-        )}
-
-        <RightPanel slot1="告発" slot3={getSlot3()} slot4={getSlot4()} />
+      <div className="absolute inset-x-0 bottom-[18vh] flex justify-center">
+        <CharacterCard suspect={votedSuspect} portrait selected />
       </div>
-    </GamePhaseLayout>
+
+      <div className="absolute inset-x-0 bottom-0 p-3">
+        <div className={cn('bg-gothic-panel/85 backdrop-blur-sm border-2', dialog.borderClass)}>
+          <DialogBox key={step} text={dialog.text} speakerName={dialog.speakerName} />
+        </div>
+      </div>
+
+      {hasLeftPanel && (
+        <LeftSpecialPanel>
+          <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-2 text-center">
+            <p className="font-display text-gothic-gold text-xs tracking-widest">証拠を選ぶ</p>
+          </div>
+          <div className="bg-gothic-panel/80 backdrop-blur-sm border border-gothic-border/60 overflow-y-auto max-h-64">
+            <div className="px-2 py-2 space-y-1.5">
+              {selectableEvidence.map((evidence) => (
+                <button
+                  key={evidence.id}
+                  onClick={() => setSelectedEvidenceId(evidence.id)}
+                  className={`w-full text-left border p-2 transition-all ${
+                    selectedEvidenceId === evidence.id
+                      ? 'border-gothic-gold bg-stone-800/60 shadow-[0_0_8px_rgba(217,119,6,0.2)]'
+                      : 'border-gothic-border/60 bg-gothic-panel/60 hover:border-gothic-accent'
+                  }`}
+                >
+                  <p className="text-gothic-text font-serif text-[11px]">{evidence.name}</p>
+                  <p className="text-gothic-muted font-serif text-[10px] mt-0.5 line-clamp-2">
+                    {evidence.description}
+                  </p>
+                </button>
+              ))}
+            </div>
+          </div>
+        </LeftSpecialPanel>
+      )}
+
+      <RightPanel slot1="告発" slot3={getSlot3()} slot4={getSlot4()} />
+    </div>
   )
 }

@@ -18,7 +18,7 @@ export function ApiKeyInput() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center px-4">
+    <div className="h-full flex items-center justify-center px-4">
       <GothicPanel title="GEMINI API KEY" className="w-full max-w-md">
         <p className="text-gothic-muted font-serif text-sm mb-6">
           Google AI

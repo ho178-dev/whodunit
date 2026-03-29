@@ -8,9 +8,9 @@ export function TrialPreview() {
   const setPhase = useGameStore((s) => s.setPhase)
 
   return (
-    <div className="min-h-screen">
+    <div className="h-full relative">
       <MansionSceneBackground phase="ending" fixed />
-      <div className="relative z-10 px-4 py-8">
+      <div className="relative z-10 h-full overflow-y-auto px-4 py-8">
         <div className="max-w-2xl mx-auto">
           <div className="text-center mb-8">
             <p className="text-gothic-muted font-serif text-xs tracking-widest mb-4">

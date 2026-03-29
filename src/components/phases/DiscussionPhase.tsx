@@ -14,7 +14,6 @@ import { MansionSceneBackground } from '../shared/MansionBackground'
 import { EvidenceSelectModal } from '../discussion/EvidenceSelectModal'
 import { behaviorBorderColors, behaviorLabel } from '../../constants/npcBehavior'
 import { cn } from '../../utils/cn'
-import { GamePhaseLayout } from '../layout/GamePhaseLayout'
 import { RightPanel } from '../layout/RightPanel'
 import { LeftSpecialPanel } from '../layout/LeftSpecialPanel'
 import { PanelButton } from '../layout/PanelButton'
@@ -283,94 +282,92 @@ export function DiscussionPhase() {
         />
       )}
 
-      <GamePhaseLayout>
-        <div className="relative w-full aspect-video border border-gothic-border overflow-hidden">
-          <MansionSceneBackground phase="discussion" />
+      <div className="relative h-full overflow-hidden">
+        <MansionSceneBackground phase="discussion" />
 
-          {/* 一覧モード: スライダー（フル幅） */}
-          {!isConversationMode && (
-            <CharacterSlider
-              suspects={scenario.suspects}
-              sliderIndex={sliderIndex}
-              onSliderIndexChange={setSliderIndex}
-              onSuspectClick={handleSuspectClick}
-            />
-          )}
+        {/* 一覧モード: スライダー（フル幅） */}
+        {!isConversationMode && (
+          <CharacterSlider
+            suspects={scenario.suspects}
+            sliderIndex={sliderIndex}
+            onSliderIndexChange={setSliderIndex}
+            onSuspectClick={handleSuspectClick}
+          />
+        )}
 
-          {/* 会話モード: キャラクター中央表示（フル幅） */}
-          {isConversationMode && selectedSuspect && (
-            <div className="absolute inset-x-0 bottom-24 flex justify-center">
-              <div className="transition-all duration-300">
-                <CharacterCard
-                  suspect={selectedSuspect}
-                  portrait
-                  selected
-                  onClick={() => setShowEvidenceModal(true)}
-                />
-              </div>
+        {/* 会話モード: キャラクター中央表示（フル幅） */}
+        {isConversationMode && selectedSuspect && (
+          <div className="absolute inset-x-0 bottom-[18vh] flex justify-center">
+            <div className="transition-all duration-300">
+              <CharacterCard
+                suspect={selectedSuspect}
+                portrait
+                selected
+                onClick={() => setShowEvidenceModal(true)}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* ダイアログエリア（フル幅・下部固定） */}
+        <div className="absolute inset-x-0 bottom-0 p-3">
+          {dialogReaction && selectedSuspect ? (
+            <div
+              className={cn(
+                'bg-gothic-panel/85 backdrop-blur-sm border-2',
+                behaviorBorderColors[dialogReaction.behavior]
+              )}
+            >
+              <DialogBox
+                key={`${selectedSuspectId}-${selectedEvidenceId}-${confrontationLog.length}-${currentWrongResult ? 'wrong' : ''}`}
+                text={dialogReaction.reaction}
+                speakerName={`${selectedSuspect.name} ─ ${currentWrongResult ? '的外れ' : behaviorLabel[dialogReaction.behavior]}`}
+              />
+              {hasContradiction && latestReaction && (
+                <p className="px-4 pb-3 border-t border-yellow-700/50 pt-2 text-yellow-400 font-serif text-xs">
+                  ⚠ この証拠はあなたが聞いたある証言と矛盾している
+                </p>
+              )}
+            </div>
+          ) : (
+            <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border p-4">
+              <p className="text-gothic-muted font-serif text-sm text-center">
+                容疑者をクリックして証拠を突きつける
+              </p>
             </div>
           )}
-
-          {/* ダイアログエリア（フル幅・下部固定） */}
-          <div className="absolute inset-x-0 bottom-0 p-3">
-            {dialogReaction && selectedSuspect ? (
-              <div
-                className={cn(
-                  'bg-gothic-panel/85 backdrop-blur-sm border-2',
-                  behaviorBorderColors[dialogReaction.behavior]
-                )}
-              >
-                <DialogBox
-                  key={`${selectedSuspectId}-${selectedEvidenceId}-${confrontationLog.length}-${currentWrongResult ? 'wrong' : ''}`}
-                  text={dialogReaction.reaction}
-                  speakerName={`${selectedSuspect.name} ─ ${currentWrongResult ? '的外れ' : behaviorLabel[dialogReaction.behavior]}`}
-                />
-                {hasContradiction && latestReaction && (
-                  <p className="px-4 pb-3 border-t border-yellow-700/50 pt-2 text-yellow-400 font-serif text-xs">
-                    ⚠ この証拠はあなたが聞いたある証言と矛盾している
-                  </p>
-                )}
-              </div>
-            ) : (
-              <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border p-4">
-                <p className="text-gothic-muted font-serif text-sm text-center">
-                  容疑者をクリックして証拠を突きつける
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* 左特別パネル（会話モード時のみ） */}
-          {leftPanel}
-
-          {/* 右パネル */}
-          <RightPanel
-            slot1="議論"
-            slot3={
-              <PanelButton
-                variant="primary"
-                disabled={!selectedSuspectId}
-                onClick={() => setShowEvidenceModal(true)}
-              >
-                証拠を選ぶ
-              </PanelButton>
-            }
-            slot4={
-              <PanelButton onClick={() => setShowNotesManual(true)}>
-                <span className="flex items-center justify-center gap-1.5">
-                  <NotesIcon size={13} />
-                  <span>捜査メモ</span>
-                </span>
-              </PanelButton>
-            }
-            slot5={
-              <PanelButton variant="primary" onClick={() => setPhase('voting')}>
-                投票へ進む
-              </PanelButton>
-            }
-          />
         </div>
-      </GamePhaseLayout>
+
+        {/* 左特別パネル（会話モード時のみ） */}
+        {leftPanel}
+
+        {/* 右パネル */}
+        <RightPanel
+          slot1="議論"
+          slot3={
+            <PanelButton
+              variant="primary"
+              disabled={!selectedSuspectId}
+              onClick={() => setShowEvidenceModal(true)}
+            >
+              証拠を選ぶ
+            </PanelButton>
+          }
+          slot4={
+            <PanelButton onClick={() => setShowNotesManual(true)}>
+              <span className="flex items-center justify-center gap-1.5">
+                <NotesIcon size={13} />
+                <span>捜査メモ</span>
+              </span>
+            </PanelButton>
+          }
+          slot5={
+            <PanelButton variant="primary" onClick={() => setPhase('voting')}>
+              投票へ進む
+            </PanelButton>
+          }
+        />
+      </div>
     </>
   )
 }
