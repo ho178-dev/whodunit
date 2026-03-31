@@ -114,7 +114,7 @@ export function NpcDialog({ roomId, twoCharInset }: NpcDialogProps) {
       {suspectsHere.length > 0 && (
         <div
           className={cn(
-            'absolute inset-x-0 bottom-[18vh] flex items-end gap-4',
+            'absolute inset-x-0 bottom-[30vh] flex items-end gap-4',
             suspectsHere.length === 1
               ? 'justify-center px-6 sm:px-12'
               : cn('justify-between', twoCharInset ?? 'px-6 sm:px-12')

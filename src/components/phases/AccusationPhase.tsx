@@ -138,7 +138,9 @@ export function AccusationPhase() {
         )
       case 'select_evidence':
         return selectableEvidence.length === 0 ? (
-          <PanelButton onClick={() => setStep('escape')}>証拠を提示できない</PanelButton>
+          <PanelButton variant="dimmed" onClick={() => setStep('escape')}>
+            証拠を提示できない
+          </PanelButton>
         ) : (
           <PanelButton
             variant="primary"
@@ -157,7 +159,7 @@ export function AccusationPhase() {
       case 'wrong_evidence':
         return (
           <PanelButton
-            variant="primary"
+            variant="secondary"
             onClick={() => {
               setSelectedEvidenceId(null)
               setStep('select_evidence')
@@ -181,6 +183,7 @@ export function AccusationPhase() {
       case 'escape':
         return (
           <PanelButton
+            variant="primary"
             onClick={() => {
               setMurdererEscaped(true)
               setPhase('ending')
@@ -190,15 +193,27 @@ export function AccusationPhase() {
           </PanelButton>
         )
       case 'confusion':
-        return <PanelButton onClick={() => setStep('alibi_reveal')}>続きを見る</PanelButton>
+        return (
+          <PanelButton variant="primary" onClick={() => setStep('alibi_reveal')}>
+            続きを見る
+          </PanelButton>
+        )
       case 'alibi_reveal':
-        return <PanelButton onClick={() => setPhase('ending')}>結果を見る</PanelButton>
+        return (
+          <PanelButton variant="primary" onClick={() => setPhase('ending')}>
+            結果を見る
+          </PanelButton>
+        )
     }
   }
 
   const getSlot4 = () => {
     if (step === 'wrong_evidence' && !hasDecisiveEvidence) {
-      return <PanelButton onClick={() => setStep('escape')}>これ以上の証拠はない</PanelButton>
+      return (
+        <PanelButton variant="dimmed" onClick={() => setStep('escape')}>
+          これ以上の証拠はない
+        </PanelButton>
+      )
     }
     return undefined
   }
@@ -207,7 +222,7 @@ export function AccusationPhase() {
     <div className="relative h-full overflow-hidden">
       <MansionSceneBackground phase="accusation" />
 
-      <div className="absolute inset-x-0 bottom-[18vh] flex justify-center">
+      <div className="absolute inset-x-0 bottom-[30vh] flex justify-center">
         <CharacterCard suspect={votedSuspect} portrait selected />
       </div>
 

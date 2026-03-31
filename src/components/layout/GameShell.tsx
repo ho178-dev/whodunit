@@ -81,7 +81,7 @@ export function GameShell() {
         {/* 設定ボタン: 全フェーズで表示（セーブ可否はSettingsModal内で制御） */}
         <button
           onClick={() => setShowSaveModal(true)}
-          className="absolute top-2 right-2 z-40 border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-2.5 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200"
+          className="absolute top-2 left-2 z-40 border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-2.5 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200"
           title="設定"
         >
           ⚙
