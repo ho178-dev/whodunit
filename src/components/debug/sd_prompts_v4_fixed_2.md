@@ -438,31 +438,20 @@ gothic manor interior, dark stone walls, candlelight, mysterious shadows, old wo
 | CFG Scale | 7                                 |
 | Steps     | 30                                |
 
-### ピクセル化対応について
+### ピクセル化・減色対応について
 
-証拠品は128×128pxまで縮小されるため、**シンプルで認識しやすい形状**が重要:
+証拠品は128×128pxまで縮小＋7色パレットに減色されるため:
 
-- 複雑な装飾より**明確なシルエット**
-- **純黒背景**で高コントラスト（アイコン感を出す）
-- 単一オブジェクトを大きく配置
-- **汎用的な形状**で複数シナリオに使い回し可能に
+- **フラットカラー**でグラデーションを避ける
+- **太い線・明確なシルエット**で縮小後も認識可能に
+- **単色グレー背景**でアイコン感を出す
+- **シンプルな形状**で細部に頼らない
+- キャラクターと同じく `flat color, cel shading, no shading, bold outlines` を使用
 
-### 背景を確実に黒にするコツ
-
-- `pure black background, #000000 background, vantablack` を使用
-- ネガティブに `shadow, drop shadow, cast shadow, ambient occlusion, ground shadow, reflected light` を追加
-- `studio lighting, rim light only` で影を最小化
-
-### 共通プロンプト（末尾に追加）
+### 共通スタイルタグ（各プロンプト末尾に含む）
 
 ```
-single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
-```
-
-### 共通ネガティブ
-
-```
-(worst quality, low quality:1.4), people, multiple objects, gradient background, textured background, gray background, floor, table, surface, ground, reflection, shadow, drop shadow, cast shadow, ground shadow, ambient occlusion, reflected light, soft lighting, environmental lighting, complex background, pattern, fine details, intricate design, ornate, decorative, fancy, realistic photo
+flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
 ```
 
 ---
@@ -472,7 +461,13 @@ single object, centered, isolated, pure black background, #000000 background, va
 **プロンプト:**
 
 ```
-kitchen knife, silver blade, black handle, side view, flat lay, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+simple kitchen knife, silver blade, black handle, side view, single knife, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, multiple knives, cutting board, food, hand, detailed texture, fine details
 ```
 
 ---
@@ -482,7 +477,13 @@ kitchen knife, silver blade, black handle, side view, flat lay, single object, c
 **プロンプト:**
 
 ```
-red brick, rectangular block, simple clay brick, building brick, solid rectangular shape, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+wooden baseball bat, brown wood bat, simple bat shape, horizontal view, single bat, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, baseball, ball, glove, player, brick, wall, multiple bats, detailed texture, fine details
 ```
 
 ---
@@ -492,7 +493,13 @@ red brick, rectangular block, simple clay brick, building brick, solid rectangul
 **プロンプト:**
 
 ```
-black revolver pistol, side profile view, simple gun silhouette, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+black revolver, simple pistol shape, side view, single gun, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, bullets, ammunition, hand holding, muzzle flash, detailed texture, fine details
 ```
 
 ---
@@ -502,7 +509,13 @@ black revolver pistol, side profile view, simple gun silhouette, single object, 
 **プロンプト:**
 
 ```
-small glass bottle with skull label, cork stopper, round bottle, green liquid inside, poison bottle, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+small glass bottle, cork stopper, dark liquid inside, simple bottle shape, single bottle, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, shadow, multiple bottles, shelf, skull label, pills, detailed texture, fine details
 ```
 
 ---
@@ -512,13 +525,13 @@ small glass bottle with skull label, cork stopper, round bottle, green liquid in
 **プロンプト:**
 
 ```
-opened envelope with letter inside, white paper with handwritten text lines, cursive writing visible, folded letter partially pulled out, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette
+white envelope with letter, folded paper, simple envelope shape, handwritten lines visible, single letter, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
 ```
 
-**専用ネガティブ:**
+**ネガティブ:**
 
 ```
-(worst quality, low quality:1.4), people, multiple objects, gradient background, floor, table, surface, shadow, drop shadow, cast shadow, ground shadow, empty envelope, closed envelope, blank paper, no text, clean paper
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, multiple letters, mailbox, blank paper, no writing, sealed envelope, detailed texture, fine details
 ```
 
 ---
@@ -528,7 +541,13 @@ opened envelope with letter inside, white paper with handwritten text lines, cur
 **プロンプト:**
 
 ```
-leather bound journal, closed diary book, brown leather cover, visible bookmark ribbon, thick book with many pages, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette
+closed book, brown leather cover, simple book shape, ribbon bookmark, single book, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, multiple books, bookshelf, open book, stack of books, detailed texture, fine details
 ```
 
 ---
@@ -538,13 +557,13 @@ leather bound journal, closed diary book, brown leather cover, visible bookmark 
 **プロンプト:**
 
 ```
-official document paper, formal contract with printed text lines, signature at bottom, legal document, rolled scroll with visible text, wax seal stamp, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette
+paper document, printed text lines, official paper, simple rectangular shape, single document, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
 ```
 
-**専用ネガティブ:**
+**ネガティブ:**
 
 ```
-(worst quality, low quality:1.4), people, multiple objects, gradient background, floor, table, surface, shadow, drop shadow, cast shadow, ground shadow, blank paper, no text, clean paper, empty document
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, multiple documents, folder, blank paper, no text, scroll, detailed texture, fine details
 ```
 
 ---
@@ -554,13 +573,13 @@ official document paper, formal contract with printed text lines, signature at b
 **プロンプト:**
 
 ```
-folded dark jacket with shoes beneath, clothing pile, leather shoes visible under folded coat, neatly stacked clothes, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette
+folded jacket with shoes, dark coat and leather shoes, simple clothing pile, single set, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
 ```
 
-**専用ネガティブ:**
+**ネガティブ:**
 
 ```
-(worst quality, low quality:1.4), people, gradient background, floor, table, surface, shadow, drop shadow, cast shadow, ground shadow, shoes only, just shoes, no clothes, single shoe
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, mannequin, hanger, closet, shoes only, no jacket, person wearing, detailed texture, fine details
 ```
 
 ---
@@ -570,7 +589,13 @@ folded dark jacket with shoes beneath, clothing pile, leather shoes visible unde
 **プロンプト:**
 
 ```
-gold ring with gemstone, simple band ring, circular jewelry, shiny metal ring, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+gold ring, simple band ring, circular shape, shiny metal, single ring, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, multiple rings, jewelry box, necklace, hand wearing, detailed texture, fine details
 ```
 
 ---
@@ -580,7 +605,13 @@ gold ring with gemstone, simple band ring, circular jewelry, shiny metal ring, s
 **プロンプト:**
 
 ```
-old fashioned metal key, simple key shape, oval bow handle, straight shaft, brass key, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+metal key, simple key shape, oval handle, brass color, single key, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, key ring, multiple keys, lock, door, hand holding, detailed texture, fine details
 ```
 
 ---
@@ -590,7 +621,13 @@ old fashioned metal key, simple key shape, oval bow handle, straight shaft, bras
 **プロンプト:**
 
 ```
-wine glass with red liquid, stemmed glass, transparent glass, simple goblet shape, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+wine glass, stemmed glass shape, red liquid inside, simple goblet, single glass, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, multiple glasses, wine bottle, table setting, hand holding, detailed texture, fine details
 ```
 
 ---
@@ -600,7 +637,13 @@ wine glass with red liquid, stemmed glass, transparent glass, simple goblet shap
 **プロンプト:**
 
 ```
-old polaroid photograph, rectangular photo with white border, sepia toned image, vintage photo, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+polaroid photo, rectangular shape, white border, simple photo, single photograph, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, photo album, multiple photos, picture frame, camera, detailed texture, fine details
 ```
 
 ---
@@ -610,7 +653,13 @@ old polaroid photograph, rectangular photo with white border, sepia toned image,
 **プロンプト:**
 
 ```
-orange pill bottle with white cap, prescription medicine bottle, cylindrical container, pharmacy bottle, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+pill bottle, orange cylindrical bottle, white cap, simple container shape, single bottle, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, multiple bottles, pills, medicine cabinet, syringe, detailed texture, fine details
 ```
 
 ---
@@ -620,7 +669,13 @@ orange pill bottle with white cap, prescription medicine bottle, cylindrical con
 **プロンプト:**
 
 ```
-white coffee mug with handle, simple ceramic cup, steaming hot drink, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+coffee mug, white ceramic cup, simple mug shape with handle, single cup, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, multiple cups, coffee pot, food, kitchen scene, steam, detailed texture, fine details
 ```
 
 ---
@@ -630,7 +685,13 @@ white coffee mug with handle, simple ceramic cup, steaming hot drink, single obj
 **プロンプト:**
 
 ```
-metal wrench, silver spanner tool, simple hand tool, adjustable wrench, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+metal wrench, silver spanner, simple tool shape, single wrench, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, toolbox, multiple tools, workshop, hand holding, detailed texture, fine details
 ```
 
 ---
@@ -640,7 +701,13 @@ metal wrench, silver spanner tool, simple hand tool, adjustable wrench, single o
 **プロンプト:**
 
 ```
-white folded handkerchief, square cloth napkin, simple fabric, neatly folded, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+white handkerchief, folded square cloth, simple fabric shape, single cloth, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, multiple cloths, towel rack, laundry, wrinkled, detailed texture, fine details
 ```
 
 ---
@@ -650,13 +717,13 @@ white folded handkerchief, square cloth napkin, simple fabric, neatly folded, si
 **プロンプト:**
 
 ```
-glowing fingerprint, orange fingerprint pattern, swirl pattern, biometric scan, forensic fingerprint, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette
+fingerprint pattern, orange swirl lines, simple oval shape, single fingerprint, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid dark gray background, flat background, high contrast
 ```
 
-**専用ネガティブ:**
+**ネガティブ:**
 
 ```
-(worst quality, low quality:1.4), people, hand, finger, realistic finger, multiple fingerprints, gradient background, floor, surface, shadow, drop shadow
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, realistic hand, realistic finger, multiple fingerprints, detailed texture, fine details
 ```
 
 ---
@@ -666,13 +733,13 @@ glowing fingerprint, orange fingerprint pattern, swirl pattern, biometric scan, 
 **プロンプト:**
 
 ```
-dark red blood splatter, blood stain, irregular splatter shape, dried blood drop, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette
+blood splatter, dark red stain, simple splatter shape, single blood drop, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid dark gray background, flat background, high contrast
 ```
 
-**専用ネガティブ:**
+**ネガティブ:**
 
 ```
-(worst quality, low quality:1.4), people, body parts, wound, injury, gradient background, floor, surface, shadow, drop shadow, pool of blood, crime scene
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, wound, body parts, crime scene, pool of blood, detailed texture, fine details
 ```
 
 ---
@@ -682,7 +749,13 @@ dark red blood splatter, blood stain, irregular splatter shape, dried blood drop
 **プロンプト:**
 
 ```
-magnifying glass, detective magnifier, round glass lens, simple handle, investigation tool, single object, centered, isolated, pure black background, #000000 background, vantablack, studio lighting, rim light only, floating object, no surface, no floor, icon style, high contrast, bold silhouette, simple shape
+magnifying glass, round lens, simple handle, detective tool, single magnifier, centered, flat color, cel shading, no shading, solid fill, bold outlines, very thick lines, hard edges, simple shape, icon style, solid gray background, flat gray background, high contrast
+```
+
+**ネガティブ:**
+
+```
+(worst quality, low quality:1.4), realistic, photorealistic, 3d render, gradient, shading, shadow, reflection, multiple magnifiers, detective scene, hand holding, detailed texture, fine details
 ```
 
 ---
