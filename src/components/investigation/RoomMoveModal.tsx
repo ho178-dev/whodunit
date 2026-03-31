@@ -8,7 +8,7 @@ interface RoomMoveModalProps {
 
 // 部屋一覧を表示し、選択時に移動＆モーダルを閉じるコンポーネント
 export function RoomMoveModal({ onClose }: RoomMoveModalProps) {
-  const { scenario, currentRoomId, setCurrentRoomId } = useGameStore()
+  const { scenario, currentRoomId, setCurrentRoomId, inspectedEvidenceIds } = useGameStore()
   if (!scenario) return null
 
   // 部屋を選択して移動後、モーダルを閉じる
@@ -38,8 +38,20 @@ export function RoomMoveModal({ onClose }: RoomMoveModalProps) {
                   : 'border-gothic-border bg-gothic-panel text-gothic-text hover:border-gothic-accent hover:bg-stone-800/50'
               )}
             >
-              <div className="text-sm font-semibold">{room.name}</div>
-              <div className="text-xs text-gothic-muted mt-0.5">{room.description}</div>
+              <div className="flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2 min-w-0">
+                  <span className="text-sm font-semibold truncate">{room.name}</span>
+                  {room.id === currentRoomId && (
+                    <span className="shrink-0 text-[10px] border border-gothic-gold px-1 py-0.5 text-gothic-gold font-display tracking-widest">
+                      現在地
+                    </span>
+                  )}
+                </div>
+                <span className="shrink-0 text-[11px] text-gothic-muted font-display tracking-wider">
+                  証拠 {room.evidence_ids.filter((id) => inspectedEvidenceIds.includes(id)).length}/
+                  {room.evidence_ids.length}件
+                </span>
+              </div>
             </button>
           ))}
         </div>

@@ -22,12 +22,7 @@ interface RightPanelProps {
 // top-10: セーブボタン（GameShell absolute top-2）との重複を避けるためデフォルトで下げる
 export function RightPanel({ slot1, slot2, slot3, slot4, slot5, className }: RightPanelProps) {
   return (
-    <div
-      className={cn(
-        'absolute right-3 top-10 flex flex-col gap-2 z-20 w-[clamp(130px,11vw,175px)]',
-        className
-      )}
-    >
+    <div className={cn('absolute right-3 top-10 flex flex-col gap-2 z-20 w-[160px]', className)}>
       {/* Slot 1: フェーズ名バッジ */}
       <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-1.5 text-center">
         <p className="font-display text-gothic-gold text-xs tracking-widest">{slot1}</p>

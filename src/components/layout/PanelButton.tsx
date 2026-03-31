@@ -2,7 +2,7 @@
 import { cn } from '../../utils/cn'
 import type { ReactNode } from 'react'
 
-type Variant = 'primary' | 'secondary' | 'danger' | 'glow'
+type Variant = 'primary' | 'secondary' | 'danger' | 'glow' | 'dimmed'
 
 interface PanelButtonProps {
   onClick?: () => void
@@ -18,6 +18,7 @@ const variantClass: Record<Variant, string> = {
     'border-gothic-border bg-gothic-panel hover:border-gothic-accent text-gothic-muted hover:text-gothic-text',
   danger: 'border-red-800 bg-gothic-panel hover:bg-red-950/30 text-red-400',
   glow: 'border-gothic-gold bg-gothic-panel text-gothic-gold animate-glow-pulse',
+  dimmed: 'border-gothic-border/30 bg-gothic-panel text-gothic-muted/40 hover:text-gothic-muted/60',
 }
 
 // フェーズ右パネルのスロットで使用する統一ボタンコンポーネント

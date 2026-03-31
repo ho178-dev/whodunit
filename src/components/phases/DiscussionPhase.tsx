@@ -297,7 +297,7 @@ export function DiscussionPhase() {
 
         {/* 会話モード: キャラクター中央表示（フル幅） */}
         {isConversationMode && selectedSuspect && (
-          <div className="absolute inset-x-0 bottom-[18vh] flex justify-center">
+          <div className="absolute inset-x-0 bottom-[30vh] flex justify-center">
             <div className="transition-all duration-300">
               <CharacterCard
                 suspect={selectedSuspect}
@@ -354,7 +354,7 @@ export function DiscussionPhase() {
             </PanelButton>
           }
           slot4={
-            <PanelButton onClick={() => setShowNotesManual(true)}>
+            <PanelButton variant="secondary" onClick={() => setShowNotesManual(true)}>
               <span className="flex items-center justify-center gap-1.5">
                 <NotesIcon size={13} />
                 <span>捜査メモ</span>
@@ -362,7 +362,7 @@ export function DiscussionPhase() {
             </PanelButton>
           }
           slot5={
-            <PanelButton variant="primary" onClick={() => setPhase('voting')}>
+            <PanelButton variant="glow" onClick={() => setPhase('voting')}>
               投票へ進む
             </PanelButton>
           }

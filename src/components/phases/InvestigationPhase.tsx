@@ -84,13 +84,13 @@ export function InvestigationPhase() {
       }
       slot4={
         <div className="flex flex-col gap-2">
-          <PanelButton onClick={() => setShowNotes(true)}>
+          <PanelButton variant="secondary" onClick={() => setShowNotes(true)}>
             <span className="flex items-center justify-center gap-1.5">
               <NotesIcon size={13} />
               <span>捜査メモ</span>
             </span>
           </PanelButton>
-          <PanelButton variant="primary" onClick={() => setShowMoveModal(true)}>
+          <PanelButton variant="secondary" onClick={() => setShowMoveModal(true)}>
             <span className="flex items-center justify-center gap-1.5">
               <DoorIcon size={13} />
               <span>移動</span>

@@ -65,7 +65,7 @@ export function RoomView({ roomId, hideEvidenceIcon = false, rightPanel }: RoomV
 
         {/* max-width: RightPanel幅(clamp)+right余白+間隔 分だけ右側を除外して重なりを防ぐ */}
         <div
-          className="absolute top-0 left-0 p-3"
+          className="absolute bottom-32 left-0 p-3"
           style={{ maxWidth: 'calc(100% - clamp(154px, 13vw, 202px))' }}
         >
           <div className="inline-block bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-4 py-2">
