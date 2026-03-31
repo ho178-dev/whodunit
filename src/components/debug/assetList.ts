@@ -100,6 +100,45 @@ export const EVIDENCE_ASSETS: ImageAsset[] = [
 // ファイルを public/assets/bgm/ に配置し、以下に追加する
 export const BGM_ASSETS: BgmAsset[] = [
   // 例:
-  // { path: '/assets/bgm/title.mp3', label: 'タイトル', category: 'メイン' },
-  // { path: '/assets/bgm/investigation.mp3', label: '調査フェーズ', category: 'ゲーム中' },
+  {
+    path: '/assets/bgm/The Manor Awaits.wav',
+    label: 'The Manor Awaits',
+    category: 'タイトル / シナリオ選択',
+  },
+  {
+    path: '/assets/bgm/A Death in the Parlour.wav',
+    label: 'A Death in the Parlour',
+    category: 'ブリーフィング（事件概要）',
+  },
+  {
+    path: '/assets/bgm/Candlelit Clues.wav',
+    label: 'Candlelit Clues',
+    category: '捜査フェーズ ★ 最重要',
+  },
+  {
+    path: '/assets/bgm/Cross-Examination.wav',
+    label: 'Cross-Examination',
+    category: '議論フェーズ',
+  },
+  { path: '/assets/bgm/The Verdict.wav', label: 'The Verdict', category: '投票フェーズ' },
+  {
+    path: '/assets/bgm/Unmasked.wav',
+    label: 'Unmasked',
+    category: '告発フェーズ（正解ルート）★クライマックス',
+  },
+  {
+    path: '/assets/bgm/Wrong Accusation.wav',
+    label: 'Wrong Accusation',
+    category: '告発フェーズ（不正解ルート）',
+  },
+  {
+    path: '/assets/bgm/Truth Revealed.wav',
+    label: 'Truth Revealed',
+    category: 'エンディング（正解・真相解明）★カタルシス',
+  },
+  {
+    path: '/assets/bgm/The One That Got Away.wav',
+    label: 'The One That Got Away',
+    category: 'エンディング（不正解・真犯人逃走）',
+  },
 ]
