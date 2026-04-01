@@ -6,6 +6,7 @@ import { CharacterSlider } from '../shared/CharacterSlider'
 import { MansionSceneBackground } from '../shared/MansionBackground'
 import { RightPanel } from '../layout/RightPanel'
 import { PanelButton } from '../layout/PanelButton'
+import { resolveMansionAsset } from '../../services/assetResolver'
 
 // 容疑者選択と告発確認を行い、告発フェーズへ遷移する最終投票コンポーネント
 export function VotingPhase() {
@@ -34,7 +35,11 @@ export function VotingPhase() {
 
   return (
     <div className="relative h-full overflow-hidden">
-      <MansionSceneBackground phase="voting" />
+      {/* シナリオの館背景IDを使用して背景画像を表示する */}
+      <MansionSceneBackground
+        phase="voting"
+        mansionBackgroundSrc={resolveMansionAsset(scenario.mansion_background_id)}
+      />
 
       {/* スライダー（フル幅） */}
       <CharacterSlider
@@ -71,9 +76,8 @@ export function VotingPhase() {
         )}
       </div>
 
-      {/* 右パネル */}
+      {/* 右パネル（slot1はGameShellの右上ヘッダーに移管） */}
       <RightPanel
-        slot1="投票"
         slot3={
           confirming ? (
             <PanelButton variant="danger" onClick={handleVote}>

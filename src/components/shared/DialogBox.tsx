@@ -49,6 +49,16 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
     const interval = setInterval(() => {
       i++
       setDisplayed(text.slice(0, i))
+
+      // タイピング中に表示テキストが2行を超えた場合、自動スクロールして最新行を表示し
+      // スクロールボタンの表示状態を更新する
+      const el = scrollRef.current
+      if (el && el.scrollHeight > el.clientHeight) {
+        el.scrollTop = el.scrollHeight - el.clientHeight
+        setCanScrollUp(el.scrollTop > 0)
+        setCanScrollDown(false)
+      }
+
       if (i >= text.length) {
         clearInterval(interval)
         setDone(true)
@@ -86,7 +96,10 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
 
   return (
     <div
-      className={cn('border border-gothic-border bg-gothic-panel/90 p-3 cursor-pointer', className)}
+      className={cn(
+        'border border-gothic-border bg-gothic-panel/90 p-2 game-md:p-3 game-lg:p-4 cursor-pointer',
+        className
+      )}
       onClick={handleClick}
     >
       {speakerName && (

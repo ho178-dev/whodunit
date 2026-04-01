@@ -10,6 +10,7 @@ import { cn } from '../../utils/cn'
 import { RightPanel } from '../layout/RightPanel'
 import { LeftSpecialPanel } from '../layout/LeftSpecialPanel'
 import { PanelButton } from '../layout/PanelButton'
+import { resolveMansionAsset } from '../../services/assetResolver'
 
 // 告発シーンの進行ステップ
 type AccusationStep =
@@ -220,7 +221,11 @@ export function AccusationPhase() {
 
   return (
     <div className="relative h-full overflow-hidden">
-      <MansionSceneBackground phase="accusation" />
+      {/* シナリオの館背景IDを使用して背景画像を表示する */}
+      <MansionSceneBackground
+        phase="accusation"
+        mansionBackgroundSrc={resolveMansionAsset(scenario.mansion_background_id)}
+      />
 
       <div className="absolute inset-x-0 bottom-[30vh] flex justify-center">
         <CharacterCard suspect={votedSuspect} portrait selected />
@@ -260,7 +265,8 @@ export function AccusationPhase() {
         </LeftSpecialPanel>
       )}
 
-      <RightPanel slot1="告発" slot3={getSlot3()} slot4={getSlot4()} />
+      {/* 右パネル（slot1はGameShellの右上ヘッダーに移管） */}
+      <RightPanel slot3={getSlot3()} slot4={getSlot4()} />
     </div>
   )
 }

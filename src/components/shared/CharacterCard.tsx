@@ -28,11 +28,9 @@ export function CharacterCard({
   // ポートレートモード: 部屋背景前面に配置する額縁風表示
   if (portrait) {
     return (
+      // hover:scale-105 を削除し、代わりに額縁にゴールド発光エフェクトを適用する
       <div
-        className={cn(
-          'flex flex-col items-center cursor-pointer transition-all duration-200',
-          onClick && 'hover:scale-105'
-        )}
+        className={cn('flex flex-col items-center cursor-pointer transition-all duration-200')}
         onClick={onClick}
       >
         {/* 額縁風キャラクター画像 */}
@@ -41,12 +39,15 @@ export function CharacterCard({
             'relative border-2 shadow-lg transition-all duration-200',
             selected
               ? 'border-gothic-gold shadow-[0_0_20px_rgba(217,119,6,0.5)]'
-              : 'border-gothic-border/80 shadow-black/40'
+              : 'border-gothic-border/80 shadow-black/40',
+            onClick &&
+              !selected &&
+              'hover:border-gothic-gold/70 hover:shadow-[0_0_15px_rgba(217,119,6,0.5)]'
           )}
         >
           {/* 内側の装飾線 */}
           <div className="border border-gothic-border/40 bg-stone-800">
-            <div className="h-[34vh] aspect-[832/1216] overflow-hidden">
+            <div className="h-[200px] game-sm:h-[220px] game-md:h-[260px] game-lg:h-[300px] aspect-[832/1216] overflow-hidden">
               <PixelImageWithFallback
                 src={imgSrc}
                 alt={suspect.name}

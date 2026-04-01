@@ -8,12 +8,30 @@ import type { SaveSlot } from '../../types/save'
 import { isTrialMode } from '../../constants/salesConfig'
 import { FIXED_SCENARIO } from '../../constants/fixedScenario'
 
+// タイトル画面で使用する館背景ID一覧（default_mansionを含む全アセット）
+const TITLE_MANSION_IDS = [
+  'default_mansion',
+  'mansion_gothic',
+  'mansion_japanese',
+  'mansion_seaside',
+  'mansion_forest',
+  'mansion_snowy',
+  'mansion_night',
+  'mansion_ruins',
+] as const
+
 // タイトル画面を表示し、シナリオ選択・続きから・設定への経路を分岐するコンポーネント
 export function TitleScreen() {
   const { setPhase, loadSaveSlot, setScenario, setUseFixedScenario, setActiveSaveSlot } =
     useGameStore()
   const [showContinue, setShowContinue] = useState(false)
   const [slots, setSlots] = useState<SaveSlot[]>(() => getAllSlots())
+
+  // useState の初期化関数で1度だけランダムIDを決定し、以降は変化させない
+  const [randomMansionSrc] = useState<string>(() => {
+    const idx = Math.floor(Math.random() * TITLE_MANSION_IDS.length)
+    return `/assets/mansion/${TITLE_MANSION_IDS[idx]}.png`
+  })
 
   const hasSave = slots.some((s) => s !== null)
   const trial = isTrialMode()
@@ -40,8 +58,8 @@ export function TitleScreen() {
 
   return (
     <div className="h-full flex flex-col items-center justify-center px-4 relative overflow-hidden">
-      {/* 館背景 */}
-      <MansionSceneBackground phase="title" fixed />
+      {/* 館背景（ランダム選択） */}
+      <MansionSceneBackground phase="title" fixed mansionBackgroundSrc={randomMansionSrc} />
 
       <div className="relative z-10 text-center max-w-2xl">
         {/* ロゴ */}

@@ -34,7 +34,7 @@ export function PanelButton({
       onClick={onClick}
       disabled={disabled}
       className={cn(
-        'w-full py-2.5 px-2 font-display text-xs tracking-widest transition-all text-center border leading-tight disabled:opacity-40 disabled:cursor-not-allowed',
+        'w-full min-h-[32px] game-md:min-h-[40px] game-lg:min-h-[44px] py-2 game-md:py-2.5 game-lg:py-3 px-2 font-display text-[10px] game-sm:text-xs game-md:text-sm tracking-widest transition-all text-center border leading-tight disabled:opacity-40 disabled:cursor-not-allowed',
         variantClass[variant],
         className
       )}

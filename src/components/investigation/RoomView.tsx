@@ -63,11 +63,8 @@ export function RoomView({ roomId, hideEvidenceIcon = false, rightPanel }: RoomV
       <div className="relative h-full overflow-hidden">
         <RoomBackground key={room.type_id} typeId={room.type_id} name={room.name} />
 
-        {/* max-width: RightPanel幅(clamp)+right余白+間隔 分だけ右側を除外して重なりを防ぐ */}
-        <div
-          className="absolute bottom-32 left-0 p-3"
-          style={{ maxWidth: 'calc(100% - clamp(154px, 13vw, 202px))' }}
-        >
+        {/* 部屋名を左上に配置。max-width: RightPanel幅+right offset+余白分を右側から除外して重なりを防ぐ */}
+        <div className="absolute top-3 left-0 p-3 max-w-[calc(100%_-_156px)] game-sm:max-w-[calc(100%_-_180px)] game-md:max-w-[calc(100%_-_200px)] game-lg:max-w-[calc(100%_-_224px)]">
           <div className="inline-block bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-4 py-2">
             <h2 className="font-display text-gothic-gold text-[clamp(12px,1.7vh,16px)] tracking-widest">
               {room.name}
@@ -93,7 +90,7 @@ export function RoomView({ roomId, hideEvidenceIcon = false, rightPanel }: RoomV
         )}
 
         {/* rightPanel がある場合は両側均等に内側へ寄せてボタンと被らないようにする */}
-        <NpcDialog roomId={roomId} twoCharInset={rightPanel ? 'px-48' : undefined} />
+        <NpcDialog roomId={roomId} hasRightPanel={!!rightPanel} />
 
         {/* 追加パネル（右パネルなど） */}
         {rightPanel}
