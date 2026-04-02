@@ -15,12 +15,17 @@ interface MansionSceneBackgroundProps {
    * ※ CSS の fixed ポジショニングは使用しない（16:9 コンテナ内で absolute に統一）
    */
   fixed?: boolean
+  /**
+   * 表示する館背景画像のパス。指定しない場合は MANSION_DEFAULT_ASSET を使用する
+   */
+  mansionBackgroundSrc?: string
 }
 
 /** 館背景・下部グラデーション・フェーズ別色調オーバーレイを重ねて描画する */
 export const MansionSceneBackground = memo(function MansionSceneBackground({
   phase,
   fixed = false,
+  mansionBackgroundSrc,
 }: MansionSceneBackgroundProps) {
   const overlay = PHASE_OVERLAYS[phase]
   // 常に absolute inset-0 で親コンテナ内に収める（viewport固定は使用しない）
@@ -29,11 +34,13 @@ export const MansionSceneBackground = memo(function MansionSceneBackground({
   const gradientClass = fixed
     ? 'absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-black/20'
     : 'absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent'
+  // mansionBackgroundSrc が指定されていればそれを使用し、なければデフォルトに fallback する
+  const src = mansionBackgroundSrc ?? MANSION_DEFAULT_ASSET
 
   return (
     <div className={containerClass}>
       <PixelImageWithFallback
-        src={MANSION_DEFAULT_ASSET}
+        src={src}
         alt="館"
         pixelSize={PIXEL_ART_CONFIG.pixelSize.mansion}
         canvasWidth={PIXEL_ART_CONFIG.canvasSize.mansion.width}

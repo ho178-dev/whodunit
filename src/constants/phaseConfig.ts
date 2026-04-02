@@ -53,6 +53,7 @@ export const PHASE_LABELS: Partial<Record<GamePhase, PhaseLabel>> = {
 /** セーブスロット一覧でのフェーズ表示テキスト */
 export const PHASE_DISPLAY: Partial<Record<GamePhase, string>> = {
   scenario_briefing: 'ブリーフィング',
+  difficulty_select: '難易度選択',
   investigation: '捜査中',
   discussion: '議論中',
   voting: '投票中',

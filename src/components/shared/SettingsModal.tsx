@@ -1,6 +1,9 @@
-// 設定モーダル。セーブスロット選択と画面サイズ変更を統合する
+// 設定モーダル。セーブ・表示・音声・画面サイズ・APIキーの設定を統合する
 import { useState, useEffect } from 'react'
 import { useGameStore } from '../../stores/gameStore'
+import { useAudioStore } from '../../stores/audioStore'
+import { useSettingsStore } from '../../stores/settingsStore'
+import type { TextSpeed } from '../../stores/settingsStore'
 import { getManualSlots } from '../../utils/saveLoad'
 import { SaveSlotList } from './SaveSlotList'
 import { cn } from '../../utils/cn'
@@ -15,7 +18,7 @@ const SCREEN_SIZES = [
 const SCREEN_SIZE_KEY = 'whodunit_screen_size'
 const SAVE_CONFIRM_DURATION_MS = 1200
 
-type Tab = 'save' | 'display'
+type Tab = 'save' | 'view' | 'audio' | 'display' | 'apikey'
 
 interface Props {
   onClose: () => void
@@ -49,15 +52,27 @@ const TAB_BASE = 'flex-1 py-2.5 font-display text-xs tracking-widest transition-
 const TAB_ACTIVE = 'text-gothic-gold border-b-2 border-gothic-gold -mb-px'
 const TAB_INACTIVE = 'text-gothic-muted hover:text-gothic-text'
 
-// セーブスロット選択と画面サイズ変更を1つのモーダルにまとめたコンポーネント
+const TEXT_SPEED_OPTIONS: { key: TextSpeed; label: string }[] = [
+  { key: 'slow', label: 'ゆっくり' },
+  { key: 'normal', label: '普通' },
+  { key: 'fast', label: '速い' },
+]
+
+// セーブ・表示・音声・画面サイズ・APIキーの設定を1つのモーダルにまとめたコンポーネント
 export function SettingsModal({ onClose, showSave }: Props) {
   const manualSave = useGameStore((s) => s.manualSave)
+  const setApiKey = useGameStore((s) => s.setApiKey)
+  const setPhase = useGameStore((s) => s.setPhase)
+  const { bgmVolume, seVolume, setBgmVolume, setSeVolume } = useAudioStore()
+  const { skipInterlude, textSpeed, setSkipInterlude } = useSettingsStore()
   const [slots] = useState(getManualSlots)
   const [savedIndex, setSavedIndex] = useState<number | null>(null)
-  const [tab, setTab] = useState<Tab>(showSave ? 'save' : 'display')
+  const [tab, setTab] = useState<Tab>(showSave ? 'save' : 'view')
   const [selectedSize, setSelectedSize] = useState<{ width: number; height: number } | null>(
     loadScreenSize
   )
+  const [apiKey, setApiKeyInput] = useState('')
+  const apiKeyTrimmed = apiKey.trim()
 
   // 保存成功後に自動クローズ
   useEffect(() => {
@@ -76,9 +91,21 @@ export function SettingsModal({ onClose, showSave }: Props) {
     applyScreenSize(width, height)
   }
 
+  // APIキーを保存してシナリオ生成フェーズへ遷移する
+  const handleApiKeySubmit = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (!apiKeyTrimmed) return
+    setApiKey(apiKeyTrimmed)
+    setPhase('generating')
+    onClose()
+  }
+
   const tabs: Array<{ id: Tab; label: string }> = [
     ...(showSave ? [{ id: 'save' as Tab, label: 'セーブ' }] : []),
+    { id: 'view', label: '表示' },
+    { id: 'audio', label: '音声' },
     { id: 'display', label: '画面サイズ' },
+    { id: 'apikey', label: 'APIキー' },
   ]
 
   return (
@@ -125,6 +152,107 @@ export function SettingsModal({ onClose, showSave }: Props) {
             </>
           )}
 
+          {tab === 'view' && (
+            <div className="space-y-6">
+              {/* 幕間スキップ */}
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="font-display text-xs text-gothic-muted tracking-widest mb-0.5">
+                    幕間スキップ
+                  </p>
+                  <p className="font-serif text-[10px] text-gothic-muted/60">
+                    フェーズ切り替え時の演出をスキップする
+                  </p>
+                </div>
+                <button
+                  onClick={() => setSkipInterlude(!skipInterlude)}
+                  className={cn(
+                    'relative w-12 h-6 rounded-full transition-colors duration-200 flex-shrink-0',
+                    skipInterlude ? 'bg-gothic-gold' : 'bg-gothic-border'
+                  )}
+                  role="switch"
+                  aria-checked={skipInterlude}
+                >
+                  <span
+                    className={cn(
+                      'absolute top-0.5 w-5 h-5 rounded-full bg-gothic-bg transition-transform duration-200',
+                      skipInterlude ? 'translate-x-6' : 'translate-x-0.5'
+                    )}
+                  />
+                </button>
+              </div>
+
+              {/* テキスト速度（タイプライター演出実装まで無効） */}
+              <div className="opacity-40">
+                <p className="font-display text-xs text-gothic-muted tracking-widest mb-1">
+                  テキスト速度
+                </p>
+                <p className="font-serif text-[10px] text-gothic-muted/60 mb-3">
+                  ※ タイプライター演出実装後に有効化されます
+                </p>
+                <div className="flex gap-2">
+                  {TEXT_SPEED_OPTIONS.map(({ key, label }) => (
+                    <button
+                      key={key}
+                      disabled
+                      className={cn(
+                        'flex-1 border py-2 font-display text-xs tracking-widest transition-all',
+                        textSpeed === key
+                          ? 'border-gothic-gold text-gothic-gold bg-gothic-panel'
+                          : 'border-gothic-border text-gothic-muted'
+                      )}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
+          {tab === 'audio' && (
+            <div className="space-y-6">
+              {/* BGM音量 */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="font-display text-xs text-gothic-muted tracking-widest">
+                    BGM
+                  </label>
+                  <span className="font-serif text-xs text-gothic-text">
+                    {Math.round(bgmVolume * 100)}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={Math.round(bgmVolume * 100)}
+                  onChange={(e) => setBgmVolume(Number(e.target.value) / 100)}
+                  className="w-full accent-gothic-gold"
+                />
+              </div>
+              {/* SE音量 */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="font-display text-xs text-gothic-muted tracking-widest">
+                    SE
+                  </label>
+                  <span className="font-serif text-xs text-gothic-text">
+                    {Math.round(seVolume * 100)}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={Math.round(seVolume * 100)}
+                  onChange={(e) => setSeVolume(Number(e.target.value) / 100)}
+                  className="w-full accent-gothic-gold"
+                />
+              </div>
+            </div>
+          )}
+
           {tab === 'display' && (
             <>
               <p className="text-gothic-muted font-serif text-xs tracking-widest text-center mb-4">
@@ -155,6 +283,34 @@ export function SettingsModal({ onClose, showSave }: Props) {
               <p className="text-gothic-muted font-serif text-[10px] text-center mt-4">
                 ※ exe版でウィンドウサイズを変更します
               </p>
+            </>
+          )}
+
+          {tab === 'apikey' && (
+            <>
+              <p className="text-gothic-muted font-serif text-xs tracking-widest text-center mb-4">
+                ― Gemini API キー ―
+              </p>
+              <p className="text-gothic-muted font-serif text-xs mb-4 leading-relaxed">
+                Google AI Studio の API
+                キーを入力してください。キーはこのセッション中のみ使用され、保存されません。
+              </p>
+              <form onSubmit={handleApiKeySubmit} className="space-y-3">
+                <input
+                  type="password"
+                  value={apiKey}
+                  onChange={(e) => setApiKeyInput(e.target.value)}
+                  placeholder="AIza..."
+                  className="w-full bg-gothic-bg border border-gothic-border text-gothic-text font-serif px-4 py-3 focus:outline-none focus:border-gothic-gold text-sm"
+                />
+                <button
+                  type="submit"
+                  disabled={!apiKeyTrimmed}
+                  className="w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 disabled:opacity-40 text-gothic-gold font-display tracking-widest py-3 transition-all text-xs"
+                >
+                  シナリオを生成する
+                </button>
+              </form>
             </>
           )}
         </div>

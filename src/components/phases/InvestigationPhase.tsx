@@ -11,7 +11,7 @@ import { EvidenceModal } from '../investigation/EvidenceModal'
 import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
 import { PixelImageWithFallback } from '../shared/PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
-import { MANSION_DEFAULT_ASSET } from '../../services/assetResolver'
+import { MANSION_DEFAULT_ASSET, resolveMansionAsset } from '../../services/assetResolver'
 import { RightPanel } from '../layout/RightPanel'
 import { PanelButton } from '../layout/PanelButton'
 import { SearchIcon, NotesIcon, DoorIcon } from '../shared/Icons'
@@ -62,23 +62,23 @@ export function InvestigationPhase() {
     </>
   )
 
-  // ボタン群: slot2にAPカウンターを含むRightPanel
+  // ボタン群: slot2にAPカウンターを含むRightPanel（slot1はGameShellの右上ヘッダーに移管）
   const rightButtons = (
     <RightPanel
-      slot1="探索"
       slot2={apSlot}
       slot3={
         currentRoomId ? (
+          // 証拠品ボタン: アイコン・名前・カウントを1行にまとめる
           <PanelButton variant="primary" onClick={() => setShowEvidence(true)}>
             <span className="flex items-center justify-center gap-1.5">
               <SearchIcon size={13} />
               <span>証拠品</span>
+              {roomEvidenceTotal > 0 && (
+                <span className="text-[10px] text-gothic-muted">
+                  {roomEvidenceInspected}/{roomEvidenceTotal}
+                </span>
+              )}
             </span>
-            {roomEvidenceTotal > 0 && (
-              <span className="block text-[10px] text-gothic-muted mt-0.5">
-                {roomEvidenceInspected}/{roomEvidenceTotal}
-              </span>
-            )}
           </PanelButton>
         ) : undefined
       }
@@ -121,11 +121,11 @@ export function InvestigationPhase() {
       {currentRoomId ? (
         <RoomView roomId={currentRoomId} hideEvidenceIcon rightPanel={rightButtons} />
       ) : (
-        /* 初期状態: 館背景を表示 */
+        /* 初期状態: シナリオの館背景を表示 */
         <div className="relative h-full overflow-hidden">
           <div className="absolute inset-0">
             <PixelImageWithFallback
-              src={MANSION_DEFAULT_ASSET}
+              src={resolveMansionAsset(scenario.mansion_background_id)}
               alt="館"
               pixelSize={PIXEL_ART_CONFIG.pixelSize.mansion}
               canvasWidth={PIXEL_ART_CONFIG.canvasSize.mansion.width}

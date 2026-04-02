@@ -18,6 +18,7 @@ import { RightPanel } from '../layout/RightPanel'
 import { LeftSpecialPanel } from '../layout/LeftSpecialPanel'
 import { PanelButton } from '../layout/PanelButton'
 import { NotesIcon } from '../shared/Icons'
+import { resolveMansionAsset } from '../../services/assetResolver'
 
 // 議論フェーズのメインコンポーネント
 export function DiscussionPhase() {
@@ -283,7 +284,11 @@ export function DiscussionPhase() {
       )}
 
       <div className="relative h-full overflow-hidden">
-        <MansionSceneBackground phase="discussion" />
+        {/* シナリオの館背景IDを使用して背景画像を表示する */}
+        <MansionSceneBackground
+          phase="discussion"
+          mansionBackgroundSrc={resolveMansionAsset(scenario.mansion_background_id)}
+        />
 
         {/* 一覧モード: スライダー（フル幅） */}
         {!isConversationMode && (
@@ -297,7 +302,7 @@ export function DiscussionPhase() {
 
         {/* 会話モード: キャラクター中央表示（フル幅） */}
         {isConversationMode && selectedSuspect && (
-          <div className="absolute inset-x-0 bottom-[30vh] flex justify-center">
+          <div className="absolute inset-x-0 bottom-28 game-md:bottom-[130px] game-lg:bottom-36 flex justify-center">
             <div className="transition-all duration-300">
               <CharacterCard
                 suspect={selectedSuspect}
@@ -310,7 +315,7 @@ export function DiscussionPhase() {
         )}
 
         {/* ダイアログエリア（フル幅・下部固定） */}
-        <div className="absolute inset-x-0 bottom-0 p-3">
+        <div className="absolute inset-x-0 bottom-0 p-2 game-md:p-3">
           {dialogReaction && selectedSuspect ? (
             <div
               className={cn(
@@ -341,9 +346,8 @@ export function DiscussionPhase() {
         {/* 左特別パネル（会話モード時のみ） */}
         {leftPanel}
 
-        {/* 右パネル */}
+        {/* 右パネル（slot1はGameShellの右上ヘッダーに移管） */}
         <RightPanel
-          slot1="議論"
           slot3={
             <PanelButton
               variant="primary"

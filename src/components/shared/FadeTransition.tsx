@@ -1,6 +1,7 @@
 // triggerKeyの変化を検知してフェードイン/アウトと幕間テキスト演出を行うラッパーコンポーネント
 import { useEffect, useState, useCallback, type ReactNode } from 'react'
 import type { PhaseLabel } from '../../constants/phaseConfig'
+import { useSettingsStore } from '../../stores/settingsStore'
 import { cn } from '../../utils/cn'
 
 interface FadeTransitionProps {
@@ -18,6 +19,7 @@ type TransitionState = 'label' | 'visible'
 
 /** フェーズ切り替え時にコンテンツをフェードアウトし、幕間テキストを表示してからフェードインする */
 export function FadeTransition({ children, triggerKey, phaseLabel }: FadeTransitionProps) {
+  const skipInterlude = useSettingsStore((s) => s.skipInterlude)
   const [state, setState] = useState<TransitionState>('visible')
   const [prevKey, setPrevKey] = useState(triggerKey)
 
@@ -32,12 +34,13 @@ export function FadeTransition({ children, triggerKey, phaseLabel }: FadeTransit
 
   useEffect(() => {
     if (state !== 'label') return
+    // skipInterlude=true の場合は即座にコンテンツを表示（duration=0）
     // phaseLabel がある場合は指定時間（デフォルト1200ms）後にコンテンツを表示
     // phaseLabel がない場合は従来通り50msでフェードイン
-    const duration = phaseLabel ? (phaseLabel.duration ?? 1200) : 50
+    const duration = skipInterlude ? 0 : phaseLabel ? (phaseLabel.duration ?? 1200) : 50
     const timer = setTimeout(() => setState('visible'), duration)
     return () => clearTimeout(timer)
-  }, [state, phaseLabel, triggerKey])
+  }, [state, phaseLabel, triggerKey, skipInterlude])
 
   const contentVisible = state === 'visible'
   const labelVisible = state === 'label' && !!phaseLabel

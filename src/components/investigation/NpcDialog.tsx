@@ -10,8 +10,8 @@ import type { Suspect } from '../../types/scenario'
 
 interface NpcDialogProps {
   roomId: string
-  /** 2名表示時の左右均等パディング（ボタンパネルとの重なりを避けるために調整）。デフォルトは 'px-6 sm:px-12' */
-  twoCharInset?: string
+  /** true のとき2名表示の左右インセットを右パネル幅に合わせて広げる */
+  hasRightPanel?: boolean
 }
 
 // 容疑者の詳細情報をモーダル表示するコンポーネント
@@ -42,7 +42,7 @@ function SuspectDetailModal({ suspect, onClose }: { suspect: Suspect; onClose: (
 }
 
 // 部屋内のキャラクター配置（最大2名左右）とダイアログを統合表示するコンポーネント
-export function NpcDialog({ roomId, twoCharInset }: NpcDialogProps) {
+export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
   const {
     scenario,
     talkedSuspectIds,
@@ -114,10 +114,12 @@ export function NpcDialog({ roomId, twoCharInset }: NpcDialogProps) {
       {suspectsHere.length > 0 && (
         <div
           className={cn(
-            'absolute inset-x-0 bottom-[30vh] flex items-end gap-4',
+            'absolute inset-x-0 bottom-28 game-md:bottom-[130px] game-lg:bottom-36 flex items-end gap-4',
             suspectsHere.length === 1
-              ? 'justify-center px-6 sm:px-12'
-              : cn('justify-between', twoCharInset ?? 'px-6 sm:px-12')
+              ? 'justify-center px-6 game-md:px-10'
+              : hasRightPanel
+                ? 'justify-between px-40 game-sm:px-48 game-md:px-52 game-lg:px-56'
+                : 'justify-between px-6 game-md:px-10'
           )}
         >
           {suspectsHere.map((suspect) => (
@@ -141,7 +143,7 @@ export function NpcDialog({ roomId, twoCharInset }: NpcDialogProps) {
         </div>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 p-3">
+      <div className="absolute inset-x-0 bottom-0 p-2 game-md:p-3">
         {currentSuspect && currentDialog ? (
           <div className="relative">
             <DialogBox

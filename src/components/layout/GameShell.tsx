@@ -1,12 +1,15 @@
 // ゲームフェーズに応じた画面切り替えを行うルートレイアウトコンポーネント
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGameStore } from '../../stores/gameStore'
+import { audioManager } from '../../services/audioManager'
+import { PHASE_BGM, ACCUSATION_BGM, ENDING_BGM } from '../../services/audioConfig'
 import { FadeTransition } from '../shared/FadeTransition'
 import { PHASE_LABELS } from '../../constants/phaseConfig'
 import { TitleScreen } from '../phases/TitleScreen'
 import { ApiKeyInput } from '../phases/ApiKeyInput'
 import { LoadingScreen } from '../phases/LoadingScreen'
 import { ScenarioBriefing } from '../phases/ScenarioBriefing'
+import { DifficultySelect } from '../phases/DifficultySelect'
 import { InvestigationPhase } from '../phases/InvestigationPhase'
 import { DiscussionPhase } from '../phases/DiscussionPhase'
 import { VotingPhase } from '../phases/VotingPhase'
@@ -15,21 +18,47 @@ import { EndingScreen } from '../phases/EndingScreen'
 import { ScenarioSelect } from '../phases/ScenarioSelect'
 import { TrialPreview } from '../phases/TrialPreview'
 import { SettingsModal } from '../shared/SettingsModal'
+import type { GamePhase } from '../../types/game'
 
 // セーブ機能を有効にするフェーズ
 const MANUAL_SAVE_PHASES = new Set([
   'scenario_briefing',
+  'difficulty_select',
   'investigation',
   'discussion',
   'voting',
   'accusation',
 ])
 
+// 右上に表示するフェーズ名バッジのテキスト（表示しないフェーズは undefined）
+const PHASE_BADGE_TEXT: Partial<Record<GamePhase, string>> = {
+  investigation: '探索',
+  discussion: '議論',
+  voting: '投票',
+  accusation: '告発',
+}
+
 // ゲームのルートレイアウト。フェーズに応じた画面を切り替えてレンダリングする
 export function GameShell() {
   const phase = useGameStore((s) => s.phase)
   const useFixedScenario = useGameStore((s) => s.useFixedScenario)
+  const murdererId = useGameStore((s) => s.scenario?.murderer_id)
+  const votedSuspectId = useGameStore((s) => s.votedSuspectId)
   const [showSaveModal, setShowSaveModal] = useState(false)
+
+  // フェーズ変更時に対応 BGM を再生する
+  useEffect(() => {
+    const isCorrect = votedSuspectId != null && votedSuspectId === murdererId
+    let path: string | undefined
+    if (phase === 'accusation') {
+      path = isCorrect ? ACCUSATION_BGM.correct : ACCUSATION_BGM.wrong
+    } else if (phase === 'ending') {
+      path = isCorrect ? ENDING_BGM.correct : ENDING_BGM.wrong
+    } else {
+      path = PHASE_BGM[phase]
+    }
+    if (path) audioManager.playBgm(path)
+  }, [phase, murdererId, votedSuspectId])
 
   const showSave = useFixedScenario && MANUAL_SAVE_PHASES.has(phase)
 
@@ -46,6 +75,8 @@ export function GameShell() {
         return <LoadingScreen />
       case 'scenario_briefing':
         return <ScenarioBriefing />
+      case 'difficulty_select':
+        return <DifficultySelect />
       case 'investigation':
         return <InvestigationPhase />
       case 'discussion':
@@ -78,14 +109,25 @@ export function GameShell() {
           {renderPhase()}
         </FadeTransition>
 
-        {/* 設定ボタン: 全フェーズで表示（セーブ可否はSettingsModal内で制御） */}
-        <button
-          onClick={() => setShowSaveModal(true)}
-          className="absolute top-2 left-2 z-40 border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-2.5 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200"
-          title="設定"
-        >
-          ⚙
-        </button>
+        {/* 右上ヘッダー: フェーズ名バッジ（左）＋設定ボタン（右）。合計幅 = RightPanel と一致 */}
+        <div className="absolute top-2 right-2 game-md:right-3 game-lg:right-4 z-40 flex w-[140px] game-sm:w-[160px] game-md:w-[180px] game-lg:w-[200px]">
+          {/* フェーズ名バッジ（フェーズ名がある場合のみ表示） */}
+          {PHASE_BADGE_TEXT[phase] && (
+            <div className="flex-1 bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-1.5 text-center mr-1">
+              <p className="font-display text-gothic-gold text-xs tracking-widest">
+                {PHASE_BADGE_TEXT[phase]}
+              </p>
+            </div>
+          )}
+          {/* 設定ボタン: 全フェーズで表示（セーブ可否はSettingsModal内で制御） */}
+          <button
+            onClick={() => setShowSaveModal(true)}
+            className="border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-2.5 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200 ml-auto"
+            title="設定"
+          >
+            ⚙
+          </button>
+        </div>
 
         {showSaveModal && (
           <SettingsModal showSave={showSave} onClose={() => setShowSaveModal(false)} />

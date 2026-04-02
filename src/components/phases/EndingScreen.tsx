@@ -11,6 +11,7 @@ import { calculateRank } from '../../utils/score'
 import { getEvidenceNames } from '../../utils/scenario'
 import { loadScoreData, saveScore } from '../../utils/score'
 import type { DifficultyScore } from '../../types/game'
+import { resolveMansionAsset } from '../../services/assetResolver'
 
 // ランク表示スタイル（S=金, A=銀, B=銅, C=白グレー）
 const RANK_STYLE = {
@@ -98,7 +99,12 @@ export function EndingScreen() {
     const displayText = isEpilogue ? (epilogueText ?? confessionText) : confessionText
     return (
       <div className="h-full relative">
-        <MansionSceneBackground phase="ending" fixed />
+        {/* シナリオの館背景IDを使用して背景画像を表示する */}
+        <MansionSceneBackground
+          phase="ending"
+          fixed
+          mansionBackgroundSrc={resolveMansionAsset(scenario.mansion_background_id)}
+        />
         <div className="relative z-10 h-full flex flex-col items-center justify-end pb-6 px-4">
           <div className="w-full max-w-2xl">
             {!isEpilogue && <CharacterCard suspect={murderer} portrait />}
