@@ -1,6 +1,7 @@
-// 設定モーダル。セーブスロット選択と画面サイズ変更を統合する
+// 設定モーダル。セーブスロット選択・画面サイズ変更・音声設定を統合する
 import { useState, useEffect } from 'react'
 import { useGameStore } from '../../stores/gameStore'
+import { useAudioStore } from '../../stores/audioStore'
 import { getManualSlots } from '../../utils/saveLoad'
 import { SaveSlotList } from './SaveSlotList'
 import { cn } from '../../utils/cn'
@@ -15,7 +16,7 @@ const SCREEN_SIZES = [
 const SCREEN_SIZE_KEY = 'whodunit_screen_size'
 const SAVE_CONFIRM_DURATION_MS = 1200
 
-type Tab = 'save' | 'display'
+type Tab = 'save' | 'display' | 'audio'
 
 interface Props {
   onClose: () => void
@@ -49,12 +50,13 @@ const TAB_BASE = 'flex-1 py-2.5 font-display text-xs tracking-widest transition-
 const TAB_ACTIVE = 'text-gothic-gold border-b-2 border-gothic-gold -mb-px'
 const TAB_INACTIVE = 'text-gothic-muted hover:text-gothic-text'
 
-// セーブスロット選択と画面サイズ変更を1つのモーダルにまとめたコンポーネント
+// セーブスロット選択・画面サイズ変更・音声設定を1つのモーダルにまとめたコンポーネント
 export function SettingsModal({ onClose, showSave }: Props) {
   const manualSave = useGameStore((s) => s.manualSave)
+  const { bgmVolume, seVolume, setBgmVolume, setSeVolume } = useAudioStore()
   const [slots] = useState(getManualSlots)
   const [savedIndex, setSavedIndex] = useState<number | null>(null)
-  const [tab, setTab] = useState<Tab>(showSave ? 'save' : 'display')
+  const [tab, setTab] = useState<Tab>(showSave ? 'save' : 'audio')
   const [selectedSize, setSelectedSize] = useState<{ width: number; height: number } | null>(
     loadScreenSize
   )
@@ -78,6 +80,7 @@ export function SettingsModal({ onClose, showSave }: Props) {
 
   const tabs: Array<{ id: Tab; label: string }> = [
     ...(showSave ? [{ id: 'save' as Tab, label: 'セーブ' }] : []),
+    { id: 'audio', label: '音声' },
     { id: 'display', label: '画面サイズ' },
   ]
 
@@ -123,6 +126,49 @@ export function SettingsModal({ onClose, showSave }: Props) {
                 <SaveSlotList slots={slots} onSelect={handleSave} mode="save" baseSlotIndex={1} />
               )}
             </>
+          )}
+
+          {tab === 'audio' && (
+            <div className="space-y-6">
+              {/* BGM音量 */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="font-display text-xs text-gothic-muted tracking-widest">
+                    BGM
+                  </label>
+                  <span className="font-serif text-xs text-gothic-text">
+                    {Math.round(bgmVolume * 100)}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={Math.round(bgmVolume * 100)}
+                  onChange={(e) => setBgmVolume(Number(e.target.value) / 100)}
+                  className="w-full accent-gothic-gold"
+                />
+              </div>
+              {/* SE音量 */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <label className="font-display text-xs text-gothic-muted tracking-widest">
+                    SE
+                  </label>
+                  <span className="font-serif text-xs text-gothic-text">
+                    {Math.round(seVolume * 100)}%
+                  </span>
+                </div>
+                <input
+                  type="range"
+                  min={0}
+                  max={100}
+                  value={Math.round(seVolume * 100)}
+                  onChange={(e) => setSeVolume(Number(e.target.value) / 100)}
+                  className="w-full accent-gothic-gold"
+                />
+              </div>
+            </div>
           )}
 
           {tab === 'display' && (

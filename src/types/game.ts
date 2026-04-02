@@ -5,6 +5,7 @@ export type GamePhase =
   | 'api_key_input'
   | 'generating'
   | 'scenario_briefing'
+  | 'difficulty_select'
   | 'investigation'
   | 'discussion'
   | 'voting'

@@ -1,5 +1,6 @@
 // 部屋移動用モーダル。移動先の部屋を選択して自動クローズする
 import { useGameStore } from '../../stores/gameStore'
+import { audioManager } from '../../services/audioManager'
 import { cn } from '../../utils/cn'
 
 interface RoomMoveModalProps {
@@ -11,8 +12,9 @@ export function RoomMoveModal({ onClose }: RoomMoveModalProps) {
   const { scenario, currentRoomId, setCurrentRoomId, inspectedEvidenceIds } = useGameStore()
   if (!scenario) return null
 
-  // 部屋を選択して移動後、モーダルを閉じる
+  // 部屋を選択して move SE を再生し、移動後にモーダルを閉じる
   const handleSelect = (roomId: string) => {
+    audioManager.playSe('move')
     setCurrentRoomId(roomId)
     onClose()
   }

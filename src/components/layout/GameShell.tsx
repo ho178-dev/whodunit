@@ -1,12 +1,15 @@
 // ゲームフェーズに応じた画面切り替えを行うルートレイアウトコンポーネント
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useGameStore } from '../../stores/gameStore'
+import { audioManager } from '../../services/audioManager'
+import { PHASE_BGM, ACCUSATION_BGM, ENDING_BGM } from '../../services/audioConfig'
 import { FadeTransition } from '../shared/FadeTransition'
 import { PHASE_LABELS } from '../../constants/phaseConfig'
 import { TitleScreen } from '../phases/TitleScreen'
 import { ApiKeyInput } from '../phases/ApiKeyInput'
 import { LoadingScreen } from '../phases/LoadingScreen'
 import { ScenarioBriefing } from '../phases/ScenarioBriefing'
+import { DifficultySelect } from '../phases/DifficultySelect'
 import { InvestigationPhase } from '../phases/InvestigationPhase'
 import { DiscussionPhase } from '../phases/DiscussionPhase'
 import { VotingPhase } from '../phases/VotingPhase'
@@ -20,6 +23,7 @@ import type { GamePhase } from '../../types/game'
 // セーブ機能を有効にするフェーズ
 const MANUAL_SAVE_PHASES = new Set([
   'scenario_briefing',
+  'difficulty_select',
   'investigation',
   'discussion',
   'voting',
@@ -38,7 +42,23 @@ const PHASE_BADGE_TEXT: Partial<Record<GamePhase, string>> = {
 export function GameShell() {
   const phase = useGameStore((s) => s.phase)
   const useFixedScenario = useGameStore((s) => s.useFixedScenario)
+  const murdererId = useGameStore((s) => s.scenario?.murderer_id)
+  const votedSuspectId = useGameStore((s) => s.votedSuspectId)
   const [showSaveModal, setShowSaveModal] = useState(false)
+
+  // フェーズ変更時に対応 BGM を再生する
+  useEffect(() => {
+    const isCorrect = votedSuspectId != null && votedSuspectId === murdererId
+    let path: string | undefined
+    if (phase === 'accusation') {
+      path = isCorrect ? ACCUSATION_BGM.correct : ACCUSATION_BGM.wrong
+    } else if (phase === 'ending') {
+      path = isCorrect ? ENDING_BGM.correct : ENDING_BGM.wrong
+    } else {
+      path = PHASE_BGM[phase]
+    }
+    if (path) audioManager.playBgm(path)
+  }, [phase, murdererId, votedSuspectId])
 
   const showSave = useFixedScenario && MANUAL_SAVE_PHASES.has(phase)
 
@@ -55,6 +75,8 @@ export function GameShell() {
         return <LoadingScreen />
       case 'scenario_briefing':
         return <ScenarioBriefing />
+      case 'difficulty_select':
+        return <DifficultySelect />
       case 'investigation':
         return <InvestigationPhase />
       case 'discussion':
