@@ -1,11 +1,12 @@
 // 証拠品の画像・名前・説明を表示する汎用カードコンポーネント
 import { cn } from '../../utils/cn'
 import { useEvidenceAsset } from '../../hooks/useAsset'
+import { assetUrl } from '../../utils/assetUrl'
 import type { Evidence } from '../../types/scenario'
 import { PixelImageWithFallback } from './PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 
-const DEFAULT_EVIDENCE_IMG = '/assets/evidence/default_evidence.png'
+const DEFAULT_EVIDENCE_IMG = assetUrl('/assets/evidence/default_evidence.png')
 
 interface EvidenceCardProps {
   evidence: Evidence

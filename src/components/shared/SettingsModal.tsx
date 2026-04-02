@@ -8,8 +8,9 @@ import { getManualSlots } from '../../utils/saveLoad'
 import { SaveSlotList } from './SaveSlotList'
 import { cn } from '../../utils/cn'
 
-// 画面サイズのプリセット（exe想定: 1280×720 / 1600×900 / 1920×1080）
+// 画面サイズのプリセット（exe想定: 960×540 がデフォルト起動サイズ）
 const SCREEN_SIZES = [
+  { label: '960 × 540', width: 960, height: 540 },
   { label: '1280 × 720', width: 1280, height: 720 },
   { label: '1600 × 900', width: 1600, height: 900 },
   { label: '1920 × 1080', width: 1920, height: 1080 },

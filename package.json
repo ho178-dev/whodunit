@@ -1,8 +1,9 @@
 {
-  "name": "myapp",
+  "name": "whodunit",
   "private": true,
-  "version": "0.0.0",
+  "version": "0.1.0",
   "type": "module",
+  "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",
     "build": "tsc -b && vite build",
@@ -15,7 +16,14 @@
     "test": "vitest",
     "test:run": "vitest run",
     "coverage": "vitest run --coverage",
-    "prepare": "husky"
+    "prepare": "husky",
+    "electron:run:dev": "tsc -b && vite build --mode dev && electron .",
+    "electron:run:trial": "tsc -b && vite build --mode trial && electron .",
+    "electron:run:prod": "tsc -b && vite build && electron .",
+    "build:exe:dev": "tsc -b && vite build --mode dev && electron-builder",
+    "build:exe:trial": "tsc -b && vite build --mode trial && electron-builder",
+    "build:exe:prod": "tsc -b && vite build && electron-builder",
+    "build:exe:all": "npm run build:exe:dev && npm run build:exe:trial && npm run build:exe:prod"
   },
   "lint-staged": {
     "*.{ts,tsx}": [
@@ -46,6 +54,8 @@
     "@types/react-dom": "^19.2.3",
     "@vitejs/plugin-react": "^6.0.1",
     "@vitest/coverage-v8": "^4.1.0",
+    "electron": "^41.1.1",
+    "electron-builder": "^26.8.1",
     "eslint": "^9.39.4",
     "eslint-config-prettier": "^10.1.8",
     "eslint-plugin-react-hooks": "^7.0.1",

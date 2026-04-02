@@ -4,6 +4,7 @@ import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { useRoomAsset } from '../../hooks/useAsset'
+import { assetUrl } from '../../utils/assetUrl'
 import type { RoomTypeId, Evidence } from '../../types/scenario'
 import { NpcDialog } from './NpcDialog'
 import { EvidenceModal } from './EvidenceModal'
@@ -11,7 +12,7 @@ import { PixelImageWithFallback } from '../shared/PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 import { SearchIcon } from '../shared/Icons'
 
-const DEFAULT_ROOM_IMG = '/assets/rooms/default_room.png'
+const DEFAULT_ROOM_IMG = assetUrl('/assets/rooms/default_room.png')
 
 // 部屋タイプに応じた背景画像を全面表示するコンポーネント
 function RoomBackground({ typeId, name }: { typeId: RoomTypeId; name: string }) {

@@ -6,7 +6,8 @@ import { SaveSlotList } from '../shared/SaveSlotList'
 import { MansionSceneBackground } from '../shared/MansionBackground'
 import { TutorialOverlay } from './TutorialOverlay'
 import type { SaveSlot } from '../../types/save'
-import { isTrialMode } from '../../constants/salesConfig'
+import { isTrialMode, isDevBuild } from '../../constants/salesConfig'
+import { assetUrl } from '../../utils/assetUrl'
 import { FIXED_SCENARIO } from '../../constants/fixedScenario'
 
 // タイトル画面で使用する館背景ID一覧（default_mansionを含む全アセット）
@@ -32,11 +33,12 @@ export function TitleScreen() {
   // useState の初期化関数で1度だけランダムIDを決定し、以降は変化させない
   const [randomMansionSrc] = useState<string>(() => {
     const idx = Math.floor(Math.random() * TITLE_MANSION_IDS.length)
-    return `/assets/mansion/${TITLE_MANSION_IDS[idx]}.png`
+    return assetUrl(`/assets/mansion/${TITLE_MANSION_IDS[idx]}.png`)
   })
 
   const hasSave = slots.some((s) => s !== null)
   const trial = isTrialMode()
+  const devBuild = isDevBuild()
 
   // スロットを選択してゲームを復元する（loadSaveSlot が activeSaveSlot も設定する）
   const handleSelectSlot = (index: number) => {
@@ -119,6 +121,20 @@ export function TitleScreen() {
             >
               遊び方
             </button>
+
+            {/* dev ビルドのみ表示するデバッグページへのボタン */}
+            {devBuild && (
+              <button
+                onClick={() => {
+                  const url = new URL(window.location.href)
+                  url.searchParams.set('debug', 'true')
+                  window.location.href = url.toString()
+                }}
+                className="w-full border border-gothic-border/40 bg-transparent text-gothic-muted/40 font-serif text-xs py-1.5 px-8 transition-all duration-200 hover:border-gothic-accent hover:text-gothic-muted"
+              >
+                [DEV] デバッグ
+              </button>
+            )}
           </div>
         ) : (
           <div>

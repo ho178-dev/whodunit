@@ -150,31 +150,62 @@ AIシナリオ生成時にシナリオの設定に合う `mansion_background_id`
 
 ```bash
 npm install
-npm run dev          # 開発サーバー起動（有料版相当・全シナリオ表示）
-npm run build:full   # 有料版ビルド（全3シナリオ）
-npm run build:trial  # 体験版ビルド（シナリオ1本のみ・予告画面あり）
+npm run dev          # ブラウザで開発サーバーを起動
+npm run build:full   # Web 向け prod ビルド（全3シナリオ）
+npm run build:trial  # Web 向け trial ビルド（シナリオ1本のみ・予告画面あり）
 npm run build        # build:full と同等
 ```
 
-### 体験版 / 有料版の切り替え
+### ビルドモード（dev / trial / prod）
 
-`VITE_TRIAL_MODE` 環境変数でビルド内容を制御する。
+`VITE_BUILD_MODE` 環境変数でビルド内容を制御する。
 
-| モード | コマンド      | 読み込まれる env ファイル | シナリオ数 | 予告画面 |
-| ------ | ------------- | ------------------------- | ---------- | -------- |
-| 有料版 | `build:full`  | `.env`                    | 3本        | なし     |
-| 体験版 | `build:trial` | `.env.trial`              | 1本        | あり     |
+| モード  | シナリオ | AI生成 | デバッグ機能 | 体験版予告 | 読み込まれる env ファイル |
+| ------- | -------- | ------ | ------------ | ---------- | ------------------------- |
+| `prod`  | 全本     | ○      | ×            | ×          | `.env`                    |
+| `trial` | 1本のみ  | ×      | ×            | ○          | `.env` + `.env.trial`     |
+| `dev`   | 全本     | ○      | ○            | ×          | `.env` + `.env.dev`       |
 
-- `.env.trial` には `VITE_TRIAL_MODE=true` が設定済み
-- 体験版ではタイトル画面からシナリオ選択を**スキップ**して直接ブリーフィングへ遷移する
-- エンディング後に「次のシナリオ予告を見る」ボタンが表示され、シナリオ2・3の紹介とBooth購入リンクを案内する
+- trial: タイトル画面からシナリオ選択をスキップして直接ブリーフィングへ遷移する
+- trial: エンディング後に「次のシナリオ予告を見る」ボタンが表示され、シナリオ2・3の紹介とBooth購入リンクを案内する
+- dev: タイトル画面に「[DEV] デバッグ」ボタンが表示される
+
+### Electron exe ビルド
+
+初期ウィンドウサイズ: **960 × 540**（リサイズ可）  
+出力先: `release/` ディレクトリ
+
+#### 動作確認（パッケージなしで Electron 起動）
+
+```bash
+npm run electron:run:dev    # dev モードで起動
+npm run electron:run:trial  # trial モードで起動
+npm run electron:run:prod   # prod モードで起動
+```
+
+#### exe パッケージング（個別）
+
+```bash
+npm run build:exe:dev       # dev 版 exe をビルド
+npm run build:exe:trial     # trial 版 exe をビルド
+npm run build:exe:prod      # prod 版 exe をビルド
+```
+
+#### exe パッケージング（全モード一括）
+
+```bash
+npm run build:exe:all       # dev → trial → prod の順に全モードをビルド
+```
 
 ### デバッグページ
 
-開発サーバー起動中に以下のURLでデバッグページを表示できる（本番ビルドでは無効）。
+ブラウザ開発サーバーまたは dev exe ビルドで利用可能。
 
 ```
+# ブラウザ開発サーバー
 http://localhost:5173/?debug=true
+
+# dev exe: タイトル画面の「[DEV] デバッグ」ボタンをクリック
 ```
 
 | タブ | 内容                                                                                             |

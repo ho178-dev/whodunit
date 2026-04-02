@@ -1,0 +1,27 @@
+# electron-builder パッケージ設定
+# dev / trial / prod の3モードとも同じ設定でビルドする
+# モードの違いは Vite ビルド時の VITE_BUILD_MODE 環境変数で吸収する
+
+appId: com.whodunit.game
+productName: WhoDuNiT
+copyright: Copyright © 2024 whodunit
+
+directories:
+  output: release
+
+files:
+  - dist/**
+  - electron/**
+  - package.json
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  shortcutName: WhoDuNiT
