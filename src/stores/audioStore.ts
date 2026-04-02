@@ -13,8 +13,8 @@ interface AudioState {
 export const useAudioStore = create<AudioState>()(
   persist(
     (set) => ({
-      bgmVolume: 0.7,
-      seVolume: 0.8,
+      bgmVolume: 0.5,
+      seVolume: 0.5,
       setBgmVolume: (v) => {
         set({ bgmVolume: v })
         audioManager.setBgmVolume(v)

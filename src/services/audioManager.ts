@@ -8,8 +8,8 @@ const AUDIO_STORE_KEY = 'whodunit_audio'
 class AudioManager {
   private bgmAudio: HTMLAudioElement | null = null
   private currentBgmPath: string | null = null
-  private bgmVolume = 0.7
-  private seVolume = 0.8
+  private bgmVolume = 0.5
+  private seVolume = 0.5
 
   constructor() {
     // localStorage から永続化済み音量を読み込んで初期値に適用する

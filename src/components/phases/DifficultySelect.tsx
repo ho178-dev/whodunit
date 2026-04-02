@@ -2,7 +2,6 @@
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { MansionSceneBackground } from '../shared/MansionBackground'
-import { TutorialOverlay } from './TutorialOverlay'
 import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
 import { resolveMansionAsset } from '../../services/assetResolver'
 import type { Difficulty } from '../../types/game'
@@ -11,7 +10,6 @@ import type { Difficulty } from '../../types/game'
 export function DifficultySelect() {
   const { scenario, setPhase, setDifficulty, difficulty } = useGameStore()
   const [selectedDifficulty, setSelectedDifficulty] = useState<Difficulty>(difficulty)
-  const [showTutorial, setShowTutorial] = useState(false)
 
   if (!scenario) return null
 
@@ -25,8 +23,6 @@ export function DifficultySelect() {
 
   return (
     <div className="relative h-full">
-      {showTutorial && <TutorialOverlay onClose={() => setShowTutorial(false)} />}
-
       <MansionSceneBackground
         phase="difficulty_select"
         fixed={true}
@@ -95,20 +91,12 @@ export function DifficultySelect() {
           >
             ← 戻る
           </button>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={() => setShowTutorial(true)}
-              className="border border-gothic-border text-gothic-muted font-serif text-xs py-2 px-6 hover:border-gothic-accent hover:text-gothic-text transition-all"
-            >
-              ？ 遊び方
-            </button>
-            <button
-              onClick={handleStart}
-              className="border border-gothic-gold bg-gothic-panel/80 hover:bg-stone-800 text-gothic-gold font-display tracking-widest text-xs game-md:text-sm py-3 px-10 game-md:px-12 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
-            >
-              捜査を開始する
-            </button>
-          </div>
+          <button
+            onClick={handleStart}
+            className="border border-gothic-gold bg-gothic-panel/80 hover:bg-stone-800 text-gothic-gold font-display tracking-widest text-xs game-md:text-sm py-3 px-10 game-md:px-12 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
+          >
+            捜査を開始する
+          </button>
         </div>
       </div>
     </div>
