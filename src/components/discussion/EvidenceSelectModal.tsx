@@ -35,7 +35,7 @@ export function EvidenceSelectModal({
           </p>
         </div>
 
-        <div className="px-4 py-4 max-h-80 overflow-y-auto space-y-2">
+        <div className="px-4 py-4 max-h-80 overflow-y-auto game-scrollbar space-y-2">
           {discovered.length === 0 ? (
             <p className="text-gothic-muted font-serif text-sm text-center py-4">
               証拠が見つかっていません

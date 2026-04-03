@@ -64,7 +64,6 @@ export function SaveSlotList({
                       })}
                     </span>
                     <span className="text-gothic-border text-xs">·</span>
-                    <span className="text-gothic-muted text-xs">{slot.difficulty}</span>
                   </div>
                 </div>
               ) : (

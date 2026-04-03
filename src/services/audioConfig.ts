@@ -13,7 +13,6 @@ export const PHASE_BGM: Partial<Record<GamePhase, string>> = {
   generating: BGM_MANOR_AWAITS,
   trial_preview: BGM_MANOR_AWAITS,
   scenario_briefing: BGM_PARLOUR,
-  difficulty_select: BGM_PARLOUR,
   investigation: assetUrl('/assets/bgm/Candlelit Clues.ogg'),
   discussion: assetUrl('/assets/bgm/Cross-Examination.ogg'),
   voting: assetUrl('/assets/bgm/The Verdict.ogg'),

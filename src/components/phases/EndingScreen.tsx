@@ -6,7 +6,7 @@ import { GothicPanel } from '../layout/GothicPanel'
 import { MansionSceneBackground } from '../shared/MansionBackground'
 import { CharacterCard } from '../shared/CharacterCard'
 import { DialogBox } from '../shared/DialogBox'
-import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
+import { ACTIONS, TALK_ACTIONS } from '../../constants/gameConfig'
 import { calculateRank } from '../../utils/score'
 import { getEvidenceNames } from '../../utils/scenario'
 import { loadScoreData, saveScore } from '../../utils/score'
@@ -42,7 +42,6 @@ export function EndingScreen() {
     examinedEvidenceIds,
     actionsRemaining,
     talkActionsRemaining,
-    difficulty,
     useFixedScenario,
     setPhase,
     resetGame,
@@ -59,16 +58,15 @@ export function EndingScreen() {
   const [savedScore, setSavedScore] = useState<DifficultyScore | null>(null)
 
   const trial = isTrialMode()
-  const config = DIFFICULTY_CONFIG[difficulty]
-  const usedActions = config.actions - actionsRemaining
-  const usedTalkActions = config.talkActions - talkActionsRemaining
+  const usedActions = ACTIONS - actionsRemaining
+  const usedTalkActions = TALK_ACTIONS - talkActionsRemaining
 
   // 固定シナリオかつエンディング到達時にスコアを保存する（1回のみ・early return の前に配置）
   useEffect(() => {
     if (!useFixedScenario || !scenario || !votedSuspectId || scoreSaved.current) return
     scoreSaved.current = true
 
-    const prev = loadScoreData(scenario.title)[difficulty]
+    const prev = loadScoreData(scenario.title)
     const cleared = votedSuspectId === scenario.murderer_id && !murdererEscaped
 
     if (cleared) {
@@ -78,7 +76,7 @@ export function EndingScreen() {
       })
     }
 
-    setSavedScore(saveScore(scenario.title, difficulty, { cleared, usedActions, usedTalkActions }))
+    setSavedScore(saveScore(scenario.title, { cleared, usedActions, usedTalkActions }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // 意図的にマウント時1回のみ実行
 
@@ -123,7 +121,7 @@ export function EndingScreen() {
     )
   }
   // 今回プレイのランク（正解時のみ算出）
-  const currentRank = isCorrect && !murdererEscaped ? calculateRank(usedActions, difficulty) : null
+  const currentRank = isCorrect && !murdererEscaped ? calculateRank(usedActions) : null
   // 犯人を正しく特定できたか（完全正解 or 証拠不足で逃亡）
   const isMurdererIdentified = isCorrect || murdererEscaped
   const voted = scenario.suspects.find((s) => s.id === votedSuspectId)!
@@ -174,7 +172,7 @@ export function EndingScreen() {
   return (
     <div className="h-full relative">
       <MansionSceneBackground phase="ending" fixed />
-      <div className="relative z-10 h-full overflow-y-auto px-4 py-8">
+      <div className="relative z-10 h-full overflow-y-auto game-scrollbar px-4 py-8">
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8">
             {isCorrect && !murdererEscaped ? (
@@ -354,9 +352,7 @@ export function EndingScreen() {
                   <span className="text-gothic-muted font-serif text-xs">証拠調査</span>
                   <span className="text-gothic-text font-display text-sm flex items-center gap-1.5">
                     {usedActions}
-                    <span className="text-gothic-muted text-xs">
-                      / {config.actions} アクション使用
-                    </span>
+                    <span className="text-gothic-muted text-xs">/ {ACTIONS} アクション使用</span>
                     {bestFlags.actions && (
                       <span className="text-gothic-gold text-xs font-serif">★ベスト</span>
                     )}
@@ -367,7 +363,7 @@ export function EndingScreen() {
                   <span className="text-gothic-text font-display text-sm flex items-center gap-1.5">
                     {usedTalkActions}
                     <span className="text-gothic-muted text-xs">
-                      / {config.talkActions} アクション使用
+                      / {TALK_ACTIONS} アクション使用
                     </span>
                     {bestFlags.talkActions && (
                       <span className="text-gothic-gold text-xs font-serif">★ベスト</span>

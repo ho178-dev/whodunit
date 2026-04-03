@@ -34,7 +34,7 @@ export function ScenarioBriefing() {
               事件概要
             </h2>
           </div>
-          <div className="p-4 game-md:p-6 flex flex-col gap-4 game-md:gap-6 font-serif overflow-y-auto">
+          <div className="p-4 game-md:p-6 flex flex-col gap-4 game-md:gap-6 font-serif overflow-y-auto game-scrollbar">
             <div>
               <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">舞台</p>
               <p className="text-gothic-text text-sm game-md:text-base">{scenario.setting}</p>
@@ -61,10 +61,10 @@ export function ScenarioBriefing() {
             ← 戻る
           </button>
           <button
-            onClick={() => setPhase('difficulty_select')}
+            onClick={() => setPhase('investigation')}
             className="border border-gothic-gold bg-gothic-panel/80 hover:bg-stone-800 text-gothic-gold font-display tracking-widest text-xs game-md:text-sm py-3 px-10 game-md:px-12 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
           >
-            難易度を選ぶ →
+            捜査を開始する →
           </button>
         </div>
       </div>

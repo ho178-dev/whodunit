@@ -1,5 +1,4 @@
-// ゲーム設定定数。容疑者・部屋・証拠の数、難易度ごとのアクション数などを定義
-import type { Difficulty } from '../types/game'
+// ゲーム設定定数。容疑者・部屋・証拠の数、アクション数などを定義
 
 export const SUSPECT_COUNT = 6
 export const ROOM_COUNT = 5
@@ -16,39 +15,13 @@ export const MURDERER_CONTRADICTION_COUNT = 2
 // UIレイアウト上限（これを超えると会話ピップが折り返して見切れる）
 export const MAX_VISIBLE_TALK_PIPS = 30
 
-// 探偵ランク閾値: usedActions（証拠調査消費数）がこの値以下でそのランク、超えたら下位ランク、B超えはC
-// easy=12, normal=8, hard=5 アクションを基準に設定
-export const RANK_THRESHOLDS: Record<Difficulty, { S: number; A: number; B: number }> = {
-  easy: { S: 6, A: 9, B: 11 },
-  normal: { S: 4, A: 6, B: 7 },
-  hard: { S: 2, A: 3, B: 4 },
-}
+// 調査・会話アクション上限（固定値）
+export const ACTIONS = 8
+export const TALK_ACTIONS = 30
 
-export const DIFFICULTY_CONFIG: Record<
-  Difficulty,
-  {
-    actions: number
-    talkActions: number
-    label: string
-    description: string
-  }
-> = {
-  easy: {
-    actions: 12,
-    talkActions: 45,
-    label: '入門',
-    description: '証拠も証言も十分。じっくりと推理できる。',
-  },
-  normal: {
-    actions: 8,
-    talkActions: 30,
-    label: '普通',
-    description: 'バランスよく調査できる標準の難易度。',
-  },
-  hard: {
-    actions: 5,
-    talkActions: 18,
-    label: '難解',
-    description: '限られた手がかりで真犯人を追い詰める。',
-  },
-}
+// 議論・告発フェーズの証拠突きつけAP
+export const DISCUSSION_CONFRONT_ACTIONS = 6
+export const ACCUSATION_CONFRONT_ACTIONS = 3
+
+// 探偵ランク閾値: usedActions（証拠調査消費数）がこの値以下でそのランク、超えたら下位ランク、B超えはC
+export const RANK_THRESHOLDS = { S: 4, A: 6, B: 7 }

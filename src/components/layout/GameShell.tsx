@@ -9,7 +9,6 @@ import { TitleScreen } from '../phases/TitleScreen'
 import { ApiKeyInput } from '../phases/ApiKeyInput'
 import { LoadingScreen } from '../phases/LoadingScreen'
 import { ScenarioBriefing } from '../phases/ScenarioBriefing'
-import { DifficultySelect } from '../phases/DifficultySelect'
 import { InvestigationPhase } from '../phases/InvestigationPhase'
 import { DiscussionPhase } from '../phases/DiscussionPhase'
 import { VotingPhase } from '../phases/VotingPhase'
@@ -23,7 +22,6 @@ import type { GamePhase } from '../../types/game'
 // セーブ機能を有効にするフェーズ
 const MANUAL_SAVE_PHASES = new Set([
   'scenario_briefing',
-  'difficulty_select',
   'investigation',
   'discussion',
   'voting',
@@ -44,6 +42,7 @@ export function GameShell() {
   const useFixedScenario = useGameStore((s) => s.useFixedScenario)
   const murdererId = useGameStore((s) => s.scenario?.murderer_id)
   const votedSuspectId = useGameStore((s) => s.votedSuspectId)
+  const setPhase = useGameStore((s) => s.setPhase)
   const [showSaveModal, setShowSaveModal] = useState(false)
 
   // フェーズ変更時に対応 BGM を再生する
@@ -75,8 +74,6 @@ export function GameShell() {
         return <LoadingScreen />
       case 'scenario_briefing':
         return <ScenarioBriefing />
-      case 'difficulty_select':
-        return <DifficultySelect />
       case 'investigation':
         return <InvestigationPhase />
       case 'discussion':
@@ -110,14 +107,23 @@ export function GameShell() {
         </FadeTransition>
 
         {/* 右上ヘッダー: フェーズ名バッジ（左）＋設定ボタン（右）。合計幅 = RightPanel と一致 */}
-        <div className="absolute top-2 right-2 game-md:right-3 game-lg:right-4 z-40 flex w-[140px] game-sm:w-[160px] game-md:w-[180px] game-lg:w-[200px]">
+        <div className="absolute top-2 right-2 game-md:right-3 game-lg:right-4 z-40 flex gap-1 w-[140px] game-sm:w-[160px] game-md:w-[180px] game-lg:w-[200px]">
           {/* フェーズ名バッジ（フェーズ名がある場合のみ表示） */}
           {PHASE_BADGE_TEXT[phase] && (
-            <div className="flex-1 bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-1.5 text-center mr-1">
+            <div className="flex-1 bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-1.5 text-center">
               <p className="font-display text-gothic-gold text-xs tracking-widest">
                 {PHASE_BADGE_TEXT[phase]}
               </p>
             </div>
+          )}
+          {/* タイトル画面のみシナリオ生成ボタンを表示 */}
+          {phase === 'title' && (
+            <button
+              onClick={() => setPhase('api_key_input')}
+              className="flex-1 border border-gothic-gold/60 bg-gothic-bg/80 text-gothic-gold font-serif text-xs px-2 py-1.5 hover:border-gothic-gold hover:bg-stone-900 transition-all duration-200"
+            >
+              AI生成
+            </button>
           )}
           {/* 設定ボタン: 全フェーズで表示（セーブ可否はSettingsModal内で制御） */}
           <button

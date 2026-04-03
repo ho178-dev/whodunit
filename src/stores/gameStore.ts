@@ -3,14 +3,18 @@ import { create } from 'zustand'
 import type {
   GamePhase,
   ConfrontationEntry,
-  Difficulty,
   SuspectHypothesis,
   UnlockedPursuitQuestion,
   PendingPursuitActivation,
   PursuitWrongResult,
 } from '../types/game'
 import type { Scenario } from '../types/scenario'
-import { DIFFICULTY_CONFIG } from '../constants/gameConfig'
+import {
+  ACTIONS,
+  TALK_ACTIONS,
+  DISCUSSION_CONFRONT_ACTIONS,
+  ACCUSATION_CONFRONT_ACTIONS,
+} from '../constants/gameConfig'
 import { getRootQuestionIds } from '../utils/scenario'
 import { SAVE_VERSION } from '../types/save'
 import type { SaveInput } from '../types/save'
@@ -68,9 +72,10 @@ export interface GameState {
   scenario: Scenario | null
   isGenerating: boolean
   generationError: string | null
-  difficulty: Difficulty
   actionsRemaining: number
   talkActionsRemaining: number
+  discussionConfrontActionsRemaining: number // 議論フェーズの証拠突きつけAP
+  accusationConfrontActionsRemaining: number // 告発フェーズの証拠突きつけAP
   currentRoomId: string | null
   inspectedEvidenceIds: string[] // 1段階目：外観開示済み
   examinedEvidenceIds: string[] // 2段階目：論理的示唆開示済み
@@ -98,7 +103,6 @@ export interface GameState {
   setScenario: (scenario: Scenario) => void
   setIsGenerating: (generating: boolean) => void
   setGenerationError: (error: string | null) => void
-  setDifficulty: (difficulty: Difficulty) => void
   setCurrentRoomId: (id: string | null) => void
   inspectEvidence: (evidenceId: string) => void
   examineEvidence: (evidenceId: string) => void
@@ -108,6 +112,8 @@ export interface GameState {
   consumeAction: () => void
   hearStatement: (entry: HeardStatement) => void
   addConfrontation: (entry: Omit<ConfrontationEntry, 'timestamp'>) => void
+  consumeDiscussionConfrontAction: () => void
+  consumeAccusationConfrontAction: () => void
   initiatePursuitActivation: (suspectId: string, evidenceId: string) => void
   selectTestimonyForPursuit: (suspectId: string, statementIndex: number) => void
   clearPursuitActivation: () => void
@@ -152,9 +158,10 @@ const initialState = {
   scenario: null,
   isGenerating: false,
   generationError: null,
-  difficulty: 'normal' as Difficulty,
-  actionsRemaining: DIFFICULTY_CONFIG.normal.actions,
-  talkActionsRemaining: DIFFICULTY_CONFIG.normal.talkActions,
+  actionsRemaining: ACTIONS,
+  talkActionsRemaining: TALK_ACTIONS,
+  discussionConfrontActionsRemaining: DISCUSSION_CONFRONT_ACTIONS,
+  accusationConfrontActionsRemaining: ACCUSATION_CONFRONT_ACTIONS,
   currentRoomId: null,
   inspectedEvidenceIds: [],
   examinedEvidenceIds: [],
@@ -192,10 +199,11 @@ function buildSaveInput(state: GameState, phase: GamePhase): SaveInput {
     version: SAVE_VERSION,
     scenarioTitle: state.scenario!.title,
     phase,
-    difficulty: state.difficulty,
     currentRoomId: state.currentRoomId,
     actionsRemaining: state.actionsRemaining,
     talkActionsRemaining: state.talkActionsRemaining,
+    discussionConfrontActionsRemaining: state.discussionConfrontActionsRemaining,
+    accusationConfrontActionsRemaining: state.accusationConfrontActionsRemaining,
     inspectedEvidenceIds: state.inspectedEvidenceIds,
     examinedEvidenceIds: state.examinedEvidenceIds,
     discoveredCombinationIds: state.discoveredCombinationIds,
@@ -249,13 +257,6 @@ export const useGameStore = create<GameState>((set, get) => ({
   setIsGenerating: (generating) => set({ isGenerating: generating }),
   // 生成エラーメッセージを更新する
   setGenerationError: (error) => set({ generationError: error }),
-  // 難易度を設定し、アクション残数を初期値にリセットする
-  setDifficulty: (difficulty) =>
-    set({
-      difficulty,
-      actionsRemaining: DIFFICULTY_CONFIG[difficulty].actions,
-      talkActionsRemaining: DIFFICULTY_CONFIG[difficulty].talkActions,
-    }),
   // 現在の選択部屋IDを更新する
   setCurrentRoomId: (id) => set({ currentRoomId: id }),
   // 証拠を外観開示済みリストに追加する（1段階目、重複追加しない）
@@ -335,6 +336,16 @@ export const useGameStore = create<GameState>((set, get) => ({
   addConfrontation: (entry) =>
     set((state) => ({
       confrontationLog: [...state.confrontationLog, { ...entry, timestamp: Date.now() }],
+    })),
+  // 議論フェーズの証拠突きつけAPを1消費する（0を下回らない）
+  consumeDiscussionConfrontAction: () =>
+    set((state) => ({
+      discussionConfrontActionsRemaining: Math.max(0, state.discussionConfrontActionsRemaining - 1),
+    })),
+  // 告発フェーズの証拠突きつけAPを1消費する（0を下回らない）
+  consumeAccusationConfrontAction: () =>
+    set((state) => ({
+      accusationConfrontActionsRemaining: Math.max(0, state.accusationConfrontActionsRemaining - 1),
     })),
   // 証言選択モードを開始する（捜査メモの証言タブが自動オープンされる）
   initiatePursuitActivation: (suspectId, evidenceId) =>
@@ -467,9 +478,6 @@ export const useGameStore = create<GameState>((set, get) => ({
         scenario: state.scenario,
         apiKey: state.apiKey,
         useFixedScenario: state.useFixedScenario,
-        difficulty: state.difficulty,
-        actionsRemaining: DIFFICULTY_CONFIG[state.difficulty].actions,
-        talkActionsRemaining: DIFFICULTY_CONFIG[state.difficulty].talkActions,
         activeSaveSlot: state.activeSaveSlot,
       }
     }),
@@ -495,10 +503,11 @@ export const useGameStore = create<GameState>((set, get) => ({
       phase: slot.phase,
       scenario,
       useFixedScenario: true,
-      difficulty: slot.difficulty,
       currentRoomId: slot.currentRoomId,
       actionsRemaining: slot.actionsRemaining,
       talkActionsRemaining: slot.talkActionsRemaining,
+      discussionConfrontActionsRemaining: slot.discussionConfrontActionsRemaining,
+      accusationConfrontActionsRemaining: slot.accusationConfrontActionsRemaining,
       inspectedEvidenceIds: slot.inspectedEvidenceIds,
       examinedEvidenceIds: slot.examinedEvidenceIds,
       discoveredCombinationIds: slot.discoveredCombinationIds,

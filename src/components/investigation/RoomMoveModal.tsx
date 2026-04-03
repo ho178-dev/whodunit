@@ -28,7 +28,7 @@ export function RoomMoveModal({ onClose }: RoomMoveModalProps) {
         </div>
 
         {/* 部屋一覧 */}
-        <div className="px-6 py-4 space-y-2 max-h-80 overflow-y-auto">
+        <div className="px-6 py-4 space-y-2 max-h-80 overflow-y-auto game-scrollbar">
           {scenario.rooms.map((room) => (
             <button
               key={room.id}
