@@ -35,11 +35,6 @@ const config: Config = {
         display: ['Cinzel', 'Georgia', 'serif'],
         pixel: ['Press Start 2P', 'monospace'],
       },
-      screens: {
-        'game-sm': '1280px',
-        'game-md': '1600px',
-        'game-lg': '1920px',
-      },
     },
   },
   plugins: [],

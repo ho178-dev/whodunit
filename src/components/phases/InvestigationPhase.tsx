@@ -46,14 +46,14 @@ export function InvestigationPhase() {
   const apSlot = (
     <>
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-gothic-muted font-serif text-[clamp(9px,1.3vh,12px)]">調査</span>
-        <span className="text-gothic-gold font-pixel text-[clamp(11px,1.5vh,14px)]">
+        <span className="text-gothic-muted font-serif text-[10px]">調査</span>
+        <span className="text-gothic-gold font-pixel text-xs">
           {actionsRemaining}/{ACTIONS}
         </span>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-gothic-muted font-serif text-[clamp(9px,1.3vh,12px)]">会話</span>
-        <span className="text-gothic-accent font-pixel text-[clamp(11px,1.5vh,14px)]">
+        <span className="text-gothic-muted font-serif text-[10px]">会話</span>
+        <span className="text-gothic-accent font-pixel text-xs">
           {talkActionsRemaining}/{TALK_ACTIONS}
         </span>
       </div>

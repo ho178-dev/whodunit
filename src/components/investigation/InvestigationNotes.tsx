@@ -65,7 +65,7 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
 
   // 選択中タブかどうかに応じたスタイルクラスを返すユーティリティ関数
   const tabClass = (t: Tab) =>
-    `px-2 game-md:px-3 py-2 text-[10px] game-md:text-xs font-display tracking-widest transition-colors whitespace-nowrap ${
+    `px-2 py-2 text-[10px] font-display tracking-widest transition-colors whitespace-nowrap ${
       tab === t
         ? 'text-gothic-gold border-b border-gothic-gold'
         : 'text-gothic-muted hover:text-gothic-text'
@@ -155,7 +155,7 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
       {/* メインエリア: 左サイドバー + コンテンツ */}
       <div className="flex flex-1 min-h-0">
         {/* 左サイドバー: 容疑者名一覧（画像なし） */}
-        <div className="w-[80px] game-md:w-[96px] game-lg:w-[112px] border-r border-gothic-border flex-shrink-0 overflow-y-auto game-scrollbar bg-stone-950/30">
+        <div className="w-[80px] border-r border-gothic-border flex-shrink-0 overflow-y-auto game-scrollbar bg-stone-950/30">
           <p className="text-gothic-muted font-display text-[9px] tracking-widest text-center py-2 border-b border-gothic-border">
             容疑者
           </p>
@@ -244,7 +244,7 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
                 まだ証拠を発見していません
               </p>
             ) : (
-              <div className="grid grid-cols-1 game-md:grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-3">
                 {discoveredEvidence.map((evidence) => {
                   const examined = examinedEvidenceIds.includes(evidence.id)
                   const imgSrc = resolveEvidenceAsset(evidence.category_id)

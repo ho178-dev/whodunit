@@ -7,10 +7,15 @@ import type { TextSpeed } from '../../stores/settingsStore'
 import { getManualSlots } from '../../utils/saveLoad'
 import { SaveSlotList } from './SaveSlotList'
 import { cn } from '../../utils/cn'
+import { GAME_BASE_WIDTH, GAME_BASE_HEIGHT } from '../../constants/gameConfig'
 
-// 画面サイズのプリセット（exe想定: 960×540 がデフォルト起動サイズ）
+// 画面サイズのプリセット（exe想定: GAME_BASE がデフォルト起動サイズ）
 const SCREEN_SIZES = [
-  { label: '960 × 540', width: 960, height: 540 },
+  {
+    label: `${GAME_BASE_WIDTH} × ${GAME_BASE_HEIGHT}`,
+    width: GAME_BASE_WIDTH,
+    height: GAME_BASE_HEIGHT,
+  },
   { label: '1280 × 720', width: 1280, height: 720 },
   { label: '1600 × 900', width: 1600, height: 900 },
   { label: '1920 × 1080', width: 1920, height: 1080 },
@@ -275,7 +280,21 @@ export function SettingsModal({ onClose, showSave }: Props) {
         </div>
 
         {/* フッター */}
-        <div className="border-t border-gothic-border px-6 pb-5 pt-4">
+        <div className="border-t border-gothic-border px-6 pb-5 pt-4 space-y-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => window.electronAPI?.windowControls.minimize()}
+              className="flex-1 border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 transition-all duration-200 hover:border-gothic-accent hover:text-gothic-text"
+            >
+              最小化
+            </button>
+            <button
+              onClick={() => window.electronAPI?.windowControls.quit()}
+              className="flex-1 border border-red-900/60 bg-transparent text-red-400/70 font-serif text-xs py-2 transition-all duration-200 hover:border-red-700 hover:text-red-400"
+            >
+              ゲームを終了
+            </button>
+          </div>
           <button
             onClick={onClose}
             className="w-full border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 transition-all duration-200 hover:border-gothic-accent"

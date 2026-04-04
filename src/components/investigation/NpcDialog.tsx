@@ -114,12 +114,12 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
       {suspectsHere.length > 0 && (
         <div
           className={cn(
-            'absolute inset-x-0 bottom-28 game-md:bottom-[130px] game-lg:bottom-36 flex items-end gap-4',
+            'absolute inset-x-0 bottom-28 flex items-end gap-4',
             suspectsHere.length === 1
-              ? 'justify-center px-6 game-md:px-10'
+              ? 'justify-center px-6'
               : hasRightPanel
-                ? 'justify-between px-40 game-sm:px-48 game-md:px-52 game-lg:px-56'
-                : 'justify-between px-6 game-md:px-10'
+                ? 'justify-between px-40'
+                : 'justify-between px-6'
           )}
         >
           {suspectsHere.map((suspect) => (
@@ -143,7 +143,7 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
         </div>
       )}
 
-      <div className="absolute inset-x-0 bottom-0 p-2 game-md:p-3">
+      <div className="absolute inset-x-0 bottom-0 p-2">
         {currentSuspect && currentDialog ? (
           <div className="relative">
             <DialogBox

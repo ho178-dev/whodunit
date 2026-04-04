@@ -1,5 +1,9 @@
 // ゲーム設定定数。容疑者・部屋・証拠の数、アクション数などを定義
 
+// ゲームの基準解像度（GameShell スケール計算・SettingsModal プリセットで共用）
+export const GAME_BASE_WIDTH = 960
+export const GAME_BASE_HEIGHT = 540
+
 export const SUSPECT_COUNT = 6
 export const ROOM_COUNT = 5
 export const EVIDENCE_COUNT = 12

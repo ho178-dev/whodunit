@@ -1,10 +1,13 @@
 // ゲームフェーズに応じた画面切り替えを行うルートレイアウトコンポーネント
+// 960×540を基準サイズとしてCSSスケールでウィンドウ全体に引き伸ばす
 import { useState, useEffect } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { audioManager } from '../../services/audioManager'
 import { PHASE_BGM, ACCUSATION_BGM, ENDING_BGM } from '../../services/audioConfig'
 import { FadeTransition } from '../shared/FadeTransition'
 import { PHASE_LABELS } from '../../constants/phaseConfig'
+import { isTrialMode } from '../../constants/salesConfig'
+import { GAME_BASE_WIDTH, GAME_BASE_HEIGHT } from '../../constants/gameConfig'
 import { TitleScreen } from '../phases/TitleScreen'
 import { ApiKeyInput } from '../phases/ApiKeyInput'
 import { LoadingScreen } from '../phases/LoadingScreen'
@@ -44,6 +47,21 @@ export function GameShell() {
   const votedSuspectId = useGameStore((s) => s.votedSuspectId)
   const setPhase = useGameStore((s) => s.setPhase)
   const [showSaveModal, setShowSaveModal] = useState(false)
+  const [scale, setScale] = useState(1)
+
+  // ウィンドウサイズに合わせてスケール係数を更新する
+  useEffect(() => {
+    const update = () => {
+      const next = Math.min(
+        window.innerWidth / GAME_BASE_WIDTH,
+        window.innerHeight / GAME_BASE_HEIGHT
+      )
+      setScale((prev) => (prev === next ? prev : next))
+    }
+    update()
+    window.addEventListener('resize', update)
+    return () => window.removeEventListener('resize', update)
+  }, [])
 
   // フェーズ変更時に対応 BGM を再生する
   useEffect(() => {
@@ -92,22 +110,30 @@ export function GameShell() {
   }
 
   return (
-    // 外層: ウィンドウ全体を覆い、16:9コンテナをレターボックス形式で中央配置する
-    <div className="w-screen h-screen bg-gothic-bg flex items-center justify-center overflow-hidden">
-      {/* 16:9固定コンテナ: min(100vw, 100vh*16/9) × min(100vh, 100vw*9/16) */}
+    // 外層: ウィンドウ全体を覆い、960×540コンテナをスケールして中央配置する
+    <div className="w-screen h-screen bg-gothic-bg flex items-center justify-center overflow-hidden relative">
+      {/* フレームレスウィンドウ用ドラッグ領域: 画面最上部の細いバーでウィンドウを移動できる */}
+      <div
+        className="absolute inset-x-0 top-0 h-2 z-[200]"
+        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
+      />
+
+      {/* 960×540 固定コンテナ: transform: scale でウィンドウサイズに合わせて拡縮する */}
       <div
         className="relative overflow-hidden border border-gothic-border"
         style={{
-          width: 'min(100vw, calc(100vh * 16 / 9))',
-          height: 'min(100vh, calc(100vw * 9 / 16))',
+          width: GAME_BASE_WIDTH,
+          height: GAME_BASE_HEIGHT,
+          transform: `scale(${scale})`,
+          transformOrigin: 'center center',
         }}
       >
         <FadeTransition triggerKey={phase} phaseLabel={PHASE_LABELS[phase]}>
           {renderPhase()}
         </FadeTransition>
 
-        {/* 右上ヘッダー: フェーズ名バッジ（左）＋設定ボタン（右）。合計幅 = RightPanel と一致 */}
-        <div className="absolute top-2 right-2 game-md:right-3 game-lg:right-4 z-40 flex gap-1 w-[140px] game-sm:w-[160px] game-md:w-[180px] game-lg:w-[200px]">
+        {/* 右上ヘッダー: フェーズ名バッジ（左）＋設定ボタン（右）。RightPanel幅と一致させる */}
+        <div className="absolute top-2 right-2 z-40 flex gap-1 w-[140px]">
           {/* フェーズ名バッジ（フェーズ名がある場合のみ表示） */}
           {PHASE_BADGE_TEXT[phase] && (
             <div className="flex-1 bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-1.5 text-center">
@@ -116,8 +142,8 @@ export function GameShell() {
               </p>
             </div>
           )}
-          {/* タイトル画面のみシナリオ生成ボタンを表示 */}
-          {phase === 'title' && (
+          {/* タイトル画面のみシナリオ生成ボタンを表示（体験版では非表示） */}
+          {phase === 'title' && !isTrialMode() && (
             <button
               onClick={() => setPhase('api_key_input')}
               className="flex-1 border border-gothic-gold/60 bg-gothic-bg/80 text-gothic-gold font-serif text-xs px-2 py-1.5 hover:border-gothic-gold hover:bg-stone-900 transition-all duration-200"

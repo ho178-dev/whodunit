@@ -1,20 +1,24 @@
 // Electron メインプロセス。BrowserWindow を生成してゲームを起動する
 'use strict'
 
-const { app, BrowserWindow } = require('electron')
+const { app, BrowserWindow, ipcMain } = require('electron')
 const path = require('path')
 
+/** @type {BrowserWindow | null} */
+let win = null
+
 /**
- * ゲームウィンドウを生成する
- * 初期サイズ 960×540・リサイズ可・メニューバーなし
+ * フレームレスゲームウィンドウを生成する
+ * 初期サイズ 960×540・リサイズ可・ネイティブフレームなし
  */
 function createWindow() {
-  const win = new BrowserWindow({
+  win = new BrowserWindow({
     width: 960,
     height: 540,
     minWidth: 640,
     minHeight: 360,
     resizable: true,
+    frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -28,6 +32,10 @@ function createWindow() {
   // dist/ 内の index.html を読み込む（開発時・パッケージ後いずれも同じパス構造）
   win.loadFile(path.join(__dirname, '../dist/index.html'))
 }
+
+// ウィンドウ操作 IPC ハンドラ（レンダラーの windowControls API から呼び出される）
+ipcMain.on('win:minimize', () => win?.minimize())
+ipcMain.on('win:close', () => win?.close())
 
 app.whenReady().then(() => {
   createWindow()

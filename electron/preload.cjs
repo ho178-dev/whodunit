@@ -1,4 +1,12 @@
 // Electron プリロードスクリプト
-// セーブは localStorage で管理するため現時点で IPC API は不要
-// ファイルベースのセーブへ移行する際はここに contextBridge API を追加する
+// contextBridge 経由でウィンドウ操作 API をレンダラープロセスに公開する
 'use strict'
+
+const { contextBridge, ipcRenderer } = require('electron')
+
+contextBridge.exposeInMainWorld('electronAPI', {
+  windowControls: {
+    minimize: () => ipcRenderer.send('win:minimize'),
+    quit: () => ipcRenderer.send('win:close'),
+  },
+})

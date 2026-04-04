@@ -21,12 +21,7 @@ interface RightPanelProps {
 // top-10: GameShell 右上ヘッダー（absolute top-2）との重複を避けるためデフォルトで下げる
 export function RightPanel({ slot2, slot3, slot4, slot5, className }: RightPanelProps) {
   return (
-    <div
-      className={cn(
-        'absolute right-2 game-md:right-3 game-lg:right-4 top-10 flex flex-col gap-2 z-20 w-[140px] game-sm:w-[160px] game-md:w-[180px] game-lg:w-[200px]',
-        className
-      )}
-    >
+    <div className={cn('absolute right-2 top-10 flex flex-col gap-2 z-20 w-[140px]', className)}>
       {/* Slot 2: 状態表示 */}
       {slot2 && (
         <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-2">

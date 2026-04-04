@@ -48,7 +48,7 @@ export function CharacterCard({
         >
           {/* 内側の装飾線 */}
           <div className="border border-gothic-border/40 bg-stone-800">
-            <div className="h-[200px] game-sm:h-[220px] game-md:h-[260px] game-lg:h-[300px] aspect-[832/1216] overflow-hidden">
+            <div className="h-[200px] aspect-[832/1216] overflow-hidden">
               <PixelImageWithFallback
                 src={imgSrc}
                 alt={suspect.name}

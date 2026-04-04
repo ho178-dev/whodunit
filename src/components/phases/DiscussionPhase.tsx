@@ -338,7 +338,7 @@ export function DiscussionPhase() {
 
         {/* 会話モード: キャラクター中央表示（フル幅） */}
         {isConversationMode && selectedSuspect && (
-          <div className="absolute inset-x-0 bottom-28 game-md:bottom-[130px] game-lg:bottom-36 flex justify-center">
+          <div className="absolute inset-x-0 bottom-28 flex justify-center">
             <div className="transition-all duration-300">
               <CharacterCard
                 suspect={selectedSuspect}
@@ -351,7 +351,7 @@ export function DiscussionPhase() {
         )}
 
         {/* ダイアログエリア（フル幅・下部固定） */}
-        <div className="absolute inset-x-0 bottom-0 p-2 game-md:p-3">
+        <div className="absolute inset-x-0 bottom-0 p-2">
           {pendingPlayerText ? (
             <div className="bg-gothic-panel/85 backdrop-blur-sm border-2 border-blue-700/60">
               <DialogBox
