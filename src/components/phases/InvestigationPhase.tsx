@@ -8,7 +8,7 @@ import { CombinationDiscovery } from '../investigation/CombinationDiscovery'
 import { FakeRevealModal } from '../investigation/FakeRevealModal'
 import { RoomMoveModal } from '../investigation/RoomMoveModal'
 import { EvidenceModal } from '../investigation/EvidenceModal'
-import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
+import { ACTIONS, TALK_ACTIONS } from '../../constants/gameConfig'
 import { PixelImageWithFallback } from '../shared/PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 import { MANSION_DEFAULT_ASSET, resolveMansionAsset } from '../../services/assetResolver'
@@ -22,11 +22,9 @@ export function InvestigationPhase() {
     currentRoomId,
     actionsRemaining,
     talkActionsRemaining,
-    difficulty,
     setPhase,
     inspectedEvidenceIds,
   } = useGameStore()
-  const diffCfg = DIFFICULTY_CONFIG[difficulty]
   const [showNotes, setShowNotes] = useState(false)
   const [showMoveModal, setShowMoveModal] = useState(false)
   const [showEvidence, setShowEvidence] = useState(false)
@@ -48,15 +46,15 @@ export function InvestigationPhase() {
   const apSlot = (
     <>
       <div className="flex items-center gap-2 mb-1">
-        <span className="text-gothic-muted font-serif text-[clamp(9px,1.3vh,12px)]">調査</span>
-        <span className="text-gothic-gold font-pixel text-[clamp(11px,1.5vh,14px)]">
-          {actionsRemaining}/{diffCfg.actions}
+        <span className="text-gothic-muted font-serif text-[10px]">調査</span>
+        <span className="text-gothic-gold font-pixel text-xs">
+          {actionsRemaining}/{ACTIONS}
         </span>
       </div>
       <div className="flex items-center gap-2">
-        <span className="text-gothic-muted font-serif text-[clamp(9px,1.3vh,12px)]">会話</span>
-        <span className="text-gothic-accent font-pixel text-[clamp(11px,1.5vh,14px)]">
-          {talkActionsRemaining}/{diffCfg.talkActions}
+        <span className="text-gothic-muted font-serif text-[10px]">会話</span>
+        <span className="text-gothic-accent font-pixel text-xs">
+          {talkActionsRemaining}/{TALK_ACTIONS}
         </span>
       </div>
     </>

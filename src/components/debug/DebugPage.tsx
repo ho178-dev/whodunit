@@ -14,6 +14,7 @@ import {
   type ImageAsset,
   type BgmAsset,
 } from './assetList'
+import { assetUrl } from '../../utils/assetUrl'
 import { ScenarioDebug } from './ScenarioDebug'
 
 type Tab = 'images' | 'bgm' | 'scenario'
@@ -38,7 +39,7 @@ const IMAGE_CATEGORY_CONFIG: Record<
     pixelSize: PIXEL_ART_CONFIG.pixelSize.character,
     canvasWidth: PIXEL_ART_CONFIG.canvasSize.character.width,
     canvasHeight: PIXEL_ART_CONFIG.canvasSize.character.height,
-    fallbackSrc: '/assets/characters/default_character.png',
+    fallbackSrc: assetUrl('/assets/characters/default_character.png'),
     cardWidthClass: 'w-28',
     imgHeightClass: 'h-40',
   },
@@ -48,7 +49,7 @@ const IMAGE_CATEGORY_CONFIG: Record<
     pixelSize: PIXEL_ART_CONFIG.pixelSize.room,
     canvasWidth: PIXEL_ART_CONFIG.canvasSize.room.width,
     canvasHeight: PIXEL_ART_CONFIG.canvasSize.room.height,
-    fallbackSrc: '/assets/rooms/default_room.png',
+    fallbackSrc: assetUrl('/assets/rooms/default_room.png'),
     cardWidthClass: 'w-52',
     imgHeightClass: 'h-28',
   },
@@ -58,7 +59,7 @@ const IMAGE_CATEGORY_CONFIG: Record<
     pixelSize: PIXEL_ART_CONFIG.pixelSize.mansion,
     canvasWidth: PIXEL_ART_CONFIG.canvasSize.mansion.width,
     canvasHeight: PIXEL_ART_CONFIG.canvasSize.mansion.height,
-    fallbackSrc: '/assets/mansion/default_mansion.png',
+    fallbackSrc: assetUrl('/assets/mansion/default_mansion.png'),
     cardWidthClass: 'w-52',
     imgHeightClass: 'h-28',
   },
@@ -68,7 +69,7 @@ const IMAGE_CATEGORY_CONFIG: Record<
     pixelSize: PIXEL_ART_CONFIG.pixelSize.evidence,
     canvasWidth: PIXEL_ART_CONFIG.canvasSize.evidence.width,
     canvasHeight: PIXEL_ART_CONFIG.canvasSize.evidence.height,
-    fallbackSrc: '/assets/evidence/default_evidence.png',
+    fallbackSrc: assetUrl('/assets/evidence/default_evidence.png'),
     cardWidthClass: 'w-28',
     imgHeightClass: 'h-28',
   },

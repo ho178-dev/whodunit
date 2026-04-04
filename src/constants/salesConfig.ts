@@ -1,11 +1,30 @@
-// 販売設定定数。Booth URL・体験版判定・予告画面用シナリオ情報を集約管理する
+// 販売設定定数。Booth URL・ビルドモード判定・体験版予告画面用シナリオ情報を集約管理する
 
 /** Booth販売ページURL。確定後にここを差し替える */
 export const BOOTH_URL = 'https://booth.pm/ja/items/PLACEHOLDER'
 
-/** 体験版ビルドか判定する（VITE_TRIAL_MODE環境変数で制御） */
+/**
+ * ビルドモードを返す
+ * dev  : 全シナリオ・AI生成可・デバッグ機能あり
+ * trial: シナリオ1本・AI生成不可・体験版予告あり
+ * prod : 全シナリオ・AI生成可・デバッグ機能なし
+ */
+export type BuildMode = 'dev' | 'trial' | 'prod'
+
+export function getBuildMode(): BuildMode {
+  const mode = import.meta.env.VITE_BUILD_MODE
+  if (mode === 'dev' || mode === 'trial' || mode === 'prod') return mode
+  return 'prod'
+}
+
+/** 体験版ビルドか判定する */
 export function isTrialMode(): boolean {
-  return import.meta.env.VITE_TRIAL_MODE === 'true'
+  return getBuildMode() === 'trial'
+}
+
+/** デバッグ機能を有効にする開発ビルドか判定する */
+export function isDevBuild(): boolean {
+  return getBuildMode() === 'dev'
 }
 
 interface TrialPreviewScenario {

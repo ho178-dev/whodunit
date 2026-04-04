@@ -23,7 +23,7 @@ export function EvidenceModal({ roomId, onClose }: EvidenceModalProps) {
         </div>
 
         {/* 証拠品一覧 */}
-        <div className="flex-1 overflow-y-auto px-6 py-4">
+        <div className="flex-1 overflow-y-auto game-scrollbar px-6 py-4">
           <EvidenceList roomId={roomId} />
         </div>
       </div>

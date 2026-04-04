@@ -96,10 +96,7 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
 
   return (
     <div
-      className={cn(
-        'border border-gothic-border bg-gothic-panel/90 p-2 game-md:p-3 game-lg:p-4 cursor-pointer',
-        className
-      )}
+      className={cn('border border-gothic-border bg-gothic-panel/90 p-2 cursor-pointer', className)}
       onClick={handleClick}
     >
       {speakerName && (

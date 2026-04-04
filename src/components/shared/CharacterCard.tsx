@@ -1,11 +1,12 @@
 // 容疑者の画像・名前・年齢・職業を表示する汎用カードコンポーネント
 import { cn } from '../../utils/cn'
 import { useCharacterAsset } from '../../hooks/useAsset'
+import { assetUrl } from '../../utils/assetUrl'
 import type { Suspect } from '../../types/scenario'
 import { PixelImageWithFallback } from './PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 
-const DEFAULT_CHARACTER_IMG = '/assets/characters/default_character.png'
+const DEFAULT_CHARACTER_IMG = assetUrl('/assets/characters/default_character.png')
 
 interface CharacterCardProps {
   suspect: Suspect
@@ -47,7 +48,7 @@ export function CharacterCard({
         >
           {/* 内側の装飾線 */}
           <div className="border border-gothic-border/40 bg-stone-800">
-            <div className="h-[200px] game-sm:h-[220px] game-md:h-[260px] game-lg:h-[300px] aspect-[832/1216] overflow-hidden">
+            <div className="h-[200px] aspect-[832/1216] overflow-hidden">
               <PixelImageWithFallback
                 src={imgSrc}
                 alt={suspect.name}

@@ -1,10 +1,11 @@
 // アプリのルートコンポーネント。GameShellをレンダリングする
-// 開発環境で ?debug=true を付けるとデバッグページを表示する
+// dev ビルドで ?debug=true を付けるとデバッグページを表示する
 import { GameShell } from './components/layout/GameShell'
 import { DebugPage } from './components/debug/DebugPage'
+import { isDevBuild } from './constants/salesConfig'
 
-const isDebug =
-  import.meta.env.DEV && new URLSearchParams(window.location.search).get('debug') === 'true'
+// exe dev ビルド・ブラウザ開発サーバーいずれでも有効になるよう isDevBuild() を使用する
+const isDebug = isDevBuild() && new URLSearchParams(window.location.search).get('debug') === 'true'
 
 function App() {
   if (isDebug) return <DebugPage />

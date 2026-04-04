@@ -19,6 +19,7 @@ import { LeftSpecialPanel } from '../layout/LeftSpecialPanel'
 import { PanelButton } from '../layout/PanelButton'
 import { NotesIcon } from '../shared/Icons'
 import { resolveMansionAsset } from '../../services/assetResolver'
+import { DISCUSSION_CONFRONT_ACTIONS } from '../../constants/gameConfig'
 
 // 議論フェーズのメインコンポーネント
 export function DiscussionPhase() {
@@ -38,6 +39,8 @@ export function DiscussionPhase() {
     initiatePursuitActivation,
     pursuitWrongResult,
     clearPursuitWrongResult,
+    discussionConfrontActionsRemaining,
+    consumeDiscussionConfrontAction,
   } = useGameStore()
 
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null)
@@ -45,6 +48,11 @@ export function DiscussionPhase() {
   const [showEvidenceModal, setShowEvidenceModal] = useState(false)
   const [showNotesManual, setShowNotesManual] = useState(false)
   const [sliderIndex, setSliderIndex] = useState(0)
+  // 追及質問クリック後、プレイヤーの発言をダイアログに表示するための一時状態
+  const [pendingPlayerText, setPendingPlayerText] = useState<{
+    text: string
+    questionId: string
+  } | null>(null)
 
   const showNotes = showNotesManual || pendingPursuitActivation !== null
 
@@ -91,6 +99,10 @@ export function DiscussionPhase() {
     !!selectedSuspect &&
     !!selectedEvidenceId &&
     !!selectedSuspect.evidence_reactions[selectedEvidenceId]?.pursuit_questions?.length
+
+  const allQuestionsAsked =
+    unlockedForCurrent.length > 0 &&
+    unlockedForCurrent.every(({ questionId }) => askedPursuitQuestionIds.includes(questionId))
 
   const rootIds =
     isConversationMode && selectedSuspect && selectedEvidenceId
@@ -161,6 +173,7 @@ export function DiscussionPhase() {
         reaction: reaction.reaction,
         behavior: reaction.behavior,
       })
+      consumeDiscussionConfrontAction()
     }
     if (pursuitWrongResult) clearPursuitWrongResult()
   }
@@ -170,9 +183,21 @@ export function DiscussionPhase() {
     initiatePursuitActivation(selectedSuspectId, selectedEvidenceId)
   }
 
+  // 追及質問ボタン押下: まずプレイヤーの発言をダイアログに表示
   const handleAskPursuit = (questionId: string) => {
-    if (!selectedSuspectId || !selectedEvidenceId) return
-    askPursuitQuestion(selectedSuspectId, selectedEvidenceId, questionId)
+    if (!selectedSuspectId || !selectedEvidenceId || !selectedSuspect) return
+    const qData = selectedSuspect.evidence_reactions[selectedEvidenceId]?.pursuit_questions?.find(
+      (q) => q.id === questionId
+    )
+    if (!qData) return
+    setPendingPlayerText({ text: qData.text, questionId })
+  }
+
+  // 「続ける」ボタン押下: 容疑者の返答を表示
+  const handlePlayerDialogAdvance = () => {
+    if (!pendingPlayerText || !selectedSuspectId || !selectedEvidenceId) return
+    askPursuitQuestion(selectedSuspectId, selectedEvidenceId, pendingPlayerText.questionId)
+    setPendingPlayerText(null)
   }
 
   const leftPanel =
@@ -214,34 +239,45 @@ export function DiscussionPhase() {
 
         {/* 追及質問リスト（専用コンテナでスクロール） */}
         {unlockedForCurrent.length > 0 && (
-          <div className="bg-stone-900/80 backdrop-blur-sm border border-yellow-700/50 overflow-y-auto max-h-44">
+          <div className="bg-stone-900/80 backdrop-blur-sm border border-yellow-700/50 overflow-y-auto game-scrollbar max-h-44">
             <p className="font-display text-yellow-400 text-[10px] tracking-widest px-3 py-2 border-b border-yellow-700/40 flex items-center gap-1">
               <span>⚑</span>
               <span>追及質問</span>
             </p>
             <div className="px-2 py-2 space-y-1.5">
-              {unlockedForCurrent.map(({ questionId, evidenceId }) => {
-                const qData = selectedSuspect.evidence_reactions[
-                  evidenceId
-                ]?.pursuit_questions?.find((q) => q.id === questionId)
-                if (!qData) return null
+              {unlockedForCurrent.map(({ questionId }, idx) => {
                 const isAsked = askedPursuitQuestionIds.includes(questionId)
                 return (
                   <button
                     key={questionId}
                     onClick={() => !isAsked && handleAskPursuit(questionId)}
                     disabled={isAsked}
-                    className={`w-full text-left border px-2 py-1.5 font-serif text-[10px] transition-all leading-snug ${
+                    className={`w-full border px-2 py-1.5 font-display text-[10px] tracking-widest transition-all flex items-center justify-center gap-1 ${
                       isAsked
                         ? 'border-stone-700 text-stone-600 cursor-default'
                         : 'border-yellow-700 text-yellow-200 hover:bg-yellow-900/20'
                     }`}
                   >
-                    {isAsked && <span className="text-stone-600 mr-1">✓</span>}「{qData.text}」
+                    {isAsked ? (
+                      <>
+                        <span>✓</span>
+                        <span>追及済み {idx + 1}</span>
+                      </>
+                    ) : (
+                      <>
+                        <span>⚑</span>
+                        <span>追及する {idx + 1}</span>
+                      </>
+                    )}
                   </button>
                 )
               })}
             </div>
+            {allQuestionsAsked && (
+              <p className="text-center text-yellow-500/70 font-display text-[10px] tracking-widest py-2 border-t border-yellow-700/30">
+                ── 追及完了 ──
+              </p>
+            )}
           </div>
         )}
       </LeftSpecialPanel>
@@ -302,7 +338,7 @@ export function DiscussionPhase() {
 
         {/* 会話モード: キャラクター中央表示（フル幅） */}
         {isConversationMode && selectedSuspect && (
-          <div className="absolute inset-x-0 bottom-28 game-md:bottom-[130px] game-lg:bottom-36 flex justify-center">
+          <div className="absolute inset-x-0 bottom-28 flex justify-center">
             <div className="transition-all duration-300">
               <CharacterCard
                 suspect={selectedSuspect}
@@ -315,8 +351,24 @@ export function DiscussionPhase() {
         )}
 
         {/* ダイアログエリア（フル幅・下部固定） */}
-        <div className="absolute inset-x-0 bottom-0 p-2 game-md:p-3">
-          {dialogReaction && selectedSuspect ? (
+        <div className="absolute inset-x-0 bottom-0 p-2">
+          {pendingPlayerText ? (
+            <div className="bg-gothic-panel/85 backdrop-blur-sm border-2 border-blue-700/60">
+              <DialogBox
+                key={`player-${pendingPlayerText.questionId}`}
+                text={`「${pendingPlayerText.text}」`}
+                speakerName="あなた"
+              />
+              <div className="px-4 pb-3 flex justify-end">
+                <button
+                  onClick={handlePlayerDialogAdvance}
+                  className="bg-blue-900/60 border border-blue-700 text-blue-200 font-serif text-xs px-4 py-1.5 hover:bg-blue-800/60 transition-all"
+                >
+                  続ける →
+                </button>
+              </div>
+            </div>
+          ) : dialogReaction && selectedSuspect ? (
             <div
               className={cn(
                 'bg-gothic-panel/85 backdrop-blur-sm border-2',
@@ -348,6 +400,16 @@ export function DiscussionPhase() {
 
         {/* 右パネル（slot1はGameShellの右上ヘッダーに移管） */}
         <RightPanel
+          slot2={
+            <div className="flex items-center gap-2">
+              <span className="text-gothic-muted font-serif text-[clamp(9px,1.3vh,12px)]">
+                突きつけ
+              </span>
+              <span className="text-gothic-gold font-pixel text-[clamp(11px,1.5vh,14px)]">
+                {discussionConfrontActionsRemaining}/{DISCUSSION_CONFRONT_ACTIONS}
+              </span>
+            </div>
+          }
           slot3={
             <PanelButton
               variant="primary"

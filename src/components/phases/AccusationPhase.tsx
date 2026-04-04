@@ -11,6 +11,7 @@ import { RightPanel } from '../layout/RightPanel'
 import { LeftSpecialPanel } from '../layout/LeftSpecialPanel'
 import { PanelButton } from '../layout/PanelButton'
 import { resolveMansionAsset } from '../../services/assetResolver'
+import { ACCUSATION_CONFRONT_ACTIONS } from '../../constants/gameConfig'
 
 // 告発シーンの進行ステップ
 type AccusationStep =
@@ -31,8 +32,15 @@ interface StepDialog {
 
 // 告発シーンのメインコンポーネント。内部ステートマシンで段階的に進行する
 export function AccusationPhase() {
-  const { scenario, votedSuspectId, examinedEvidenceIds, setPhase, setMurdererEscaped } =
-    useGameStore()
+  const {
+    scenario,
+    votedSuspectId,
+    examinedEvidenceIds,
+    setPhase,
+    setMurdererEscaped,
+    accusationConfrontActionsRemaining,
+    consumeAccusationConfrontAction,
+  } = useGameStore()
 
   const isCorrect = votedSuspectId === scenario?.murderer_id
   const [step, setStep] = useState<AccusationStep>(() => (isCorrect ? 'defense' : 'confusion'))
@@ -147,6 +155,7 @@ export function AccusationPhase() {
             variant="primary"
             disabled={!selectedEvidenceId}
             onClick={() => {
+              consumeAccusationConfrontAction()
               if (selectedEvidenceId === accusationData.correct.decisive_evidence_id) {
                 setStep('refutation')
               } else {
@@ -242,7 +251,7 @@ export function AccusationPhase() {
           <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-2 text-center">
             <p className="font-display text-gothic-gold text-xs tracking-widest">証拠を選ぶ</p>
           </div>
-          <div className="bg-gothic-panel/80 backdrop-blur-sm border border-gothic-border/60 overflow-y-auto max-h-64">
+          <div className="bg-gothic-panel/80 backdrop-blur-sm border border-gothic-border/60 overflow-y-auto game-scrollbar max-h-64">
             <div className="px-2 py-2 space-y-1.5">
               {selectableEvidence.map((evidence) => (
                 <button
@@ -266,7 +275,20 @@ export function AccusationPhase() {
       )}
 
       {/* 右パネル（slot1はGameShellの右上ヘッダーに移管） */}
-      <RightPanel slot3={getSlot3()} slot4={getSlot4()} />
+      <RightPanel
+        slot2={
+          <div className="flex items-center gap-2">
+            <span className="text-gothic-muted font-serif text-[clamp(9px,1.3vh,12px)]">
+              突きつけ
+            </span>
+            <span className="text-gothic-gold font-pixel text-[clamp(11px,1.5vh,14px)]">
+              {accusationConfrontActionsRemaining}/{ACCUSATION_CONFRONT_ACTIONS}
+            </span>
+          </div>
+        }
+        slot3={getSlot3()}
+        slot4={getSlot4()}
+      />
     </div>
   )
 }

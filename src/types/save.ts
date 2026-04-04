@@ -1,7 +1,6 @@
 // セーブスロットのデータ型定義（localStorage 保存形式）
 import type {
   GamePhase,
-  Difficulty,
   ConfrontationEntry,
   SuspectHypothesis,
   UnlockedPursuitQuestion,
@@ -9,7 +8,7 @@ import type {
 import type { HeardStatement } from '../stores/gameStore'
 
 /** セーブデータのスキーマバージョン（型変更時にインクリメントして非互換データを弾く） */
-export const SAVE_VERSION = 1
+export const SAVE_VERSION = 2
 
 /** saveToSlot に渡すデータ（savedAt は saveToSlot 内で自動付与するため不要） */
 export type SaveInput = Omit<SavePayload, 'savedAt'>
@@ -20,10 +19,11 @@ export interface SavePayload {
   savedAt: number // UNIX ms
   scenarioTitle: string // 固定シナリオのタイトル（ロード時にシナリオ本体を引き直す）
   phase: GamePhase
-  difficulty: Difficulty
   currentRoomId: string | null
   actionsRemaining: number
   talkActionsRemaining: number
+  discussionConfrontActionsRemaining: number
+  accusationConfrontActionsRemaining: number
   inspectedEvidenceIds: string[]
   examinedEvidenceIds: string[]
   discoveredCombinationIds: string[]

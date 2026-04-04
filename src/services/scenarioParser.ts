@@ -66,12 +66,22 @@ export function validateScenario(data: unknown): Scenario {
       (r): r is typeof r & { contradicts_statement_index: number } =>
         r.contradicts_statement_index !== undefined
     )
-    const expectedCount =
-      suspect.id === s.murderer_id ? MURDERER_CONTRADICTION_COUNT : SUSPECT_CONTRADICTION_COUNT
-    if (contradictions.length !== expectedCount) {
-      throw new Error(
-        `容疑者 ${suspect.id} の contradicts_statement_index は ${expectedCount} 件必要です（現在: ${contradictions.length} 件）`
-      )
+    if (suspect.id === s.murderer_id) {
+      if (contradictions.length !== MURDERER_CONTRADICTION_COUNT) {
+        throw new Error(
+          `容疑者 ${suspect.id} の contradicts_statement_index は ${MURDERER_CONTRADICTION_COUNT} 件必要です（現在: ${contradictions.length} 件）`
+        )
+      }
+    } else {
+      // 無実の容疑者は最低 SUSPECT_CONTRADICTION_COUNT 件、最大 MURDERER_CONTRADICTION_COUNT 件を許容
+      if (
+        contradictions.length < SUSPECT_CONTRADICTION_COUNT ||
+        contradictions.length > MURDERER_CONTRADICTION_COUNT
+      ) {
+        throw new Error(
+          `容疑者 ${suspect.id} の contradicts_statement_index は ${SUSPECT_CONTRADICTION_COUNT}〜${MURDERER_CONTRADICTION_COUNT} 件必要です（現在: ${contradictions.length} 件）`
+        )
+      }
     }
     for (const r of contradictions) {
       if (r.contradicts_statement_index < 0 || r.contradicts_statement_index >= STATEMENT_COUNT) {

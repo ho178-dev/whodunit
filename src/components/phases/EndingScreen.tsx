@@ -6,7 +6,7 @@ import { GothicPanel } from '../layout/GothicPanel'
 import { MansionSceneBackground } from '../shared/MansionBackground'
 import { CharacterCard } from '../shared/CharacterCard'
 import { DialogBox } from '../shared/DialogBox'
-import { DIFFICULTY_CONFIG } from '../../constants/gameConfig'
+import { ACTIONS, TALK_ACTIONS } from '../../constants/gameConfig'
 import { calculateRank } from '../../utils/score'
 import { getEvidenceNames } from '../../utils/scenario'
 import { loadScoreData, saveScore } from '../../utils/score'
@@ -42,7 +42,6 @@ export function EndingScreen() {
     examinedEvidenceIds,
     actionsRemaining,
     talkActionsRemaining,
-    difficulty,
     useFixedScenario,
     setPhase,
     resetGame,
@@ -59,16 +58,15 @@ export function EndingScreen() {
   const [savedScore, setSavedScore] = useState<DifficultyScore | null>(null)
 
   const trial = isTrialMode()
-  const config = DIFFICULTY_CONFIG[difficulty]
-  const usedActions = config.actions - actionsRemaining
-  const usedTalkActions = config.talkActions - talkActionsRemaining
+  const usedActions = ACTIONS - actionsRemaining
+  const usedTalkActions = TALK_ACTIONS - talkActionsRemaining
 
   // 固定シナリオかつエンディング到達時にスコアを保存する（1回のみ・early return の前に配置）
   useEffect(() => {
     if (!useFixedScenario || !scenario || !votedSuspectId || scoreSaved.current) return
     scoreSaved.current = true
 
-    const prev = loadScoreData(scenario.title)[difficulty]
+    const prev = loadScoreData(scenario.title)
     const cleared = votedSuspectId === scenario.murderer_id && !murdererEscaped
 
     if (cleared) {
@@ -78,7 +76,7 @@ export function EndingScreen() {
       })
     }
 
-    setSavedScore(saveScore(scenario.title, difficulty, { cleared, usedActions, usedTalkActions }))
+    setSavedScore(saveScore(scenario.title, { cleared, usedActions, usedTalkActions }))
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // 意図的にマウント時1回のみ実行
 
@@ -122,8 +120,9 @@ export function EndingScreen() {
       </div>
     )
   }
+
   // 今回プレイのランク（正解時のみ算出）
-  const currentRank = isCorrect && !murdererEscaped ? calculateRank(usedActions, difficulty) : null
+  const currentRank = isCorrect && !murdererEscaped ? calculateRank(usedActions) : null
   // 犯人を正しく特定できたか（完全正解 or 証拠不足で逃亡）
   const isMurdererIdentified = isCorrect || murdererEscaped
   const voted = scenario.suspects.find((s) => s.id === votedSuspectId)!
@@ -171,59 +170,70 @@ export function EndingScreen() {
         emptyText: '真犯人を見誤った。',
       }
 
-  return (
-    <div className="h-full relative">
-      <MansionSceneBackground phase="ending" fixed />
-      <div className="relative z-10 h-full overflow-y-auto px-4 py-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="text-center mb-8">
-            {isCorrect && !murdererEscaped ? (
-              <>
-                <div className="text-gothic-gold font-display text-5xl mb-4">真実</div>
-                <h1 className="font-display text-2xl text-gothic-gold tracking-widest">
-                  謎は解けた
-                </h1>
-                {currentRank && (
-                  <div className="mt-6">
-                    <p className="text-gothic-muted font-serif text-xs tracking-widest mb-1">
-                      {RANK_STYLE[currentRank].label}
-                    </p>
-                    <div
-                      className={`font-display text-7xl ${RANK_STYLE[currentRank].color} ${RANK_STYLE[currentRank].shadow}`}
-                    >
-                      {currentRank}
-                    </div>
-                    {savedScore?.bestRank && savedScore.bestRank !== currentRank && (
-                      <p className="text-gothic-muted font-serif text-xs mt-1">
-                        自己ベスト：
-                        <span className={RANK_STYLE[savedScore.bestRank].color}>
-                          {savedScore.bestRank}
-                        </span>
-                      </p>
-                    )}
-                  </div>
-                )}
-              </>
-            ) : murdererEscaped ? (
-              <>
-                <div className="text-amber-500 font-display text-5xl mb-4">惜敗</div>
-                <h1 className="font-display text-2xl text-amber-500 tracking-widest">
-                  あと一歩及ばなかった
-                </h1>
-              </>
-            ) : (
-              <>
-                <div className="text-red-400 font-display text-5xl mb-4">誤謬</div>
-                <h1 className="font-display text-2xl text-red-400 tracking-widest">
-                  真犯人を見逃した
-                </h1>
-              </>
+  // 結果ラベルとランク表示（ヘッダー用）
+  const resultLabel =
+    isCorrect && !murdererEscaped ? (
+      <div className="flex items-center gap-3">
+        <span className="text-gothic-gold font-display text-2xl">真実</span>
+        <span className="text-gothic-gold font-display text-sm tracking-widest">── 謎は解けた</span>
+        {currentRank && (
+          <div className="flex items-center gap-2 ml-2">
+            <span className="text-gothic-muted font-serif text-[10px]">
+              {RANK_STYLE[currentRank].label}
+            </span>
+            <span
+              className={`font-display text-2xl ${RANK_STYLE[currentRank].color} ${RANK_STYLE[currentRank].shadow}`}
+            >
+              {currentRank}
+            </span>
+            {savedScore?.bestRank && savedScore.bestRank !== currentRank && (
+              <span className="text-gothic-muted font-serif text-[10px]">
+                ベスト：
+                <span className={RANK_STYLE[savedScore.bestRank].color}>{savedScore.bestRank}</span>
+              </span>
             )}
           </div>
+        )}
+      </div>
+    ) : murdererEscaped ? (
+      <div className="flex items-center gap-3">
+        <span className="text-amber-500 font-display text-2xl">惜敗</span>
+        <span className="text-amber-500/70 font-display text-sm tracking-widest">
+          ── あと一歩及ばなかった
+        </span>
+      </div>
+    ) : (
+      <div className="flex items-center gap-3">
+        <span className="text-red-400 font-display text-2xl">誤謬</span>
+        <span className="text-red-400/70 font-display text-sm tracking-widest">
+          ── 真犯人を見逃した
+        </span>
+      </div>
+    )
+
+  return (
+    <div className="h-full relative flex flex-col">
+      <MansionSceneBackground phase="ending" fixed />
+
+      {/* ヘッダー：結果ラベル + ランク */}
+      <div className="relative z-10 flex-shrink-0 px-4 py-2 border-b border-gothic-border bg-gothic-panel/85 backdrop-blur-sm">
+        {resultLabel}
+      </div>
+
+      {/* 2カラムメイン */}
+      <div className="relative z-10 flex-1 min-h-0 flex gap-2 px-3 py-2">
+        {/* 左カラム：真相・証拠関連 */}
+        <div className="flex-1 overflow-y-auto game-scrollbar flex flex-col gap-2 pr-1">
+          {/* キャラクターカード（犯人特定時のみ） */}
+          {isMurdererIdentified && (
+            <div className="h-[160px] flex-shrink-0">
+              <CharacterCard suspect={murderer} portrait />
+            </div>
+          )}
 
           {murdererEscaped && (
-            <GothicPanel className="mb-4 border-amber-900/60">
-              <p className="text-gothic-muted font-serif text-sm leading-relaxed">
+            <GothicPanel className="border-amber-900/60">
+              <p className="text-gothic-muted font-serif text-xs leading-relaxed">
                 犯人は <span className="text-amber-500">{murderer.name}</span>
                 ——あなたの推理は正しかった。
                 <br />
@@ -233,8 +243,8 @@ export function EndingScreen() {
           )}
 
           {!isMurdererIdentified && (
-            <GothicPanel className="mb-4 border-red-900">
-              <p className="text-gothic-muted font-serif text-sm">
+            <GothicPanel className="border-red-900">
+              <p className="text-gothic-muted font-serif text-xs">
                 あなたが告発したのは <span className="text-gothic-text">{voted.name}</span>{' '}
                 でしたが…
               </p>
@@ -242,23 +252,23 @@ export function EndingScreen() {
           )}
 
           {(murdererEscaped || (!isMurdererIdentified && showTruth)) && (
-            <GothicPanel className={`mb-4 ${missedTheme.panel}`}>
+            <GothicPanel className={missedTheme.panel}>
               {missedCombinations.length === 0 ? (
-                <p className="text-gothic-muted font-serif text-sm leading-relaxed">
+                <p className="text-gothic-muted font-serif text-xs leading-relaxed">
                   決定的証拠はすべて揃えていた——それでも、{missedTheme.emptyText}
                 </p>
               ) : (
                 <>
-                  <p className={`font-display text-xs tracking-widest mb-4 ${missedTheme.header}`}>
+                  <p className={`font-display text-xs tracking-widest mb-3 ${missedTheme.header}`}>
                     ── 見逃した決定的事実 ──
                   </p>
-                  <div className="space-y-4">
+                  <div className="space-y-3">
                     {missedCombinations.map((combo) => (
                       <div
                         key={combo.id}
-                        className={`border ${missedTheme.border} ${missedTheme.bg} p-3`}
+                        className={`border ${missedTheme.border} ${missedTheme.bg} p-2`}
                       >
-                        <p className="text-gothic-text font-serif text-sm mb-2">{combo.name}</p>
+                        <p className="text-gothic-text font-serif text-xs mb-1.5">{combo.name}</p>
                         <div className="space-y-1">
                           {combo.evidence_ids.map((eid) => {
                             const evidence = scenario.evidence.find((e) => e.id === eid)
@@ -291,13 +301,46 @@ export function EndingScreen() {
             </GothicPanel>
           )}
 
+          {/* 真相：正解時は常に / 不正解時は「真相を見る」後のみ */}
+          {(isMurdererIdentified || showTruth) && (
+            <GothicPanel title="真相">
+              <div className="space-y-3">
+                <div>
+                  <span className="text-gothic-gold font-display text-xs tracking-widest">
+                    真犯人
+                  </span>
+                  <p className="text-gothic-text font-serif mt-0.5 text-sm">{murderer.name}</p>
+                </div>
+                <div>
+                  <span className="text-gothic-gold font-display text-xs tracking-widest">
+                    動機
+                  </span>
+                  <p className="text-gothic-text font-serif mt-0.5 text-xs leading-relaxed">
+                    {scenario.motive}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-gothic-gold font-display text-xs tracking-widest">
+                    真相
+                  </span>
+                  <p className="text-gothic-text font-serif mt-0.5 text-xs leading-relaxed">
+                    {scenario.truth}
+                  </p>
+                </div>
+              </div>
+            </GothicPanel>
+          )}
+        </div>
+
+        {/* 右カラム：推理の軌跡・捜査記録 */}
+        <div className="w-[220px] flex-shrink-0 overflow-y-auto game-scrollbar flex flex-col gap-2 pl-1">
           {isMurdererIdentified &&
             (discoveredCombinations.length > 0 || missedCritical.length > 0) && (
-              <GothicPanel className="mb-4">
-                <p className="text-gothic-gold/70 font-display text-xs tracking-widest mb-4">
+              <GothicPanel>
+                <p className="text-gothic-gold/70 font-display text-xs tracking-widest mb-3">
                   ── 推理の軌跡 ──
                 </p>
-                <div className="space-y-3 mb-4">
+                <div className="space-y-3 mb-3">
                   {discoveredCombinations.map((combo) => {
                     const evidenceNames = getEvidenceNames(combo.evidence_ids, scenario.evidence)
                     return (
@@ -305,21 +348,21 @@ export function EndingScreen() {
                         <div className="flex flex-wrap items-center gap-1 mb-1">
                           {evidenceNames.map((name, i) => (
                             <span key={i} className="flex items-center gap-1">
-                              <span className="border border-gothic-border bg-stone-900/60 text-gothic-text font-serif text-xs px-2 py-0.5">
+                              <span className="border border-gothic-border bg-stone-900/60 text-gothic-text font-serif text-[10px] px-1.5 py-0.5">
                                 {name}
                               </span>
                               {i < evidenceNames.length - 1 && (
-                                <span className="text-gothic-muted text-xs">＋</span>
+                                <span className="text-gothic-muted text-[10px]">＋</span>
                               )}
                             </span>
                           ))}
                         </div>
                         <p
-                          className={`font-serif text-xs pl-1 ${combo.is_critical ? 'text-gothic-gold font-semibold' : 'text-gothic-gold/70'}`}
+                          className={`font-serif text-[10px] pl-1 ${combo.is_critical ? 'text-gothic-gold font-semibold' : 'text-gothic-gold/70'}`}
                         >
                           → {combo.name}
                           {combo.is_critical && (
-                            <span className="ml-2 border border-gothic-gold/50 text-gothic-gold/80 text-xs px-1 py-0.5 font-display tracking-wide">
+                            <span className="ml-1 border border-gothic-gold/50 text-gothic-gold/80 text-[10px] px-1 py-0.5 font-display tracking-wide">
                               ⬥ 決定的
                             </span>
                           )}
@@ -329,15 +372,15 @@ export function EndingScreen() {
                   })}
                   {missedCritical.map((combo) => (
                     <div key={combo.id} className="border-l-2 border-red-800/60 pl-2">
-                      <p className="text-red-400/80 font-serif text-xs">
+                      <p className="text-red-400/80 font-serif text-[10px]">
                         見逃した決定的事実：{combo.name}
                       </p>
                     </div>
                   ))}
                 </div>
-                <div className="border-t border-gothic-border pt-3 flex items-center gap-2">
-                  <span className="text-gothic-muted text-xs">↓</span>
-                  <span className="text-gothic-gold font-display text-sm tracking-widest">
+                <div className="border-t border-gothic-border pt-2 flex items-center gap-2">
+                  <span className="text-gothic-muted text-[10px]">↓</span>
+                  <span className="text-gothic-gold font-display text-xs tracking-widest">
                     犯人確定：{murderer.name}
                   </span>
                 </div>
@@ -345,115 +388,76 @@ export function EndingScreen() {
             )}
 
           {isMurdererIdentified && (
-            <GothicPanel className="mb-4">
-              <p className="text-gothic-gold/70 font-display text-xs tracking-widest mb-3">
+            <GothicPanel>
+              <p className="text-gothic-gold/70 font-display text-xs tracking-widest mb-2">
                 ── 捜査記録 ──
               </p>
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
-                  <span className="text-gothic-muted font-serif text-xs">証拠調査</span>
-                  <span className="text-gothic-text font-display text-sm flex items-center gap-1.5">
+                  <span className="text-gothic-muted font-serif text-[10px]">証拠調査</span>
+                  <span className="text-gothic-text font-display text-xs flex items-center gap-1">
                     {usedActions}
-                    <span className="text-gothic-muted text-xs">
-                      / {config.actions} アクション使用
-                    </span>
+                    <span className="text-gothic-muted text-[10px]">/ {ACTIONS}</span>
                     {bestFlags.actions && (
-                      <span className="text-gothic-gold text-xs font-serif">★ベスト</span>
+                      <span className="text-gothic-gold text-[10px] font-serif">★</span>
                     )}
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
-                  <span className="text-gothic-muted font-serif text-xs">聞き込み</span>
-                  <span className="text-gothic-text font-display text-sm flex items-center gap-1.5">
+                  <span className="text-gothic-muted font-serif text-[10px]">聞き込み</span>
+                  <span className="text-gothic-text font-display text-xs flex items-center gap-1">
                     {usedTalkActions}
-                    <span className="text-gothic-muted text-xs">
-                      / {config.talkActions} アクション使用
-                    </span>
+                    <span className="text-gothic-muted text-[10px]">/ {TALK_ACTIONS}</span>
                     {bestFlags.talkActions && (
-                      <span className="text-gothic-gold text-xs font-serif">★ベスト</span>
+                      <span className="text-gothic-gold text-[10px] font-serif">★</span>
                     )}
                   </span>
                 </div>
-                {/* 自己ベスト表示（クリア済みスコアがある場合） */}
                 {savedScore?.bestActions !== undefined && useFixedScenario && (
                   <div className="border-t border-gothic-border/30 pt-1.5 mt-1">
-                    <p className="text-gothic-muted font-serif text-xs mb-1">
-                      自己ベスト（クリア時）
-                    </p>
-                    <div className="flex gap-4">
-                      <span className="text-gothic-muted font-serif text-xs">
-                        調査 {savedScore.bestActions} / 聞込 {savedScore.bestTalkActions ?? '―'}
-                      </span>
-                    </div>
+                    <p className="text-gothic-muted font-serif text-[10px] mb-1">自己ベスト</p>
+                    <span className="text-gothic-muted font-serif text-[10px]">
+                      調査 {savedScore.bestActions} / 聞込 {savedScore.bestTalkActions ?? '―'}
+                    </span>
                   </div>
                 )}
               </div>
             </GothicPanel>
           )}
-
-          {/* 正解時: 常に真相表示 / 不正解時: 「真相を見る」選択後のみ表示 */}
-          {(isMurdererIdentified || showTruth) && (
-            <GothicPanel title="真相" className="mb-6">
-              <div className="space-y-4">
-                <div>
-                  <span className="text-gothic-gold font-display text-sm tracking-widest">
-                    真犯人
-                  </span>
-                  <p className="text-gothic-text font-serif mt-1 text-lg">{murderer.name}</p>
-                </div>
-                <div>
-                  <span className="text-gothic-gold font-display text-sm tracking-widest">
-                    動機
-                  </span>
-                  <p className="text-gothic-text font-serif mt-1">{scenario.motive}</p>
-                </div>
-                <div>
-                  <span className="text-gothic-gold font-display text-sm tracking-widest">
-                    真相
-                  </span>
-                  <p className="text-gothic-text font-serif mt-1 leading-relaxed">
-                    {scenario.truth}
-                  </p>
-                </div>
-              </div>
-            </GothicPanel>
-          )}
-
-          <div className="flex flex-col gap-3">
-            <button
-              onClick={() => resetGame()}
-              className="border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-3 transition-all"
-            >
-              {isMurdererIdentified ? '同じシナリオでリトライ' : 'リトライ'}
-            </button>
-            {!isMurdererIdentified && !showTruth && (
-              <button
-                onClick={() => setShowTruth(true)}
-                className="border border-gothic-accent bg-gothic-panel hover:bg-stone-800 text-gothic-text font-display tracking-widest py-3 transition-all"
-              >
-                真相を見る
-              </button>
-            )}
-            {/* 体験版エンディング後のみ予告画面への導線を表示 */}
-            {trial && useFixedScenario && (
-              <button
-                onClick={() => setPhase('trial_preview')}
-                className="border border-gothic-gold bg-gothic-gold/10 hover:bg-gothic-gold/20 text-gothic-gold font-display tracking-widest py-3 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
-              >
-                次のシナリオ予告を見る
-                <span className="block text-xs text-gothic-muted mt-1 font-serif">
-                  有料版の2シナリオを紹介
-                </span>
-              </button>
-            )}
-            <button
-              onClick={() => setPhase('title')}
-              className="border border-gothic-border text-gothic-muted font-serif py-3 hover:border-gothic-accent transition-all"
-            >
-              タイトルへ戻る
-            </button>
-          </div>
         </div>
+      </div>
+
+      {/* フッター：ボタン行 */}
+      <div className="relative z-10 flex-shrink-0 px-3 py-2 border-t border-gothic-border bg-gothic-panel/80 backdrop-blur-sm flex gap-2">
+        <button
+          onClick={() => resetGame()}
+          className="flex-1 border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest text-xs py-2 transition-all"
+        >
+          {isMurdererIdentified ? '同じシナリオでリトライ' : 'リトライ'}
+        </button>
+        {!isMurdererIdentified && !showTruth && (
+          <button
+            onClick={() => setShowTruth(true)}
+            className="flex-1 border border-gothic-accent bg-gothic-panel hover:bg-stone-800 text-gothic-text font-display tracking-widest text-xs py-2 transition-all"
+          >
+            真相を見る
+          </button>
+        )}
+        {/* 体験版エンディング後のみ予告画面への導線を表示 */}
+        {trial && useFixedScenario && (
+          <button
+            onClick={() => setPhase('trial_preview')}
+            className="flex-1 border border-gothic-gold bg-gothic-gold/10 hover:bg-gothic-gold/20 text-gothic-gold font-display tracking-widest text-xs py-2 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
+          >
+            次のシナリオ予告
+          </button>
+        )}
+        <button
+          onClick={() => setPhase('title')}
+          className="flex-1 border border-gothic-border text-gothic-muted font-serif text-xs py-2 hover:border-gothic-accent transition-all"
+        >
+          タイトルへ戻る
+        </button>
       </div>
     </div>
   )

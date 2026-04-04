@@ -1,4 +1,4 @@
-// 設定モーダル。セーブ・表示・音声・画面サイズ・APIキーの設定を統合する
+// 設定モーダル。セーブ・表示・音声・画面サイズの設定を統合する
 import { useState, useEffect } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { useAudioStore } from '../../stores/audioStore'
@@ -7,9 +7,15 @@ import type { TextSpeed } from '../../stores/settingsStore'
 import { getManualSlots } from '../../utils/saveLoad'
 import { SaveSlotList } from './SaveSlotList'
 import { cn } from '../../utils/cn'
+import { GAME_BASE_WIDTH, GAME_BASE_HEIGHT } from '../../constants/gameConfig'
 
-// 画面サイズのプリセット（exe想定: 1280×720 / 1600×900 / 1920×1080）
+// 画面サイズのプリセット（exe想定: GAME_BASE がデフォルト起動サイズ）
 const SCREEN_SIZES = [
+  {
+    label: `${GAME_BASE_WIDTH} × ${GAME_BASE_HEIGHT}`,
+    width: GAME_BASE_WIDTH,
+    height: GAME_BASE_HEIGHT,
+  },
   { label: '1280 × 720', width: 1280, height: 720 },
   { label: '1600 × 900', width: 1600, height: 900 },
   { label: '1920 × 1080', width: 1920, height: 1080 },
@@ -18,7 +24,7 @@ const SCREEN_SIZES = [
 const SCREEN_SIZE_KEY = 'whodunit_screen_size'
 const SAVE_CONFIRM_DURATION_MS = 1200
 
-type Tab = 'save' | 'view' | 'audio' | 'display' | 'apikey'
+type Tab = 'save' | 'view' | 'audio' | 'display'
 
 interface Props {
   onClose: () => void
@@ -58,11 +64,9 @@ const TEXT_SPEED_OPTIONS: { key: TextSpeed; label: string }[] = [
   { key: 'fast', label: '速い' },
 ]
 
-// セーブ・表示・音声・画面サイズ・APIキーの設定を1つのモーダルにまとめたコンポーネント
+// セーブ・表示・音声・画面サイズの設定を1つのモーダルにまとめたコンポーネント
 export function SettingsModal({ onClose, showSave }: Props) {
   const manualSave = useGameStore((s) => s.manualSave)
-  const setApiKey = useGameStore((s) => s.setApiKey)
-  const setPhase = useGameStore((s) => s.setPhase)
   const { bgmVolume, seVolume, setBgmVolume, setSeVolume } = useAudioStore()
   const { skipInterlude, textSpeed, setSkipInterlude } = useSettingsStore()
   const [slots] = useState(getManualSlots)
@@ -71,8 +75,6 @@ export function SettingsModal({ onClose, showSave }: Props) {
   const [selectedSize, setSelectedSize] = useState<{ width: number; height: number } | null>(
     loadScreenSize
   )
-  const [apiKey, setApiKeyInput] = useState('')
-  const apiKeyTrimmed = apiKey.trim()
 
   // 保存成功後に自動クローズ
   useEffect(() => {
@@ -91,21 +93,11 @@ export function SettingsModal({ onClose, showSave }: Props) {
     applyScreenSize(width, height)
   }
 
-  // APIキーを保存してシナリオ生成フェーズへ遷移する
-  const handleApiKeySubmit = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!apiKeyTrimmed) return
-    setApiKey(apiKeyTrimmed)
-    setPhase('generating')
-    onClose()
-  }
-
   const tabs: Array<{ id: Tab; label: string }> = [
     ...(showSave ? [{ id: 'save' as Tab, label: 'セーブ' }] : []),
     { id: 'view', label: '表示' },
     { id: 'audio', label: '音声' },
     { id: 'display', label: '画面サイズ' },
-    { id: 'apikey', label: 'APIキー' },
   ]
 
   return (
@@ -285,38 +277,24 @@ export function SettingsModal({ onClose, showSave }: Props) {
               </p>
             </>
           )}
-
-          {tab === 'apikey' && (
-            <>
-              <p className="text-gothic-muted font-serif text-xs tracking-widest text-center mb-4">
-                ― Gemini API キー ―
-              </p>
-              <p className="text-gothic-muted font-serif text-xs mb-4 leading-relaxed">
-                Google AI Studio の API
-                キーを入力してください。キーはこのセッション中のみ使用され、保存されません。
-              </p>
-              <form onSubmit={handleApiKeySubmit} className="space-y-3">
-                <input
-                  type="password"
-                  value={apiKey}
-                  onChange={(e) => setApiKeyInput(e.target.value)}
-                  placeholder="AIza..."
-                  className="w-full bg-gothic-bg border border-gothic-border text-gothic-text font-serif px-4 py-3 focus:outline-none focus:border-gothic-gold text-sm"
-                />
-                <button
-                  type="submit"
-                  disabled={!apiKeyTrimmed}
-                  className="w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 disabled:opacity-40 text-gothic-gold font-display tracking-widest py-3 transition-all text-xs"
-                >
-                  シナリオを生成する
-                </button>
-              </form>
-            </>
-          )}
         </div>
 
         {/* フッター */}
-        <div className="border-t border-gothic-border px-6 pb-5 pt-4">
+        <div className="border-t border-gothic-border px-6 pb-5 pt-4 space-y-2">
+          <div className="flex gap-2">
+            <button
+              onClick={() => window.electronAPI?.windowControls.minimize()}
+              className="flex-1 border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 transition-all duration-200 hover:border-gothic-accent hover:text-gothic-text"
+            >
+              最小化
+            </button>
+            <button
+              onClick={() => window.electronAPI?.windowControls.quit()}
+              className="flex-1 border border-red-900/60 bg-transparent text-red-400/70 font-serif text-xs py-2 transition-all duration-200 hover:border-red-700 hover:text-red-400"
+            >
+              ゲームを終了
+            </button>
+          </div>
           <button
             onClick={onClose}
             className="w-full border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 transition-all duration-200 hover:border-gothic-accent"

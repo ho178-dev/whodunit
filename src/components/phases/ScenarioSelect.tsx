@@ -6,7 +6,6 @@ import { FIXED_SCENARIO_2 } from '../../constants/fixedScenario2'
 import { FIXED_SCENARIO_3 } from '../../constants/fixedScenario3'
 import { loadScoreData } from '../../utils/score'
 import { isTrialMode } from '../../constants/salesConfig'
-import type { Difficulty } from '../../types/game'
 import type { Scenario } from '../../types/scenario'
 
 // 固定シナリオ一覧の定義
@@ -32,7 +31,7 @@ export function ScenarioSelect() {
   }
 
   return (
-    <div className="h-full overflow-y-auto flex flex-col items-center justify-center px-4 py-8">
+    <div className="h-full overflow-y-auto game-scrollbar flex flex-col items-center justify-center px-4 py-8">
       <div className="w-full max-w-2xl">
         <div className="text-center mb-8">
           <p className="text-gothic-muted font-serif text-xs tracking-widest">
@@ -43,10 +42,8 @@ export function ScenarioSelect() {
         <div className="space-y-3">
           {DISPLAYED_SCENARIOS.map(({ scenario, subtitle }) => {
             const scoreData = loadScoreData(scenario.title)
-            const difficulties: Difficulty[] = ['easy', 'normal', 'hard']
-            const isCleared = difficulties.some((d) => scoreData[d]?.cleared)
-            const isPlayed = difficulties.some((d) => scoreData[d]?.played)
-            const normalScore = scoreData['normal']
+            const isCleared = scoreData?.cleared ?? false
+            const isPlayed = scoreData?.played ?? false
 
             return (
               <button
@@ -75,12 +72,11 @@ export function ScenarioSelect() {
                     )}
                   </div>
                 </div>
-                {/* ベストスコア（normal難易度クリア済みの場合のみ表示） */}
-                {normalScore?.bestActions !== undefined && (
+                {/* ベストスコア（クリア済みの場合のみ表示） */}
+                {scoreData?.bestActions !== undefined && (
                   <div className="mt-2 border-t border-gothic-border/30 pt-2">
                     <span className="text-gothic-muted font-serif text-xs">
-                      ベスト（normal）：調査 {normalScore.bestActions} / 聞込{' '}
-                      {normalScore.bestTalkActions ?? '―'}
+                      ベスト：調査 {scoreData.bestActions} / 聞込 {scoreData.bestTalkActions ?? '―'}
                     </span>
                   </div>
                 )}

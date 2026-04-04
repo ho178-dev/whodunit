@@ -15,6 +15,34 @@
   --font-pixel: 'Press Start 2P', monospace;
 }
 
+/* デフォルトスクロールバーをゲーム全体で非表示 */
+* {
+  scrollbar-width: none;
+}
+*::-webkit-scrollbar {
+  display: none;
+}
+
+/* ゲーム共通カスタムスクロールバー。スクロールが必要な箇所にgame-scrollbarクラスを付与する */
+.game-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #d97706 #1c1917;
+}
+.game-scrollbar::-webkit-scrollbar {
+  display: block;
+  width: 6px;
+}
+.game-scrollbar::-webkit-scrollbar-track {
+  background: #1c1917;
+  border-left: 1px solid #44403c;
+}
+.game-scrollbar::-webkit-scrollbar-thumb {
+  background: #d97706;
+}
+.game-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #b45309;
+}
+
 body {
   background-color: #0c0a09;
   color: #fef3c7;

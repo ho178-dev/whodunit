@@ -1,11 +1,10 @@
-// ゲームフェーズ・難易度・対決ログエントリ・仮説エントリの型定義
+// ゲームフェーズ・スコア・対決ログエントリ・仮説エントリの型定義
 export type GamePhase =
   | 'title'
   | 'scenario_select'
   | 'api_key_input'
   | 'generating'
   | 'scenario_briefing'
-  | 'difficulty_select'
   | 'investigation'
   | 'discussion'
   | 'voting'
@@ -13,9 +12,7 @@ export type GamePhase =
   | 'ending'
   | 'trial_preview'
 
-export type Difficulty = 'easy' | 'normal' | 'hard'
-
-// 難易度ごとのプレイ記録（クリア有無・自己ベストアクション数・ランク）
+// シナリオのプレイスコア（クリア有無・自己ベストアクション数・ランク）
 export interface DifficultyScore {
   cleared: boolean
   played: boolean
@@ -23,9 +20,6 @@ export interface DifficultyScore {
   bestTalkActions?: number
   bestRank?: 'S' | 'A' | 'B' | 'C'
 }
-
-// シナリオタイトルをキーとしたスコアデータ（難易度ごとに保持）
-export type ScenarioScoreData = Partial<Record<Difficulty, DifficultyScore>>
 
 export interface ConfrontationEntry {
   suspectId: string
