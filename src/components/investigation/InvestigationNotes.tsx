@@ -1,6 +1,7 @@
 // 捜査中に収集したタイムライン・証拠品・証言・発見・仮説を閲覧・記述できるメモ画面
-// 捜査・議論フェーズ共通。フルスクリーンで表示し、左サイドバーに容疑者名一覧を配置する
-import { useState } from 'react'
+// 捜査・議論・告発フェーズ共通。フルスクリーンで表示し、左サイドバーに容疑者名一覧を配置する
+// タイムライン・証言タブは全容疑者を一覧表示し、左サイドバークリックで該当セクションへスクロール
+import { useRef, useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { getEvidenceNames, getInspectionDescription } from '../../utils/scenario'
 import { HypothesisNote } from './HypothesisNote'
@@ -18,16 +19,36 @@ interface PursuitSelectionMode {
   onCancel: () => void
 }
 
+/** 証拠品タブで証拠を選択し、確認ボタンで一括アクションを実行するモード */
+interface EvidenceSelectMode {
+  /** 突きつけ/反論対象の容疑者名（確認ボタンのラベルに使用） */
+  suspectName: string
+  /** 確認ボタンのラベル（例: "突きつける" / "この証拠で反論する"） */
+  actionLabel: string
+  /** すでに突きつけ済みの証拠ID（dimmed 表示） */
+  confrontedEvidenceIds?: string[]
+  /** 確認ボタン押下時に呼ばれるコールバック（選択した証拠IDを渡す） */
+  onConfirm: (evidenceId: string) => void
+  onCancel: () => void
+}
+
 interface InvestigationNotesProps {
   onClose: () => void
-  pursuitMode?: PursuitSelectionMode // 証言選択モード（追及質問の証言ゲート）
+  /** 証言選択モード（追及質問の証言ゲート） */
+  pursuitMode?: PursuitSelectionMode
+  /** 証拠品選択モード（議論・告発フェーズでの突きつけ/反論） */
+  evidenceSelectMode?: EvidenceSelectMode
 }
 
 const DEFAULT_CHARACTER_IMG = assetUrl('/assets/characters/default_character.png')
 const DEFAULT_EVIDENCE_IMG = assetUrl('/assets/evidence/default_evidence.png')
 
-// タイムライン・証拠・証言・発見をタブ切り替えで表示するフルスクリーンメモコンポーネント
-export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesProps) {
+// タイムライン・証拠・証言・発見・推理ノートをタブ切り替えで表示するフルスクリーンメモコンポーネント
+export function InvestigationNotes({
+  onClose,
+  pursuitMode,
+  evidenceSelectMode,
+}: InvestigationNotesProps) {
   const {
     scenario,
     talkedSuspectIds,
@@ -37,9 +58,19 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
     discoveredCombinationIds,
     hypotheses,
     revealedFakeEvidenceIds,
+    askedPursuitQuestionIds,
   } = useGameStore()
-  const [tab, setTab] = useState<Tab>(pursuitMode ? 'testimony' : 'timeline')
+
+  // evidenceSelectMode が有効な場合は証拠品タブを強制表示
+  const defaultTab: Tab = evidenceSelectMode ? 'evidence' : pursuitMode ? 'testimony' : 'timeline'
+  const [tab, setTab] = useState<Tab>(defaultTab)
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null)
+  // evidenceSelectMode 使用時に選択中の証拠ID
+  const [pendingEvidenceId, setPendingEvidenceId] = useState<string | null>(null)
+
+  // タイムライン・証言タブの各容疑者セクションへのref（スクロール用）
+  const timelineRefs = useRef<Map<string, HTMLDivElement>>(new Map())
+  const testimonyRefs = useRef<Map<string, HTMLDivElement>>(new Map())
 
   if (!scenario) return null
 
@@ -63,6 +94,25 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
 
   const filledHypothesesCount = hypotheses.filter(isHypothesisFilled).length
 
+  // 容疑者IDごとの追及Q&Aマップ（質問済みのもののみ）
+  const askedPursuitQABySuspect = new Map<
+    string,
+    { questionText: string; response: string; evidenceName: string }[]
+  >()
+  for (const suspect of scenario.suspects) {
+    const qas: { questionText: string; response: string; evidenceName: string }[] = []
+    for (const [evidenceId, reaction] of Object.entries(suspect.evidence_reactions ?? {})) {
+      for (const pq of reaction.pursuit_questions ?? []) {
+        if (askedPursuitQuestionIds.includes(pq.id)) {
+          const evidenceName =
+            scenario.evidence.find((e) => e.id === evidenceId)?.name ?? evidenceId
+          qas.push({ questionText: pq.text, response: pq.response, evidenceName })
+        }
+      }
+    }
+    if (qas.length > 0) askedPursuitQABySuspect.set(suspect.id, qas)
+  }
+
   // 選択中タブかどうかに応じたスタイルクラスを返すユーティリティ関数
   const tabClass = (t: Tab) =>
     `px-2 py-2 text-[10px] font-display tracking-widest transition-colors whitespace-nowrap ${
@@ -70,6 +120,26 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
         ? 'text-gothic-gold border-b border-gothic-gold'
         : 'text-gothic-muted hover:text-gothic-text'
     }`
+
+  // 左サイドバーの容疑者クリック: 選択してタイムライン/証言タブの該当セクションへスクロール
+  const handleSidebarClick = (suspectId: string) => {
+    const isSelected = selectedSuspectId === suspectId
+    setSelectedSuspectId(isSelected ? null : suspectId)
+
+    if (tab === 'timeline') {
+      timelineRefs.current.get(suspectId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    } else if (tab === 'testimony') {
+      testimonyRefs.current.get(suspectId)?.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
+  // evidenceSelectMode の確認ボタン押下
+  const handleEvidenceConfirm = () => {
+    if (!pendingEvidenceId || !evidenceSelectMode) return
+    evidenceSelectMode.onConfirm(pendingEvidenceId)
+  }
+
+  const isSpecialMode = !!pursuitMode || !!evidenceSelectMode
 
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-gothic-bg border border-gothic-gold/50">
@@ -88,10 +158,18 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
               ⚑ 矛盾する証言を選択してください
             </span>
           )}
+          {evidenceSelectMode && (
+            <span className="text-gothic-gold font-serif text-xs border border-gothic-gold/60 px-2 py-0.5">
+              証拠を選択: {evidenceSelectMode.suspectName}
+            </span>
+          )}
         </div>
-        {pursuitMode && (
+        {isSpecialMode && (
           <button
-            onClick={() => pursuitMode.onCancel()}
+            onClick={() => {
+              pursuitMode?.onCancel()
+              evidenceSelectMode?.onCancel()
+            }}
             className="text-stone-500 hover:text-stone-300 font-serif text-xs border border-stone-700 px-2 py-0.5 transition-colors"
           >
             キャンセル
@@ -167,7 +245,7 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
               return (
                 <button
                   key={suspect.id}
-                  onClick={() => setSelectedSuspectId(isSelected ? null : suspect.id)}
+                  onClick={() => handleSidebarClick(suspect.id)}
                   className={`w-full px-1.5 py-1.5 text-center border transition-all ${
                     isPursuitTarget
                       ? 'border-yellow-700 bg-yellow-950/20'
@@ -197,7 +275,7 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
 
         {/* タブコンテンツ */}
         <div className="flex-1 overflow-y-auto game-scrollbar p-4 space-y-4">
-          {/* タイムライン（キャラ画像なし） */}
+          {/* タイムライン: 全容疑者を一覧表示（左サイドバークリックで該当セクションへスクロール） */}
           {tab === 'timeline' &&
             (talkedSuspects.length === 0 ? (
               <p className="text-gothic-muted font-serif text-sm text-center py-8">
@@ -205,39 +283,43 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
               </p>
             ) : (
               <div className="space-y-4">
-                {talkedSuspects
-                  .filter((s) => !selectedSuspectId || s.id === selectedSuspectId)
-                  .map((suspect) => {
-                    const totalStatements = 1 + suspect.investigation_dialog.statements.length
-                    const heardCount = statementsById.get(suspect.id)?.length ?? 0
-                    const allHeard = heardCount >= totalStatements
-                    const remaining = totalStatements - heardCount
-                    return (
-                      <div key={suspect.id} className="border border-gothic-border p-3">
-                        <div className="mb-2">
-                          <span className="text-gothic-gold font-display text-xs tracking-widest">
-                            {suspect.name}
-                          </span>
-                          <p className="text-gothic-muted font-serif text-[10px] mt-0.5">
-                            {suspect.occupation}
-                          </p>
-                        </div>
-                        {allHeard ? (
-                          <p className="text-gothic-text font-serif text-xs leading-relaxed whitespace-pre-wrap">
-                            {suspect.timeline}
-                          </p>
-                        ) : (
-                          <p className="text-gothic-muted font-serif text-xs italic">
-                            あと{remaining}つの証言を聞くとタイムラインが確認できます
-                          </p>
-                        )}
+                {talkedSuspects.map((suspect) => {
+                  const totalStatements = 1 + suspect.investigation_dialog.statements.length
+                  const heardCount = statementsById.get(suspect.id)?.length ?? 0
+                  const allHeard = heardCount >= totalStatements
+                  const remaining = totalStatements - heardCount
+                  return (
+                    <div
+                      key={suspect.id}
+                      ref={(el) => {
+                        if (el) timelineRefs.current.set(suspect.id, el)
+                      }}
+                      className="border border-gothic-border p-3"
+                    >
+                      <div className="mb-2">
+                        <span className="text-gothic-gold font-display text-xs tracking-widest">
+                          {suspect.name}
+                        </span>
+                        <p className="text-gothic-muted font-serif text-[10px] mt-0.5">
+                          {suspect.occupation}
+                        </p>
                       </div>
-                    )
-                  })}
+                      {allHeard ? (
+                        <p className="text-gothic-text font-serif text-xs leading-relaxed whitespace-pre-wrap">
+                          {suspect.timeline}
+                        </p>
+                      ) : (
+                        <p className="text-gothic-muted font-serif text-xs italic">
+                          あと{remaining}つの証言を聞くとタイムラインが確認できます
+                        </p>
+                      )}
+                    </div>
+                  )
+                })}
               </div>
             ))}
 
-          {/* 証拠品 */}
+          {/* 証拠品: evidenceSelectMode 時は選択UI付き */}
           {tab === 'evidence' &&
             (discoveredEvidence.length === 0 ? (
               <p className="text-gothic-muted font-serif text-sm text-center py-8">
@@ -248,8 +330,24 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
                 {discoveredEvidence.map((evidence) => {
                   const examined = examinedEvidenceIds.includes(evidence.id)
                   const imgSrc = resolveEvidenceAsset(evidence.category_id)
+                  const isConfronted = evidenceSelectMode?.confrontedEvidenceIds?.includes(
+                    evidence.id
+                  )
+                  const isSelected = pendingEvidenceId === evidence.id
                   return (
-                    <div key={evidence.id} className="border border-gothic-border p-3">
+                    <div
+                      key={evidence.id}
+                      onClick={
+                        evidenceSelectMode ? () => setPendingEvidenceId(evidence.id) : undefined
+                      }
+                      className={`border p-3 transition-all ${
+                        evidenceSelectMode
+                          ? isSelected
+                            ? 'border-gothic-gold bg-stone-800/60 shadow-[0_0_12px_rgba(217,119,6,0.4)] cursor-pointer'
+                            : 'border-gothic-border hover:border-gothic-gold/50 cursor-pointer'
+                          : 'border-gothic-border'
+                      }`}
+                    >
                       <div className="flex items-start gap-3 mb-2">
                         <div className="w-14 h-14 flex-shrink-0 border border-gothic-border/50 bg-stone-900/50 overflow-hidden">
                           <PixelImageWithFallback
@@ -262,13 +360,18 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
                           />
                         </div>
                         <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1">
+                          <div className="flex items-center gap-2 mb-1 flex-wrap">
                             <span className="text-gothic-gold font-display text-xs tracking-widest">
                               {evidence.name}
                             </span>
                             {revealedFakeEvidenceIds.includes(evidence.id) && (
                               <span className="text-xs text-red-400/70 font-serif border border-red-800/50 px-1">
                                 偽証拠
+                              </span>
+                            )}
+                            {isConfronted && (
+                              <span className="text-xs text-gothic-muted font-serif border border-gothic-border px-1">
+                                突きつけ済
                               </span>
                             )}
                           </div>
@@ -297,7 +400,7 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
               </div>
             ))}
 
-          {/* 証言（左：キャラ画像+名前、右：証言内容） */}
+          {/* 証言: 全容疑者を一覧表示（左サイドバークリックで該当セクションへスクロール） */}
           {tab === 'testimony' &&
             (testimonyBySuspect.length === 0 ? (
               <p className="text-gothic-muted font-serif text-sm text-center py-8">
@@ -310,74 +413,99 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
                     この証拠と矛盾する証言を選んでください。間違えた場合は容疑者が反応します。
                   </p>
                 )}
-                {testimonyBySuspect
-                  .filter((g) => !selectedSuspectId || g.suspect.id === selectedSuspectId)
-                  .map(({ suspect, statements }) => {
-                    const isTargetSuspect = pursuitMode?.suspectId === suspect.id
-                    const imgSrc = resolveCharacterAsset(suspect.appearance_id)
-                    return (
-                      <div
-                        key={suspect.id}
-                        className={`border p-3 flex gap-3 ${
-                          pursuitMode && !isTargetSuspect
-                            ? 'border-stone-800 opacity-40'
-                            : 'border-gothic-border'
-                        }`}
-                      >
-                        {/* 左カラム: キャラ画像 + 名前 */}
-                        <div className="w-16 flex-shrink-0 flex flex-col items-center gap-1.5">
-                          <div className="w-full aspect-[832/1216] overflow-hidden border border-gothic-border/50">
-                            <PixelImageWithFallback
-                              src={imgSrc}
-                              alt={suspect.name}
-                              pixelSize={PIXEL_ART_CONFIG.pixelSize.character}
-                              canvasWidth={PIXEL_ART_CONFIG.canvasSize.character.width}
-                              canvasHeight={PIXEL_ART_CONFIG.canvasSize.character.height}
-                              fallbackSrc={DEFAULT_CHARACTER_IMG}
-                            />
-                          </div>
-                          <p
-                            className={`font-display text-[9px] tracking-wide text-center leading-tight ${
-                              isTargetSuspect ? 'text-yellow-400' : 'text-gothic-gold'
-                            }`}
-                          >
-                            {suspect.name}
-                            {isTargetSuspect && pursuitMode && (
-                              <span className="block text-yellow-600 font-serif normal-case tracking-normal text-[8px] mt-0.5">
-                                証言を選択
-                              </span>
-                            )}
-                          </p>
+                {testimonyBySuspect.map(({ suspect, statements }) => {
+                  const isTargetSuspect = pursuitMode?.suspectId === suspect.id
+                  const imgSrc = resolveCharacterAsset(suspect.appearance_id)
+                  return (
+                    <div
+                      key={suspect.id}
+                      ref={(el) => {
+                        if (el) testimonyRefs.current.set(suspect.id, el)
+                      }}
+                      className={`border p-3 flex gap-3 ${
+                        pursuitMode && !isTargetSuspect
+                          ? 'border-stone-800 opacity-40'
+                          : 'border-gothic-border'
+                      }`}
+                    >
+                      {/* 左カラム: キャラ画像 + 名前 */}
+                      <div className="w-16 flex-shrink-0 flex flex-col items-center gap-1.5">
+                        <div className="w-full aspect-[832/1216] overflow-hidden border border-gothic-border/50">
+                          <PixelImageWithFallback
+                            src={imgSrc}
+                            alt={suspect.name}
+                            pixelSize={PIXEL_ART_CONFIG.pixelSize.character}
+                            canvasWidth={PIXEL_ART_CONFIG.canvasSize.character.width}
+                            canvasHeight={PIXEL_ART_CONFIG.canvasSize.character.height}
+                            fallbackSrc={DEFAULT_CHARACTER_IMG}
+                          />
                         </div>
-
-                        {/* 右カラム: 証言内容 */}
-                        <div className="flex-1 min-w-0 space-y-2">
-                          {statements.map((s) => {
-                            const isSelectable = pursuitMode && isTargetSuspect && s.index >= 0
-                            return (
-                              <div key={s.index} className="flex gap-2">
-                                <span className="text-gothic-muted text-xs font-serif shrink-0">
-                                  {s.index === -1 ? '挨拶' : `証言${s.index + 1}`}
-                                </span>
-                                {isSelectable ? (
-                                  <button
-                                    onClick={() => pursuitMode.onSelect(suspect.id, s.index)}
-                                    className="text-left text-gothic-text font-serif text-xs leading-relaxed hover:text-yellow-200 hover:bg-yellow-900/20 px-1 -mx-1 rounded transition-colors border border-transparent hover:border-yellow-800/50 w-full"
-                                  >
-                                    {s.text}
-                                  </button>
-                                ) : (
-                                  <p className="text-gothic-text font-serif text-xs leading-relaxed">
-                                    {s.text}
-                                  </p>
-                                )}
-                              </div>
-                            )
-                          })}
-                        </div>
+                        <p
+                          className={`font-display text-[9px] tracking-wide text-center leading-tight ${
+                            isTargetSuspect ? 'text-yellow-400' : 'text-gothic-gold'
+                          }`}
+                        >
+                          {suspect.name}
+                          {isTargetSuspect && pursuitMode && (
+                            <span className="block text-yellow-600 font-serif normal-case tracking-normal text-[8px] mt-0.5">
+                              証言を選択
+                            </span>
+                          )}
+                        </p>
                       </div>
-                    )
-                  })}
+
+                      {/* 右カラム: 証言内容 */}
+                      <div className="flex-1 min-w-0 space-y-2">
+                        {statements.map((s) => {
+                          const isSelectable = pursuitMode && isTargetSuspect && s.index >= 0
+                          return (
+                            <div key={s.index} className="flex gap-2">
+                              <span className="text-gothic-muted text-xs font-serif shrink-0">
+                                {s.index === -1 ? '挨拶' : `証言${s.index + 1}`}
+                              </span>
+                              {isSelectable ? (
+                                <button
+                                  onClick={() => pursuitMode.onSelect(suspect.id, s.index)}
+                                  className="text-left text-gothic-text font-serif text-xs leading-relaxed hover:text-yellow-200 hover:bg-yellow-900/20 px-1 -mx-1 rounded transition-colors border border-transparent hover:border-yellow-800/50 w-full"
+                                >
+                                  {s.text}
+                                </button>
+                              ) : (
+                                <p className="text-gothic-text font-serif text-xs leading-relaxed">
+                                  {s.text}
+                                </p>
+                              )}
+                            </div>
+                          )
+                        })}
+                        {/* 追及Q&A: 質問済みの追及質問と返答を表示 */}
+                        {(askedPursuitQABySuspect.get(suspect.id) ?? []).map((qa) => (
+                          <div
+                            key={`${qa.evidenceName}-${qa.questionText}`}
+                            className="mt-2 border-t border-yellow-900/40 pt-2 space-y-1"
+                          >
+                            <div className="flex gap-2">
+                              <span className="text-yellow-600/80 text-xs font-serif shrink-0">
+                                追及
+                              </span>
+                              <p className="text-yellow-300/80 font-serif text-xs leading-relaxed">
+                                {qa.questionText}
+                              </p>
+                            </div>
+                            <div className="flex gap-2 pl-2">
+                              <span className="text-gothic-muted text-xs font-serif shrink-0">
+                                返答
+                              </span>
+                              <p className="text-gothic-text font-serif text-xs leading-relaxed">
+                                {qa.response}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
             ))}
 
@@ -407,7 +535,7 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
                         )}
                       </div>
                       <div className="flex flex-wrap gap-2 mb-2">
-                        {combo.evidence_ids.map((eid) => {
+                        {combo.evidence_ids.map((eid, idx) => {
                           const ev = scenario.evidence.find((e) => e.id === eid)
                           if (!ev) return null
                           const imgSrc = resolveEvidenceAsset(ev.category_id)
@@ -424,7 +552,7 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
                                 />
                               </div>
                               <span className="border border-gothic-border text-gothic-muted font-serif text-xs px-1.5 py-0.5">
-                                {evidenceNames[combo.evidence_ids.indexOf(eid)]}
+                                {evidenceNames[idx]}
                               </span>
                             </div>
                           )
@@ -439,10 +567,35 @@ export function InvestigationNotes({ onClose, pursuitMode }: InvestigationNotesP
               </div>
             ))}
 
-          {/* 推理ノート */}
-          {tab === 'hypothesis' && <HypothesisNote />}
+          {/* 推理ノート: 左サイドバーで選択した容疑者のフォームを表示 */}
+          {tab === 'hypothesis' && <HypothesisNote selectedSuspectId={selectedSuspectId} />}
         </div>
       </div>
+
+      {/* evidenceSelectMode: 証拠選択後に表示される確認ボタン（スティッキーフッター） */}
+      {evidenceSelectMode && (
+        <div className="flex-shrink-0 border-t border-gothic-border bg-gothic-panel/90 backdrop-blur-sm px-4 py-3 flex items-center justify-between gap-3">
+          {pendingEvidenceId ? (
+            <>
+              <span className="text-gothic-text font-serif text-xs">
+                <span className="text-gothic-gold">
+                  {scenario.evidence.find((e) => e.id === pendingEvidenceId)?.name ?? ''}
+                </span>
+                {' → '}
+                {evidenceSelectMode.suspectName}
+              </span>
+              <button
+                onClick={handleEvidenceConfirm}
+                className="bg-gothic-gold/10 border border-gothic-gold text-gothic-gold font-display tracking-widest text-xs px-4 py-2 hover:bg-gothic-gold/20 transition-all whitespace-nowrap"
+              >
+                {evidenceSelectMode.actionLabel}
+              </button>
+            </>
+          ) : (
+            <p className="text-gothic-muted font-serif text-xs">証拠品を選択してください</p>
+          )}
+        </div>
+      )}
     </div>
   )
 }

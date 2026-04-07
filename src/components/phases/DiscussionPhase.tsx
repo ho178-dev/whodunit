@@ -1,6 +1,7 @@
 // 議論フェーズの画面。館背景にキャラクターを配置し、証拠突きつけ・追及質問を管理する
 // 一覧モード（スライダー）と会話モード（選択キャラ中央表示）を切り替える
-// 会話モード時は左特別パネルに操作UIを表示し、ダイアログはフル幅で下部に配置する
+// 証拠選択は捜査メモの証拠品タブで行い、EvidenceSelectModal は廃止
+// 矛盾を追求ボタン・追及質問リストは CenterActionArea に集約
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { getRootQuestionIds } from '../../utils/scenario'
@@ -11,11 +12,11 @@ import { CharacterCard } from '../shared/CharacterCard'
 import { CharacterSlider } from '../shared/CharacterSlider'
 import { DialogBox } from '../shared/DialogBox'
 import { MansionSceneBackground } from '../shared/MansionBackground'
-import { EvidenceSelectModal } from '../discussion/EvidenceSelectModal'
 import { behaviorBorderColors, behaviorLabel } from '../../constants/npcBehavior'
 import { cn } from '../../utils/cn'
 import { RightPanel } from '../layout/RightPanel'
 import { LeftSpecialPanel } from '../layout/LeftSpecialPanel'
+import { CenterActionArea } from '../layout/CenterActionArea'
 import { PanelButton } from '../layout/PanelButton'
 import { NotesIcon } from '../shared/Icons'
 import { resolveMansionAsset } from '../../services/assetResolver'
@@ -26,7 +27,6 @@ export function DiscussionPhase() {
   const {
     scenario,
     setPhase,
-    inspectedEvidenceIds,
     pendingPursuitActivation,
     selectTestimonyForPursuit,
     clearPursuitActivation,
@@ -45,21 +45,25 @@ export function DiscussionPhase() {
 
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null)
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
-  const [showEvidenceModal, setShowEvidenceModal] = useState(false)
-  const [showNotesManual, setShowNotesManual] = useState(false)
+  const [showNotes, setShowNotes] = useState(false)
+  const [notesMode, setNotesMode] = useState<'normal' | 'evidence_select'>('normal')
   const [sliderIndex, setSliderIndex] = useState(0)
   // 追及質問クリック後、プレイヤーの発言をダイアログに表示するための一時状態
   const [pendingPlayerText, setPendingPlayerText] = useState<{
     text: string
     questionId: string
   } | null>(null)
+  // 続きを聞くボタンの表示制御（追及質問の返答アニメーション完了後に表示）
+  const [playerDialogDone, setPlayerDialogDone] = useState(false)
 
-  const showNotes = showNotesManual || pendingPursuitActivation !== null
+  // 追及質問モードのメモ表示（pursuitMode が有効な場合はノーマルモードを上書き）
+  const shouldShowNotes = showNotes || pendingPursuitActivation !== null
 
   if (!scenario) return null
 
   const handleNotesClose = () => {
-    setShowNotesManual(false)
+    setShowNotes(false)
+    setNotesMode('normal')
     clearPursuitActivation()
   }
 
@@ -70,8 +74,11 @@ export function DiscussionPhase() {
     ? scenario.suspects.find((s) => s.id === selectedSuspectId)
     : null
 
-  // 会話モード: 容疑者と証拠の両方が選択済みの場合のみ
-  const isConversationMode = selectedSuspectId !== null && selectedEvidenceId !== null
+  // 会話モード: 突きつけ後に selectedSuspectId が設定された場合のみ（キャラクリックでは移行しない）
+  const isConversationMode = selectedSuspectId !== null
+
+  // 次回突きつけのターゲット: 選択済み容疑者 OR スライダー中央の容疑者
+  const targetSuspect = selectedSuspect ?? scenario.suspects[sliderIndex] ?? null
 
   const latestReaction =
     selectedSuspectId && selectedEvidenceId
@@ -125,10 +132,11 @@ export function DiscussionPhase() {
   const currentWrongResult =
     pursuitWrongResult?.suspectId === selectedSuspectId ? pursuitWrongResult : null
 
-  const confrontedEvidenceIds = selectedSuspectId
+  // ターゲット容疑者に対する突きつけ済み証拠IDs（捜査メモの証拠品タブで表示用）
+  const confrontedEvidenceIds = targetSuspect
     ? [
         ...new Set(
-          confrontationLog.filter((c) => c.suspectId === selectedSuspectId).map((c) => c.evidenceId)
+          confrontationLog.filter((c) => c.suspectId === targetSuspect.id).map((c) => c.evidenceId)
         ),
       ]
     : []
@@ -143,12 +151,10 @@ export function DiscussionPhase() {
       : null) ??
     latestReaction
 
+  // キャラクリック: スライダー位置を移動するのみ（会話モードには移行しない）
   const handleSuspectClick = (suspectId: string) => {
     const idx = scenario.suspects.findIndex((s) => s.id === suspectId)
     if (idx >= 0) setSliderIndex(idx)
-    setSelectedSuspectId(suspectId)
-    setSelectedEvidenceId(null)
-    setShowEvidenceModal(true)
     if (pursuitWrongResult) clearPursuitWrongResult()
   }
 
@@ -158,23 +164,33 @@ export function DiscussionPhase() {
     if (pursuitWrongResult) clearPursuitWrongResult()
   }
 
-  const handleEvidenceSelect = (evidenceId: string) => {
-    setSelectedEvidenceId(evidenceId)
-    setShowEvidenceModal(false)
+  // 証拠を選ぶボタン: 常に有効。スライダー中央（または選択済み）の容疑者に対して開く
+  const handleOpenEvidenceSelect = () => {
+    setNotesMode('evidence_select')
+    setShowNotes(true)
   }
 
-  const handleConfront = () => {
-    if (!selectedSuspect || !selectedEvidence) return
-    const reaction = selectedSuspect.evidence_reactions[selectedEvidence.id]
+  // 突きつけアクション（InvestigationNotes 内の確認ボタンから呼ばれる）
+  // ターゲット容疑者に突きつけ、完了後に会話モードへ移行する
+  const handleConfront = (evidenceId: string) => {
+    if (!targetSuspect) return
+    const reaction = targetSuspect.evidence_reactions[evidenceId]
     if (reaction) {
       addConfrontation({
-        suspectId: selectedSuspect.id,
-        evidenceId: selectedEvidence.id,
+        suspectId: targetSuspect.id,
+        evidenceId,
         reaction: reaction.reaction,
         behavior: reaction.behavior,
       })
       consumeDiscussionConfrontAction()
     }
+    // 突きつけ後に会話モードへ移行し、スライダーもターゲットに合わせる
+    setSelectedSuspectId(targetSuspect.id)
+    setSelectedEvidenceId(evidenceId)
+    const idx = scenario.suspects.findIndex((s) => s.id === targetSuspect.id)
+    if (idx >= 0) setSliderIndex(idx)
+    setShowNotes(false)
+    setNotesMode('normal')
     if (pursuitWrongResult) clearPursuitWrongResult()
   }
 
@@ -191,103 +207,28 @@ export function DiscussionPhase() {
     )
     if (!qData) return
     setPendingPlayerText({ text: qData.text, questionId })
+    setPlayerDialogDone(false)
   }
 
-  // 「続ける」ボタン押下: 容疑者の返答を表示
+  // 「続きを聞く」押下: 容疑者の返答を表示
   const handlePlayerDialogAdvance = () => {
     if (!pendingPlayerText || !selectedSuspectId || !selectedEvidenceId) return
     askPursuitQuestion(selectedSuspectId, selectedEvidenceId, pendingPlayerText.questionId)
     setPendingPlayerText(null)
+    setPlayerDialogDone(false)
   }
 
-  const leftPanel =
-    isConversationMode && selectedSuspect && selectedEvidence ? (
-      <LeftSpecialPanel>
-        <button
-          onClick={handleBackToList}
-          className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 hover:border-gothic-accent px-3 py-2 text-gothic-muted hover:text-gothic-text font-serif text-xs transition-all text-left w-full"
-        >
-          ← 容疑者一覧
-        </button>
-
-        {/* 突きつけコンテキスト */}
-        <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-2">
-          <p className="text-gothic-muted font-serif text-[10px] leading-relaxed">
-            <span className="text-gothic-text">{selectedSuspect.name}</span>
-            {'に'}
-            <br />
-            <span className="text-gothic-gold">「{selectedEvidence.name}」</span>
-            {'を突きつける'}
-          </p>
-        </div>
-
-        {/* 突きつけボタン */}
-        <PanelButton variant="primary" onClick={handleConfront}>
-          突きつける
-        </PanelButton>
-
-        {/* 矛盾を追及する */}
-        {latestReaction && (hasPursuitQuestions ? !allRootUnlocked : !currentWrongResult) && (
-          <button
-            onClick={handleInitiatePursuit}
-            className="w-full bg-yellow-950/70 backdrop-blur-sm border border-yellow-700 hover:bg-yellow-900/50 text-yellow-300 font-display tracking-widest py-2 transition-all text-[10px] flex items-center justify-center gap-1"
-          >
-            <span>⚑</span>
-            <span>矛盾を追及</span>
-          </button>
-        )}
-
-        {/* 追及質問リスト（専用コンテナでスクロール） */}
-        {unlockedForCurrent.length > 0 && (
-          <div className="bg-stone-900/80 backdrop-blur-sm border border-yellow-700/50 overflow-y-auto game-scrollbar max-h-44">
-            <p className="font-display text-yellow-400 text-[10px] tracking-widest px-3 py-2 border-b border-yellow-700/40 flex items-center gap-1">
-              <span>⚑</span>
-              <span>追及質問</span>
-            </p>
-            <div className="px-2 py-2 space-y-1.5">
-              {unlockedForCurrent.map(({ questionId }, idx) => {
-                const isAsked = askedPursuitQuestionIds.includes(questionId)
-                return (
-                  <button
-                    key={questionId}
-                    onClick={() => !isAsked && handleAskPursuit(questionId)}
-                    disabled={isAsked}
-                    className={`w-full border px-2 py-1.5 font-display text-[10px] tracking-widest transition-all flex items-center justify-center gap-1 ${
-                      isAsked
-                        ? 'border-stone-700 text-stone-600 cursor-default'
-                        : 'border-yellow-700 text-yellow-200 hover:bg-yellow-900/20'
-                    }`}
-                  >
-                    {isAsked ? (
-                      <>
-                        <span>✓</span>
-                        <span>追及済み {idx + 1}</span>
-                      </>
-                    ) : (
-                      <>
-                        <span>⚑</span>
-                        <span>追及する {idx + 1}</span>
-                      </>
-                    )}
-                  </button>
-                )
-              })}
-            </div>
-            {allQuestionsAsked && (
-              <p className="text-center text-yellow-500/70 font-display text-[10px] tracking-widest py-2 border-t border-yellow-700/30">
-                ── 追及完了 ──
-              </p>
-            )}
-          </div>
-        )}
-      </LeftSpecialPanel>
-    ) : null
+  // 追及質問リストをCenterActionAreaに表示するかどうか
+  const showPursuitList = unlockedForCurrent.length > 0
+  // 矛盾を追求ボタンを表示するかどうか
+  const showPursuitButton =
+    !!latestReaction && (hasPursuitQuestions ? !allRootUnlocked : !currentWrongResult)
 
   return (
     <>
       <CombinationDiscovery />
       <FakeRevealModal />
-      {showNotes && (
+      {shouldShowNotes && (
         <InvestigationNotes
           onClose={handleNotesClose}
           pursuitMode={
@@ -296,26 +237,27 @@ export function DiscussionPhase() {
                   suspectId: pendingPursuitActivation.suspectId,
                   onSelect: (suspectId, statementIndex) => {
                     selectTestimonyForPursuit(suspectId, statementIndex)
-                    setShowNotesManual(false)
+                    setShowNotes(false)
+                    setNotesMode('normal')
                   },
                   onCancel: handleNotesClose,
                 }
               : undefined
           }
-        />
-      )}
-      {showEvidenceModal && selectedSuspect && (
-        <EvidenceSelectModal
-          suspectName={selectedSuspect.name}
-          discoveredIds={inspectedEvidenceIds}
-          confrontedEvidenceIds={confrontedEvidenceIds}
-          onSelect={handleEvidenceSelect}
-          onClose={() => {
-            setShowEvidenceModal(false)
-            if (!selectedEvidenceId) {
-              setSelectedSuspectId(null)
-            }
-          }}
+          evidenceSelectMode={
+            notesMode === 'evidence_select' && targetSuspect
+              ? {
+                  suspectName: targetSuspect.name,
+                  actionLabel: '突きつける',
+                  confrontedEvidenceIds,
+                  onConfirm: handleConfront,
+                  onCancel: () => {
+                    setShowNotes(false)
+                    setNotesMode('normal')
+                  },
+                }
+              : undefined
+          }
         />
       )}
 
@@ -336,37 +278,40 @@ export function DiscussionPhase() {
           />
         )}
 
-        {/* 会話モード: キャラクター中央表示（フル幅） */}
+        {/* 会話モード: 単体キャラクター表示。スライダーと同じ位置（top-1/2 -translate-y-[60%]）に配置 */}
         {isConversationMode && selectedSuspect && (
-          <div className="absolute inset-x-0 bottom-28 flex justify-center">
-            <div className="transition-all duration-300">
-              <CharacterCard
-                suspect={selectedSuspect}
-                portrait
-                selected
-                onClick={() => setShowEvidenceModal(true)}
-              />
-            </div>
+          <div className="absolute inset-x-0 top-1/2 -translate-y-[60%] flex justify-center">
+            <CharacterCard suspect={selectedSuspect} portrait selected />
           </div>
+        )}
+
+        {/* CenterActionArea: 矛盾警告バナーのみ */}
+        {isConversationMode && hasContradiction && latestReaction && !currentWrongResult && (
+          <CenterActionArea>
+            <div className="bg-yellow-900/60 border border-yellow-500 text-yellow-200 font-serif text-xs px-4 py-2 text-center w-full max-w-md">
+              ⚠ この証拠はあなたが聞いたある証言と矛盾している
+            </div>
+          </CenterActionArea>
         )}
 
         {/* ダイアログエリア（フル幅・下部固定） */}
         <div className="absolute inset-x-0 bottom-0 p-2">
           {pendingPlayerText ? (
-            <div className="bg-gothic-panel/85 backdrop-blur-sm border-2 border-blue-700/60">
+            <div className="relative bg-gothic-panel/85 backdrop-blur-sm border-2 border-blue-700/60">
               <DialogBox
                 key={`player-${pendingPlayerText.questionId}`}
                 text={`「${pendingPlayerText.text}」`}
                 speakerName="あなた"
+                onComplete={() => setPlayerDialogDone(true)}
               />
-              <div className="px-4 pb-3 flex justify-end">
+              {playerDialogDone && (
                 <button
                   onClick={handlePlayerDialogAdvance}
-                  className="bg-blue-900/60 border border-blue-700 text-blue-200 font-serif text-xs px-4 py-1.5 hover:bg-blue-800/60 transition-all"
+                  className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
                 >
-                  続ける →
+                  続きを聞く →
                 </button>
-              </div>
+              )}
             </div>
           ) : dialogReaction && selectedSuspect ? (
             <div
@@ -380,25 +325,31 @@ export function DiscussionPhase() {
                 text={dialogReaction.reaction}
                 speakerName={`${selectedSuspect.name} ─ ${currentWrongResult ? '的外れ' : behaviorLabel[dialogReaction.behavior]}`}
               />
-              {hasContradiction && latestReaction && (
-                <p className="px-4 pb-3 border-t border-yellow-700/50 pt-2 text-yellow-400 font-serif text-xs">
-                  ⚠ この証拠はあなたが聞いたある証言と矛盾している
-                </p>
-              )}
             </div>
           ) : (
             <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border p-4">
               <p className="text-gothic-muted font-serif text-sm text-center">
-                容疑者をクリックして証拠を突きつける
+                {isConversationMode
+                  ? '「証拠を選ぶ」で証拠を選んで突きつけてください'
+                  : '容疑者を選んで証拠を突きつける'}
               </p>
             </div>
           )}
         </div>
 
-        {/* 左特別パネル（会話モード時のみ） */}
-        {leftPanel}
+        {/* 左特別パネル（会話モード時のみ: 容疑者一覧に戻るボタン） */}
+        {isConversationMode && (
+          <LeftSpecialPanel>
+            <button
+              onClick={handleBackToList}
+              className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 hover:border-gothic-accent px-3 py-2 text-gothic-muted hover:text-gothic-text font-serif text-xs transition-all text-left w-full"
+            >
+              ← 容疑者一覧
+            </button>
+          </LeftSpecialPanel>
+        )}
 
-        {/* 右パネル（slot1はGameShellの右上ヘッダーに移管） */}
+        {/* 右パネル */}
         <RightPanel
           slot2={
             <div className="flex items-center gap-2">
@@ -411,21 +362,90 @@ export function DiscussionPhase() {
             </div>
           }
           slot3={
-            <PanelButton
-              variant="primary"
-              disabled={!selectedSuspectId}
-              onClick={() => setShowEvidenceModal(true)}
-            >
+            <PanelButton variant="primary" onClick={handleOpenEvidenceSelect}>
               証拠を選ぶ
             </PanelButton>
           }
           slot4={
-            <PanelButton variant="secondary" onClick={() => setShowNotesManual(true)}>
-              <span className="flex items-center justify-center gap-1.5">
-                <NotesIcon size={13} />
-                <span>捜査メモ</span>
-              </span>
-            </PanelButton>
+            <div className="flex flex-col gap-2">
+              <PanelButton
+                variant="secondary"
+                onClick={() => {
+                  setNotesMode('normal')
+                  setShowNotes(true)
+                }}
+              >
+                <span className="flex items-center justify-center gap-1.5">
+                  <NotesIcon size={13} />
+                  <span>捜査メモ</span>
+                </span>
+              </PanelButton>
+
+              {/* 矛盾を追求ボタン（捜査メモ直下・質問リスト未解放時） */}
+              {showPursuitButton && !showPursuitList && (
+                <button
+                  onClick={handleInitiatePursuit}
+                  className="w-full bg-yellow-950/70 backdrop-blur-sm border border-yellow-700 hover:bg-yellow-900/50 text-yellow-300 font-display tracking-widest py-2 transition-all text-[10px] flex items-center justify-center gap-1"
+                >
+                  <span>⚑</span>
+                  <span>矛盾を追及</span>
+                </button>
+              )}
+
+              {/* 追及質問リスト（捜査メモ直下・質問解放後） */}
+              {showPursuitList && (
+                <div className="bg-stone-900/80 backdrop-blur-sm border border-yellow-700/50">
+                  <div className="flex items-center justify-between px-2 py-1.5 border-b border-yellow-700/40">
+                    <p className="font-display text-yellow-400 text-[9px] tracking-widest flex items-center gap-1">
+                      <span>⚑</span>
+                      <span>追及質問</span>
+                    </p>
+                    {showPursuitButton && (
+                      <button
+                        onClick={handleInitiatePursuit}
+                        className="bg-yellow-950/70 border border-yellow-700 hover:bg-yellow-900/50 text-yellow-300 font-display tracking-widest py-0.5 px-1.5 transition-all text-[9px]"
+                      >
+                        ＋追及
+                      </button>
+                    )}
+                  </div>
+                  <div className="px-1.5 py-1.5 space-y-1 max-h-32 overflow-y-auto game-scrollbar">
+                    {unlockedForCurrent.map(({ questionId }, idx) => {
+                      const isAsked = askedPursuitQuestionIds.includes(questionId)
+                      return (
+                        <button
+                          key={questionId}
+                          onClick={() => !isAsked && handleAskPursuit(questionId)}
+                          disabled={isAsked}
+                          className={`w-full border px-1.5 py-1 font-display text-[9px] tracking-widest transition-all flex items-center justify-center gap-1 ${
+                            isAsked
+                              ? 'border-stone-700 text-stone-600 cursor-default'
+                              : 'border-yellow-700 text-yellow-200 hover:bg-yellow-900/20'
+                          }`}
+                        >
+                          {isAsked ? (
+                            <>
+                              <span>✓</span>
+                              <span>追及済み {idx + 1}</span>
+                            </>
+                          ) : (
+                            <>
+                              <span>⚑</span>
+                              <span>追及する {idx + 1}</span>
+                            </>
+                          )}
+                        </button>
+                      )
+                    })}
+                  </div>
+                  {allQuestionsAsked && (
+                    <p className="text-center text-yellow-500/70 font-display text-[9px] tracking-widest py-1.5 border-t border-yellow-700/30">
+                      ── 追及完了 ──
+                    </p>
+                  )}
+                </div>
+              )}
+            </div>
           }
           slot5={
             <PanelButton variant="glow" onClick={() => setPhase('voting')}>

@@ -224,9 +224,9 @@ export function EndingScreen() {
       <div className="relative z-10 flex-1 min-h-0 flex gap-2 px-3 py-2">
         {/* 左カラム：真相・証拠関連 */}
         <div className="flex-1 overflow-y-auto game-scrollbar flex flex-col gap-2 pr-1">
-          {/* キャラクターカード（犯人特定時のみ） */}
+          {/* キャラクターカード（犯人特定時のみ）: flex-shrink-0 で真相テキストと重ならないようにする */}
           {isMurdererIdentified && (
-            <div className="h-[160px] flex-shrink-0">
+            <div className="h-[120px] flex-shrink-0">
               <CharacterCard suspect={murderer} portrait />
             </div>
           )}
