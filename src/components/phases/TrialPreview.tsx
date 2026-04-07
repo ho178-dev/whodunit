@@ -37,9 +37,9 @@ export function TrialPreview() {
 
           <div className="text-center mb-6">
             <p className="text-gothic-muted font-serif text-xs mb-4">
-              上記2シナリオを含む全3本が
-              <span className="text-gothic-gold">有料版</span>
-              で遊べます
+              上記2シナリオを含む全3本(+AIシナリオ生成)を
+              <span className="text-gothic-gold">鋭意制作中</span>
+              となります。スキリストに入れていただけると励みになります！
             </p>
             <a
               href={BOOTH_URL}
