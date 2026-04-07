@@ -21,6 +21,7 @@ import { PanelButton } from '../layout/PanelButton'
 import { NotesIcon } from '../shared/Icons'
 import { resolveMansionAsset } from '../../services/assetResolver'
 import { DISCUSSION_CONFRONT_ACTIONS } from '../../constants/gameConfig'
+import type { BystanderReaction } from '../../types/scenario'
 
 // 議論フェーズのメインコンポーネント
 export function DiscussionPhase() {
@@ -55,6 +56,9 @@ export function DiscussionPhase() {
   } | null>(null)
   // 続きを聞くボタンの表示制御（追及質問の返答アニメーション完了後に表示）
   const [playerDialogDone, setPlayerDialogDone] = useState(false)
+  // 矛盾追及成功時に表示する他キャラのリアクション
+  const [bystanderReactions, setBystanderReactions] = useState<BystanderReaction[]>([])
+  const [bystanderIndex, setBystanderIndex] = useState(0)
 
   // 追及質問モードのメモ表示（pursuitMode が有効な場合はノーマルモードを上書き）
   const shouldShowNotes = showNotes || pendingPursuitActivation !== null
@@ -224,6 +228,12 @@ export function DiscussionPhase() {
   const showPursuitButton =
     !!latestReaction && (hasPursuitQuestions ? !allRootUnlocked : !currentWrongResult)
 
+  const currentBystanderReaction = bystanderReactions[bystanderIndex] ?? null
+  const currentBystanderSuspect = currentBystanderReaction
+    ? (scenario.suspects.find((s) => s.id === currentBystanderReaction.suspectId) ?? null)
+    : null
+  const isBystanderLast = bystanderIndex >= bystanderReactions.length - 1
+
   return (
     <>
       <CombinationDiscovery />
@@ -236,7 +246,20 @@ export function DiscussionPhase() {
               ? {
                   suspectId: pendingPursuitActivation.suspectId,
                   onSelect: (suspectId, statementIndex) => {
+                    // 追及前に pending 情報を保存してから実行（成功判定に使用）
+                    const pending = pendingPursuitActivation
                     selectTestimonyForPursuit(suspectId, statementIndex)
+                    // 成功判定: 追及後に pursuitWrongResult が null のまま → 正解
+                    const { pursuitWrongResult: wr } = useGameStore.getState()
+                    if (!wr && pending) {
+                      const suspect = scenario.suspects.find((s) => s.id === pending.suspectId)
+                      const reactions =
+                        suspect?.evidence_reactions[pending.evidenceId]?.bystander_reactions ?? []
+                      if (reactions.length > 0) {
+                        setBystanderReactions(reactions)
+                        setBystanderIndex(0)
+                      }
+                    }
                     setShowNotes(false)
                     setNotesMode('normal')
                   },
@@ -292,6 +315,37 @@ export function DiscussionPhase() {
               ⚠ この証拠はあなたが聞いたある証言と矛盾している
             </div>
           </CenterActionArea>
+        )}
+
+        {/* 矛盾追及成功時の他キャラリアクション表示 */}
+        {currentBystanderReaction && currentBystanderSuspect && (
+          <div className="absolute inset-0 z-30 flex flex-col items-center justify-end pb-2 px-2 bg-black/40">
+            <div className="w-full max-w-lg">
+              <div className="flex justify-center mb-2">
+                <CharacterCard suspect={currentBystanderSuspect} portrait selected />
+              </div>
+              <div className="relative bg-gothic-panel/90 backdrop-blur-sm border-2 border-yellow-600/70">
+                <DialogBox
+                  key={`bystander-${bystanderIndex}`}
+                  text={currentBystanderReaction.text}
+                  speakerName={`${currentBystanderSuspect.name} ─ 反応`}
+                />
+                <button
+                  onClick={() => {
+                    if (isBystanderLast) {
+                      setBystanderReactions([])
+                      setBystanderIndex(0)
+                    } else {
+                      setBystanderIndex((i) => i + 1)
+                    }
+                  }}
+                  className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
+                >
+                  {isBystanderLast ? '閉じる' : '次へ →'}
+                </button>
+              </div>
+            </div>
+          </div>
         )}
 
         {/* ダイアログエリア（フル幅・下部固定） */}

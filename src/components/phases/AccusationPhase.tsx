@@ -264,7 +264,7 @@ export function AccusationPhase() {
         mansionBackgroundSrc={resolveMansionAsset(scenario.mansion_background_id)}
       />
 
-      <div className="absolute inset-x-0 bottom-[30vh] flex justify-center">
+      <div className="absolute inset-x-0 top-1/2 -translate-y-[60%] flex justify-center">
         <CharacterCard suspect={votedSuspect} portrait selected />
       </div>
 

@@ -3,6 +3,7 @@
 // 画像はゲーム内と同じピクセル化・配色（ゴシックパレット）・解像度で表示する
 
 import { useState, useRef, useEffect, useLayoutEffect } from 'react'
+import { useGameStore } from '../../stores/gameStore'
 import { PixelImageWithFallback } from '../shared/PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 import {
@@ -361,6 +362,7 @@ function BgmSection() {
 }
 
 export function DebugPage() {
+  const setPhase = useGameStore((s) => s.setPhase)
   const [tab, setTab] = useState<Tab>('images')
   const [imageCategory, setImageCategory] = useState<ImageCategory>('characters')
   const [selectedAsset, setSelectedAsset] = useState<{
@@ -385,6 +387,12 @@ export function DebugPage() {
           </span>
           <h1 className="text-base font-bold text-gray-100">デバッグページ</h1>
           <span className="text-xs text-gray-500">WhoDuNit</span>
+          <button
+            onClick={() => setPhase('title')}
+            className="ml-auto rounded border border-gray-600 bg-gray-800 px-3 py-1 text-xs text-gray-300 transition-colors hover:border-gray-400 hover:text-gray-100"
+          >
+            タイトルへ戻る
+          </button>
         </div>
       </header>
 

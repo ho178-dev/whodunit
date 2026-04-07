@@ -88,8 +88,8 @@ export function RoomView({ roomId, hideEvidenceIcon = false, rightPanel }: RoomV
           </div>
         )}
 
-        {/* rightPanel がある場合は両側均等に内側へ寄せてボタンと被らないようにする */}
-        <NpcDialog roomId={roomId} hasRightPanel={!!rightPanel} />
+        {/* rightPanel がある場合は両側均等に内側へ寄せてボタンと被らないようにする。key を roomId にして部屋移動時にダイアログ状態をリセットする */}
+        <NpcDialog key={roomId} roomId={roomId} hasRightPanel={!!rightPanel} />
 
         {/* 追加パネル（右パネルなど） */}
         {rightPanel}

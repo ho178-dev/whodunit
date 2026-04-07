@@ -112,12 +112,6 @@ export function GameShell() {
   return (
     // 外層: ウィンドウ全体を覆い、960×540コンテナをスケールして中央配置する
     <div className="w-screen h-screen bg-gothic-bg flex items-center justify-center overflow-hidden relative">
-      {/* フレームレスウィンドウ用ドラッグ領域: 画面最上部の細いバーでウィンドウを移動できる */}
-      <div
-        className="absolute inset-x-0 top-0 h-2 z-[200]"
-        style={{ WebkitAppRegion: 'drag' } as React.CSSProperties}
-      />
-
       {/* 960×540 固定コンテナ: transform: scale でウィンドウサイズに合わせて拡縮する */}
       <div
         className="relative overflow-hidden border border-gothic-border"

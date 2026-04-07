@@ -226,7 +226,7 @@ export function EndingScreen() {
         <div className="flex-1 overflow-y-auto game-scrollbar flex flex-col gap-2 pr-1">
           {/* キャラクターカード（犯人特定時のみ）: flex-shrink-0 で真相テキストと重ならないようにする */}
           {isMurdererIdentified && (
-            <div className="h-[120px] flex-shrink-0">
+            <div className="flex-shrink-0 flex justify-center">
               <CharacterCard suspect={murderer} portrait />
             </div>
           )}
@@ -327,6 +327,16 @@ export function EndingScreen() {
                     {scenario.truth}
                   </p>
                 </div>
+                {scenario.main_reasoning_path && (
+                  <div className="border-t border-gothic-border pt-3">
+                    <span className="text-gothic-gold font-display text-xs tracking-widest">
+                      推理導線
+                    </span>
+                    <p className="text-gothic-muted font-serif mt-0.5 text-xs leading-relaxed whitespace-pre-line">
+                      {scenario.main_reasoning_path}
+                    </p>
+                  </div>
+                )}
               </div>
             </GothicPanel>
           )}
