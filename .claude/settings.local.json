@@ -55,7 +55,10 @@
       "Bash(find:*)",
       "Bash(npx --prefix D:/workspace/whodunit eslint D:/workspace/whodunit/src/components/investigation/InvestigationNotes.tsx D:/workspace/whodunit/src/components/phases/VotingPhase.tsx)",
       "Bash(npx:*)",
-      "Bash(echo \"exit:$?\")"
+      "Bash(echo \"exit:$?\")",
+      "Bash(echo \"DONE:$?\")",
+      "Bash(echo \"TSC:$?\")",
+      "Bash(echo \"exit: $?\")"
     ]
   }
 }
