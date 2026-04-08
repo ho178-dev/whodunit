@@ -14,12 +14,7 @@ async function main() {
   // 各ICOサイズのPNGバッファを生成
   const sizes = [16, 32, 48, 256]
   const pngBuffers = await Promise.all(
-    sizes.map((s) =>
-      sharp(SOURCE_IMAGE, { density: 300 })
-        .resize(s, s)
-        .png()
-        .toBuffer()
-    )
+    sizes.map((s) => sharp(SOURCE_IMAGE, { density: 300 }).resize(s, s).png().toBuffer())
   )
 
   const icoBuffer = await pngToIco(pngBuffers)
