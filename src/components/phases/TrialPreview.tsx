@@ -37,9 +37,9 @@ export function TrialPreview() {
 
           <div className="text-center mb-6">
             <p className="text-gothic-muted font-serif text-xs mb-4">
-              上記2シナリオを含む全3本が
-              <span className="text-gothic-gold">有料版</span>
-              で遊べます
+              上記2シナリオを含む全3本(+AIシナリオ生成)を
+              <span className="text-gothic-gold">鋭意制作中</span>
+              となります。スキリストに入れていただけると励みになります！
             </p>
             <a
               href={BOOTH_URL}
@@ -57,6 +57,16 @@ export function TrialPreview() {
           >
             タイトルへ戻る
           </button>
+
+          {/* フィードバック・不具合報告 */}
+          <div className="mt-6 text-center border-t border-gothic-border/30 pt-4">
+            <p className="text-gothic-muted/60 font-serif text-[10px] leading-relaxed">
+              不具合・フィードバックはこちらへ
+              <br />
+              <span className="text-gothic-muted">feedback@example.com</span>
+              <span className="block mt-0.5 text-gothic-muted/40 italic">（仮）</span>
+            </p>
+          </div>
         </div>
       </div>
     </div>

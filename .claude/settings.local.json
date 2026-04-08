@@ -52,7 +52,15 @@
       "Bash(find /d/workspace/whodunit/src -name scenario.ts -path */utils/*)",
       "Bash(find /d/workspace/whodunit/src -path */utils/*.ts)",
       "Bash(xargs cat:*)",
-      "Bash(find:*)"
+      "Bash(find:*)",
+      "Bash(npx --prefix D:/workspace/whodunit eslint D:/workspace/whodunit/src/components/investigation/InvestigationNotes.tsx D:/workspace/whodunit/src/components/phases/VotingPhase.tsx)",
+      "Bash(npx:*)",
+      "Bash(echo \"exit:$?\")",
+      "Bash(echo \"DONE:$?\")",
+      "Bash(echo \"TSC:$?\")",
+      "Bash(echo \"exit: $?\")",
+      "Bash(sort -t: -k2 -rn)",
+      "Bash(echo \"EXIT:$?\")"
     ]
   }
 }

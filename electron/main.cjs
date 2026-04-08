@@ -8,17 +8,17 @@ const path = require('path')
 let win = null
 
 /**
- * フレームレスゲームウィンドウを生成する
- * 初期サイズ 960×540・リサイズ可・ネイティブフレームなし
+ * ゲームウィンドウを生成する
+ * 初期サイズ 960×540・リサイズ可・OSネイティブフレーム表示
+ * innerHeight は titlebar を除いたコンテンツ領域を示すため、スケール計算はそのまま正確に動作する
  */
 function createWindow() {
   win = new BrowserWindow({
     width: 960,
-    height: 540,
+    height: 580,
     minWidth: 640,
-    minHeight: 360,
+    minHeight: 400,
     resizable: true,
-    frame: false,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,

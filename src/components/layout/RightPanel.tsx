@@ -19,9 +19,15 @@ interface RightPanelProps {
 
 // 16:9コンテナ右端に浮かせたボタン群。コンテナ自体は透過で背景が透けて見える
 // top-10: GameShell 右上ヘッダー（absolute top-2）との重複を避けるためデフォルトで下げる
+// bottom-[110px]: ダイアログ上端まで伸ばし、slot5（次フェーズへ進む）を最下部に分離配置する
 export function RightPanel({ slot2, slot3, slot4, slot5, className }: RightPanelProps) {
   return (
-    <div className={cn('absolute right-2 top-10 flex flex-col gap-2 z-20 w-[140px]', className)}>
+    <div
+      className={cn(
+        'absolute right-2 top-10 bottom-[110px] flex flex-col gap-2 z-20 w-[140px]',
+        className
+      )}
+    >
       {/* Slot 2: 状態表示 */}
       {slot2 && (
         <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-2">
@@ -29,10 +35,12 @@ export function RightPanel({ slot2, slot3, slot4, slot5, className }: RightPanel
         </div>
       )}
 
-      {/* Slots 3–5: アクションボタン群 */}
+      {/* Slots 3–4: アクションボタン群 */}
       {slot3}
       {slot4}
-      {slot5}
+
+      {/* Slot 5: フェーズ進行ボタン（パネル最下部に分離配置） */}
+      {slot5 && <div className="mt-auto">{slot5}</div>}
     </div>
   )
 }

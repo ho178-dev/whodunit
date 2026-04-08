@@ -77,6 +77,7 @@ export interface GameState {
   discussionConfrontActionsRemaining: number // 議論フェーズの証拠突きつけAP
   accusationConfrontActionsRemaining: number // 告発フェーズの証拠突きつけAP
   currentRoomId: string | null
+  suspectTalkProgress: Record<string, number> // 容疑者ごとの会話進行インデックス（dialogIndex）
   inspectedEvidenceIds: string[] // 1段階目：外観開示済み
   examinedEvidenceIds: string[] // 2段階目：論理的示唆開示済み
   discoveredCombinationIds: string[] // 発見済み証拠組み合わせID
@@ -120,6 +121,7 @@ export interface GameState {
   clearPursuitWrongResult: () => void
   askPursuitQuestion: (suspectId: string, evidenceId: string, questionId: string) => void
   viewSuspectProfile: (suspectId: string) => void
+  setSuspectTalkProgress: (suspectId: string, index: number) => void
   setVotedSuspectId: (id: string) => void
   setMurdererEscaped: (escaped: boolean) => void
   updateHypothesis: (
@@ -163,6 +165,7 @@ const initialState = {
   discussionConfrontActionsRemaining: DISCUSSION_CONFRONT_ACTIONS,
   accusationConfrontActionsRemaining: ACCUSATION_CONFRONT_ACTIONS,
   currentRoomId: null,
+  suspectTalkProgress: {},
   inspectedEvidenceIds: [],
   examinedEvidenceIds: [],
   discoveredCombinationIds: [],
@@ -434,6 +437,11 @@ export const useGameStore = create<GameState>((set, get) => ({
         }),
       }
     }),
+  // 容疑者ごとの会話進行インデックスを更新する
+  setSuspectTalkProgress: (suspectId, index) =>
+    set((state) => ({
+      suspectTalkProgress: { ...state.suspectTalkProgress, [suspectId]: index },
+    })),
   // 投票した容疑者IDを設定する
   setVotedSuspectId: (id) => set({ votedSuspectId: id }),
   // 犯人逃亡フラグを設定する（証拠不足で逃げ切った場合にtrue）

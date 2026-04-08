@@ -48,4 +48,32 @@ body {
   color: #fef3c7;
   font-family: 'DotGothic16', 'Noto Serif JP', monospace;
   min-height: 100vh;
+  cursor: url('/assets/cursors/main.cur'), auto;
+}
+
+/* ゲーム内全要素でオリジナルカーソルを強制（デフォルトカーソルの混入を防ぐ） */
+*,
+*::before,
+*::after {
+  cursor: url('/assets/cursors/main.cur'), auto !important;
+}
+
+/* ポインターカーソル：クリック可能な要素にホバーしたとき */
+button,
+a,
+[role='button'],
+select,
+input[type='checkbox'],
+input[type='radio'],
+label[for],
+input[type='range'] {
+  cursor: url('/assets/cursors/poointer.cur'), pointer !important;
+}
+
+/* テキスト入力欄はテキストカーソルを許可 */
+input[type='text'],
+input[type='password'],
+input[type='email'],
+textarea {
+  cursor: text !important;
 }

@@ -111,7 +111,7 @@ export function TitleScreen() {
             >
               シナリオを選ぶ
               <span className="block text-xs text-gothic-muted mt-1 font-serif">
-                {trial ? '体験版シナリオ・ネタバレなし' : '全3本・ネタバレなし'}
+                {trial ? '体験版シナリオ' : '全3本のシナリオから選択'}
               </span>
             </button>
 

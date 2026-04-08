@@ -4,6 +4,13 @@ import { persist } from 'zustand/middleware'
 
 export type TextSpeed = 'slow' | 'normal' | 'fast'
 
+/** テキスト速度ごとのタイプライター間隔（ms）。DialogBox で参照する */
+export const TEXT_SPEED_MS: Record<TextSpeed, number> = {
+  slow: 60,
+  normal: 30,
+  fast: 12,
+}
+
 interface SettingsState {
   /** 幕間演出をスキップするか（true のとき FadeTransition の duration を 0 にする） */
   skipInterlude: boolean

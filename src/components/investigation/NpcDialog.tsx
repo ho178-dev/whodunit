@@ -50,6 +50,8 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
     talkActionsRemaining,
     hearStatement,
     viewSuspectProfile,
+    suspectTalkProgress,
+    setSuspectTalkProgress,
   } = useGameStore()
   const [selectedSuspect, setSelectedSuspect] = useState<string | null>(null)
   const [dialogIndex, setDialogIndex] = useState(0)
@@ -63,9 +65,10 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
     : null
 
   const handleTalk = (suspect: (typeof scenario.suspects)[number]) => {
-    if (talkActionsRemaining <= 0) return
+    if (talkActionsRemaining <= 0 && !talkedSuspectIds.includes(suspect.id)) return
+    const savedIndex = suspectTalkProgress[suspect.id] ?? 0
     setSelectedSuspect(suspect.id)
-    setDialogIndex(0)
+    setDialogIndex(savedIndex)
     if (!talkedSuspectIds.includes(suspect.id)) {
       talkToSuspect(suspect.id)
     }
@@ -85,6 +88,7 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
     if (talkActionsRemaining <= 0) return
 
     setDialogIndex(nextIndex)
+    setSuspectTalkProgress(currentSuspect.id, nextIndex)
     hearStatement({
       suspectId: currentSuspect.id,
       suspectName: currentSuspect.name,

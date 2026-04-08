@@ -1,8 +1,7 @@
 // 容疑者ごとに動機・機会・手段・自由メモを記述できる推理ノートコンポーネント
-import { useState } from 'react'
+// 容疑者選択は左サイドバー（InvestigationNotes）で行うため、このコンポーネントはフォームのみ
 import { useGameStore } from '../../stores/gameStore'
 import type { SuspectHypothesis } from '../../types/game'
-import { isHypothesisFilled } from '../../types/game'
 import { SuspectProfileFields } from '../shared/SuspectProfileFields'
 
 // フォームフィールドの定義（テンプレート行）
@@ -38,10 +37,15 @@ const TEMPLATE_FIELDS: {
   },
 ]
 
-// 容疑者選択と仮説フォームを提供する推理ノートコンポーネント
-export function HypothesisNote() {
+interface HypothesisNoteProps {
+  /** 左サイドバーで選択中の容疑者ID（InvestigationNotesから渡される） */
+  selectedSuspectId: string | null
+}
+
+// 選択容疑者の動機・機会・手段・自由メモを記述できる推理ノートコンポーネント
+// 容疑者選択は左サイドバーで行うため、このコンポーネントは選択UIを持たない
+export function HypothesisNote({ selectedSuspectId }: HypothesisNoteProps) {
   const { scenario, hypotheses, updateHypothesis, viewedSuspectProfileIds } = useGameStore()
-  const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null)
 
   if (!scenario) return null
 
@@ -50,38 +54,12 @@ export function HypothesisNote() {
     (h) => h.suspectId === selectedSuspectId
   ) ?? { motive: '', opportunity: '', means: '', notes: '' }
 
-  const hasEntry = (suspectId: string) => {
-    const h = hypotheses.find((e) => e.suspectId === suspectId)
-    return !!h && isHypothesisFilled(h)
-  }
-
   return (
     <div className="space-y-4">
-      {/* 容疑者選択ボタン群 */}
-      <div>
-        <p className="text-gothic-muted font-serif text-xs mb-2 leading-relaxed">
-          容疑者を選んで仮説を書き込む。動機・機会・手段が揃えば犯人特定に近づく。
-        </p>
-        <div className="flex flex-wrap gap-2">
-          {scenario.suspects.map((suspect) => (
-            <button
-              key={suspect.id}
-              onClick={() => setSelectedSuspectId(suspect.id)}
-              className={`px-3 py-1.5 text-xs font-display tracking-wide transition-colors border ${
-                selectedSuspectId === suspect.id
-                  ? 'border-gothic-gold text-gothic-gold bg-stone-900/50'
-                  : 'border-gothic-border text-gothic-muted hover:text-gothic-text hover:border-gothic-text'
-              }`}
-            >
-              {suspect.name}
-              {/* 入力済みインジケーター */}
-              {hasEntry(suspect.id) && (
-                <span className="ml-1.5 text-gothic-gold text-[10px]">●</span>
-              )}
-            </button>
-          ))}
-        </div>
-      </div>
+      {/* 案内テキスト */}
+      <p className="text-gothic-muted font-serif text-xs leading-relaxed">
+        左の容疑者を選んで仮説を書き込む。動機・機会・手段が揃えば犯人特定に近づく。
+      </p>
 
       {/* 仮説フォーム */}
       {selectedSuspect ? (

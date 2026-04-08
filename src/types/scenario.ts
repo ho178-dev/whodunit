@@ -78,6 +78,12 @@ export interface PursuitQuestion {
   unlocks_pursuit_question_ids?: string[] // 回答後に連鎖解放するID（同じevidence_reaction内）
 }
 
+// 矛盾追及成功時に他のキャラクターが見せるリアクション
+export interface BystanderReaction {
+  suspectId: string
+  text: string
+}
+
 // 複数証拠の組み合わせで解放される決定的事実
 export interface EvidenceCombination {
   id: string
@@ -115,6 +121,7 @@ export interface Suspect {
       contradicts_statement_index?: number // この証拠が矛盾する statements[] のインデックス（0-4）
       pursuit_questions?: PursuitQuestion[] // 矛盾発覚後にアンロックされる追及質問チェーン
       wrong_testimony_response?: string // 誤った証言を選択したときの容疑者リアクション（設定があれば default より優先）
+      bystander_reactions?: BystanderReaction[] // 矛盾追及成功時に他のキャラが見せるリアクション
     }
   }
 }
@@ -153,6 +160,7 @@ export interface Scenario {
   murderer_id: string
   motive: string
   truth: string
+  main_reasoning_path?: string // プレイヤーが辿るべき主要な推理導線（エンディング真相に表示）
   suspects: Suspect[]
   rooms: Room[]
   evidence: Evidence[]
