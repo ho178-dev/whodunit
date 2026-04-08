@@ -7,31 +7,9 @@ import { MansionSceneBackground } from '../shared/MansionBackground'
 import { CharacterCard } from '../shared/CharacterCard'
 import { DialogBox } from '../shared/DialogBox'
 import { ACTIONS, TALK_ACTIONS } from '../../constants/gameConfig'
-import { calculateRank } from '../../utils/score'
 import { getEvidenceNames } from '../../utils/scenario'
-import { loadScoreData, saveScore } from '../../utils/score'
-import type { DifficultyScore } from '../../types/game'
+import { saveScore } from '../../utils/score'
 import { resolveMansionAsset } from '../../services/assetResolver'
-
-// ランク表示スタイル（S=金, A=銀, B=銅, C=白グレー）
-const RANK_STYLE = {
-  S: {
-    color: 'text-yellow-400',
-    shadow: 'drop-shadow-[0_0_12px_rgba(250,204,21,0.7)]',
-    label: '探偵ランク',
-  },
-  A: {
-    color: 'text-slate-300',
-    shadow: 'drop-shadow-[0_0_8px_rgba(203,213,225,0.6)]',
-    label: '探偵ランク',
-  },
-  B: {
-    color: 'text-amber-700',
-    shadow: 'drop-shadow-[0_0_6px_rgba(180,83,9,0.5)]',
-    label: '探偵ランク',
-  },
-  C: { color: 'text-gray-400', shadow: '', label: '探偵ランク' },
-} as const
 
 export function EndingScreen() {
   const {
@@ -54,8 +32,6 @@ export function EndingScreen() {
   )
   // スコア保存済みフラグ（StrictModeの二重発火防止）
   const scoreSaved = useRef(false)
-  const [bestFlags, setBestFlags] = useState({ actions: false, talkActions: false })
-  const [savedScore, setSavedScore] = useState<DifficultyScore | null>(null)
 
   const trial = isTrialMode()
   const usedActions = ACTIONS - actionsRemaining
@@ -65,18 +41,8 @@ export function EndingScreen() {
   useEffect(() => {
     if (!useFixedScenario || !scenario || !votedSuspectId || scoreSaved.current) return
     scoreSaved.current = true
-
-    const prev = loadScoreData(scenario.title)
     const cleared = votedSuspectId === scenario.murderer_id && !murdererEscaped
-
-    if (cleared) {
-      setBestFlags({
-        actions: prev?.bestActions === undefined || usedActions < prev.bestActions,
-        talkActions: prev?.bestTalkActions === undefined || usedTalkActions < prev.bestTalkActions,
-      })
-    }
-
-    setSavedScore(saveScore(scenario.title, { cleared, usedActions, usedTalkActions }))
+    saveScore(scenario.title, { cleared, usedActions, usedTalkActions })
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []) // 意図的にマウント時1回のみ実行
 
@@ -121,8 +87,6 @@ export function EndingScreen() {
     )
   }
 
-  // 今回プレイのランク（正解時のみ算出）
-  const currentRank = isCorrect && !murdererEscaped ? calculateRank(usedActions) : null
   // 犯人を正しく特定できたか（完全正解 or 証拠不足で逃亡）
   const isMurdererIdentified = isCorrect || murdererEscaped
   const voted = scenario.suspects.find((s) => s.id === votedSuspectId)!
@@ -170,30 +134,12 @@ export function EndingScreen() {
         emptyText: '真犯人を見誤った。',
       }
 
-  // 結果ラベルとランク表示（ヘッダー用）
+  // 結果ラベル（ヘッダー用）
   const resultLabel =
     isCorrect && !murdererEscaped ? (
       <div className="flex items-center gap-3">
         <span className="text-gothic-gold font-display text-2xl">真実</span>
         <span className="text-gothic-gold font-display text-sm tracking-widest">── 謎は解けた</span>
-        {currentRank && (
-          <div className="flex items-center gap-2 ml-2">
-            <span className="text-gothic-muted font-serif text-[10px]">
-              {RANK_STYLE[currentRank].label}
-            </span>
-            <span
-              className={`font-display text-2xl ${RANK_STYLE[currentRank].color} ${RANK_STYLE[currentRank].shadow}`}
-            >
-              {currentRank}
-            </span>
-            {savedScore?.bestRank && savedScore.bestRank !== currentRank && (
-              <span className="text-gothic-muted font-serif text-[10px]">
-                ベスト：
-                <span className={RANK_STYLE[savedScore.bestRank].color}>{savedScore.bestRank}</span>
-              </span>
-            )}
-          </div>
-        )}
       </div>
     ) : murdererEscaped ? (
       <div className="flex items-center gap-3">
@@ -215,7 +161,7 @@ export function EndingScreen() {
     <div className="h-full relative flex flex-col">
       <MansionSceneBackground phase="ending" fixed />
 
-      {/* ヘッダー：結果ラベル + ランク */}
+      {/* ヘッダー：結果ラベル */}
       <div className="relative z-10 flex-shrink-0 px-4 py-2 border-b border-gothic-border bg-gothic-panel/85 backdrop-blur-sm">
         {resultLabel}
       </div>
@@ -405,32 +351,18 @@ export function EndingScreen() {
               <div className="space-y-1.5">
                 <div className="flex justify-between items-center">
                   <span className="text-gothic-muted font-serif text-[10px]">証拠調査</span>
-                  <span className="text-gothic-text font-display text-xs flex items-center gap-1">
+                  <span className="text-gothic-text font-display text-xs">
                     {usedActions}
-                    <span className="text-gothic-muted text-[10px]">/ {ACTIONS}</span>
-                    {bestFlags.actions && (
-                      <span className="text-gothic-gold text-[10px] font-serif">★</span>
-                    )}
+                    <span className="text-gothic-muted text-[10px]"> / {ACTIONS}</span>
                   </span>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gothic-muted font-serif text-[10px]">聞き込み</span>
-                  <span className="text-gothic-text font-display text-xs flex items-center gap-1">
+                  <span className="text-gothic-text font-display text-xs">
                     {usedTalkActions}
-                    <span className="text-gothic-muted text-[10px]">/ {TALK_ACTIONS}</span>
-                    {bestFlags.talkActions && (
-                      <span className="text-gothic-gold text-[10px] font-serif">★</span>
-                    )}
+                    <span className="text-gothic-muted text-[10px]"> / {TALK_ACTIONS}</span>
                   </span>
                 </div>
-                {savedScore?.bestActions !== undefined && useFixedScenario && (
-                  <div className="border-t border-gothic-border/30 pt-1.5 mt-1">
-                    <p className="text-gothic-muted font-serif text-[10px] mb-1">自己ベスト</p>
-                    <span className="text-gothic-muted font-serif text-[10px]">
-                      調査 {savedScore.bestActions} / 聞込 {savedScore.bestTalkActions ?? '―'}
-                    </span>
-                  </div>
-                )}
               </div>
             </GothicPanel>
           )}

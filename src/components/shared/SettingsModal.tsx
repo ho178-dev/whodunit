@@ -1,4 +1,4 @@
-// 設定モーダル。セーブ・表示・音声・画面サイズの設定を統合する
+// 設定画面。セーブ・表示・音声・画面サイズの設定を統合する（別画面として表示）
 import { useState, useEffect } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { useAudioStore } from '../../stores/audioStore'
@@ -69,7 +69,7 @@ const TEXT_SPEED_OPTIONS: { key: TextSpeed; label: string }[] = [
   { key: 'fast', label: '速い' },
 ]
 
-// セーブ・表示・音声・画面サイズの設定を1つのモーダルにまとめたコンポーネント
+// セーブ・表示・音声・画面サイズの設定を1つの画面にまとめたコンポーネント
 export function SettingsModal({ onClose, showSave }: Props) {
   const manualSave = useGameStore((s) => s.manualSave)
   const loadSaveSlot = useGameStore((s) => s.loadSaveSlot)
@@ -121,16 +121,16 @@ export function SettingsModal({ onClose, showSave }: Props) {
   ]
 
   return (
-    <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/70">
+    <div className="h-full flex items-center justify-center bg-gothic-bg">
       <div className="w-full max-w-md mx-4 border border-gothic-gold/50 bg-gothic-bg">
         {/* ヘッダー */}
         <div className="border-b border-gothic-border px-6 py-4 flex items-center justify-between">
           <p className="font-display text-gothic-gold tracking-widest text-sm">設定</p>
           <button
             onClick={onClose}
-            className="text-gothic-muted hover:text-gothic-gold font-serif text-lg transition-colors leading-none"
+            className="text-gothic-muted hover:text-gothic-gold font-serif text-xs tracking-widest transition-colors"
           >
-            ×
+            閉じる
           </button>
         </div>
 
@@ -227,7 +227,7 @@ export function SettingsModal({ onClose, showSave }: Props) {
                 >
                   <span
                     className={cn(
-                      'absolute top-0.5 w-5 h-5 rounded-full bg-gothic-bg transition-transform duration-200',
+                      'absolute top-0.5 w-5 h-5 rounded-full bg-white transition-transform duration-200',
                       skipInterlude ? 'translate-x-6' : 'translate-x-0.5'
                     )}
                   />

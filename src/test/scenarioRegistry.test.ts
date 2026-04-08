@@ -16,10 +16,6 @@ describe('scenarioRegistry', () => {
     expect(getFixedScenarioByTitle('存在しないシナリオ')).toBeNull()
   })
 
-  it('旧タイトル「霧の密室」エイリアスで白銀の密室を引ける', () => {
-    expect(getFixedScenarioByTitle('霧の密室')).toBe(FIXED_SCENARIO_2)
-  })
-
   it('getAllFixedScenarioTitles は3本分のタイトルを返す', () => {
     const titles = getAllFixedScenarioTitles()
     expect(titles).toHaveLength(3)

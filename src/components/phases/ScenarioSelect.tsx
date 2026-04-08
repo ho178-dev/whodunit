@@ -1,4 +1,4 @@
-// シナリオ選択画面。固定シナリオ一覧を表示し、クリア済み・プレイ済みバッジとベストスコアを表示する
+// シナリオ選択画面。固定シナリオ一覧を表示し、クリア済み・プレイ済みバッジを表示する
 // VITE_TRIAL_MODE=true のとき1本のみ表示する
 import { useGameStore } from '../../stores/gameStore'
 import { FIXED_SCENARIO } from '../../constants/fixedScenario'
@@ -18,16 +18,13 @@ const ALL_SCENARIOS: { scenario: Scenario; subtitle: string }[] = [
 // トライアルモードでは1本のみ表示する
 const DISPLAYED_SCENARIOS = isTrialMode() ? ALL_SCENARIOS.slice(0, 1) : ALL_SCENARIOS
 
-// シナリオ選択画面。各シナリオのクリア状況とベストスコアを表示する
+// シナリオ選択画面。各シナリオのクリア状況を表示する
 export function ScenarioSelect() {
-  const { setPhase, setScenario, setUseFixedScenario, setActiveSaveSlot } = useGameStore()
+  const { setPhase, startScenario } = useGameStore()
 
-  // シナリオカードをクリックしたときの処理。常にオートセーブスロット（0番）を使用する
+  // シナリオカードをクリックしたときの処理。ゲーム状態をリセットしてシナリオを開始する
   const handleScenarioClick = (scenario: Scenario) => {
-    setActiveSaveSlot(0)
-    setScenario(scenario)
-    setUseFixedScenario(true)
-    setPhase('scenario_briefing')
+    startScenario(scenario)
   }
 
   return (
@@ -72,14 +69,6 @@ export function ScenarioSelect() {
                     )}
                   </div>
                 </div>
-                {/* ベストスコア（クリア済みの場合のみ表示） */}
-                {scoreData?.bestActions !== undefined && (
-                  <div className="mt-2 border-t border-gothic-border/30 pt-2">
-                    <span className="text-gothic-muted font-serif text-xs">
-                      ベスト：調査 {scoreData.bestActions} / 聞込 {scoreData.bestTalkActions ?? '―'}
-                    </span>
-                  </div>
-                )}
               </button>
             )
           })}

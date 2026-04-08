@@ -21,6 +21,7 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
   const [canScrollUp, setCanScrollUp] = useState(false)
   const scrollRef = useRef<HTMLDivElement>(null)
   const rafRef = useRef<number | null>(null)
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null)
   const onCompleteRef = useRef(onComplete)
   onCompleteRef.current = onComplete
   const textSpeed = useSettingsStore((s) => s.textSpeed)
@@ -81,7 +82,11 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
         tick()
       }
     }, TICK_MS)
-    return () => clearInterval(interval)
+    intervalRef.current = interval
+    return () => {
+      clearInterval(interval)
+      intervalRef.current = null
+    }
   }, [text])
 
   // アニメーション完了後にスクロール可否を判定する
@@ -93,6 +98,10 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
   // クリック時にアニメーションを即時完了しテキスト全文を表示する
   const handleClick = () => {
     if (!done) {
+      if (intervalRef.current !== null) {
+        clearInterval(intervalRef.current)
+        intervalRef.current = null
+      }
       setDisplayed(text)
       setDone(true)
       onCompleteRef.current?.()

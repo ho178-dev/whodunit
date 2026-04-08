@@ -26,6 +26,3 @@ export const TALK_ACTIONS = 30
 // 議論・告発フェーズの証拠突きつけAP
 export const DISCUSSION_CONFRONT_ACTIONS = 6
 export const ACCUSATION_CONFRONT_ACTIONS = 3
-
-// 探偵ランク閾値: usedActions（証拠調査消費数）がこの値以下でそのランク、超えたら下位ランク、B超えはC
-export const RANK_THRESHOLDS = { S: 4, A: 6, B: 7 }

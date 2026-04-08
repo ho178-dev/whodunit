@@ -58,6 +58,17 @@ function checkCombinations(
 // localStorage キー生成（シナリオタイトルをキーとして仮説データを区別する）
 const hypothesesKey = (scenarioTitle: string) => `whodunit_hypotheses_${scenarioTitle}`
 
+// シナリオタイトルに対応する保存済み仮説を localStorage から読み込む
+function loadHypotheses(scenarioTitle: string): SuspectHypothesis[] {
+  try {
+    const stored = localStorage.getItem(hypothesesKey(scenarioTitle))
+    if (stored) return JSON.parse(stored) as SuspectHypothesis[]
+  } catch {
+    /* localStorage が使えない環境では空を返す */
+  }
+  return []
+}
+
 export interface HeardStatement {
   suspectId: string
   suspectName: string
@@ -133,6 +144,9 @@ export interface GameState {
   setActiveSaveSlot: (slot: number | null) => void
   loadSaveSlot: (slotIndex: number) => void
   manualSave: (slotIndex: number) => void
+  startScenario: (scenario: Scenario) => void
+  unlockAllForDebug: () => void
+  refillAllAP: () => void
 }
 
 // IDリストへの重複なし追加ヘルパー（既存の場合はearly returnでno-op）
@@ -245,17 +259,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   // 固定シナリオ使用フラグを更新する
   setUseFixedScenario: (use) => set({ useFixedScenario: use }),
   // シナリオデータを設定し、保存済み仮説を localStorage から復元する
-  setScenario: (scenario) =>
-    set(() => {
-      let hypotheses: SuspectHypothesis[] = []
-      try {
-        const stored = localStorage.getItem(hypothesesKey(scenario.title))
-        if (stored) hypotheses = JSON.parse(stored) as SuspectHypothesis[]
-      } catch {
-        /* localStorage が使えない環境では仮説を空のまま初期化 */
-      }
-      return { scenario, hypotheses }
-    }),
+  setScenario: (scenario) => set({ scenario, hypotheses: loadHypotheses(scenario.title) }),
   // 生成中フラグを更新する
   setIsGenerating: (generating) => set({ isGenerating: generating }),
   // 生成エラーメッセージを更新する
@@ -499,6 +503,71 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!state.scenario || !state.useFixedScenario) return
     saveToSlot(slotIndex, buildSaveInput(state, state.phase))
   },
+
+  // シナリオ選択画面からシナリオを開始する。ゲーム状態を完全リセットしてシナリオを設定する
+  startScenario: (scenario) => {
+    const hypotheses = loadHypotheses(scenario.title)
+    set({
+      ...initialState,
+      scenario,
+      hypotheses,
+      useFixedScenario: true,
+      activeSaveSlot: 0,
+      phase: 'scenario_briefing' as GamePhase,
+    })
+  },
+
+  // [dev] 全証拠・全証言をアンロックする（探索フェーズのデバッグ用）
+  unlockAllForDebug: () =>
+    set((state) => {
+      if (!state.scenario) return {}
+      const allEvidenceIds = state.scenario.evidence.map((e) => e.id)
+      const allSuspectIds = state.scenario.suspects.map((s) => s.id)
+      const newStatements: HeardStatement[] = []
+      state.scenario.suspects.forEach((suspect) => {
+        if (!state.heardStatements.some((h) => h.suspectId === suspect.id && h.index === -1)) {
+          newStatements.push({
+            suspectId: suspect.id,
+            suspectName: suspect.name,
+            index: -1,
+            text: suspect.investigation_dialog.greeting,
+          })
+        }
+        suspect.investigation_dialog.statements.forEach((text, i) => {
+          if (!state.heardStatements.some((h) => h.suspectId === suspect.id && h.index === i)) {
+            newStatements.push({ suspectId: suspect.id, suspectName: suspect.name, index: i, text })
+          }
+        })
+      })
+      const mergedStatements = [...state.heardStatements, ...newStatements]
+      const newDiscovered = checkCombinations(
+        state.scenario,
+        allEvidenceIds,
+        state.discoveredCombinationIds,
+        allSuspectIds,
+        mergedStatements
+      )
+      return {
+        inspectedEvidenceIds: allEvidenceIds,
+        examinedEvidenceIds: allEvidenceIds,
+        talkedSuspectIds: allSuspectIds,
+        viewedSuspectProfileIds: allSuspectIds,
+        heardStatements: mergedStatements,
+        ...(newDiscovered.length > 0 && {
+          discoveredCombinationIds: [...state.discoveredCombinationIds, ...newDiscovered],
+          pendingCombinationIds: [...state.pendingCombinationIds, ...newDiscovered],
+        }),
+      }
+    }),
+
+  // [dev] 全APを最大値に補充する（各フェーズのデバッグ用）
+  refillAllAP: () =>
+    set({
+      actionsRemaining: ACTIONS,
+      talkActionsRemaining: TALK_ACTIONS,
+      discussionConfrontActionsRemaining: DISCUSSION_CONFRONT_ACTIONS,
+      accusationConfrontActionsRemaining: ACCUSATION_CONFRONT_ACTIONS,
+    }),
 
   // 指定スロットからゲーム状態を復元する。シナリオが見つからない場合は何もしない
   loadSaveSlot: (slotIndex) => {

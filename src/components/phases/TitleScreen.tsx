@@ -24,8 +24,7 @@ const TITLE_MANSION_IDS = [
 
 // タイトル画面を表示し、シナリオ選択・続きから・遊び方への経路を分岐するコンポーネント
 export function TitleScreen() {
-  const { setPhase, loadSaveSlot, setScenario, setUseFixedScenario, setActiveSaveSlot } =
-    useGameStore()
+  const { setPhase, loadSaveSlot, startScenario } = useGameStore()
   const [showContinue, setShowContinue] = useState(false)
   const [showTutorial, setShowTutorial] = useState(false)
   const [slots, setSlots] = useState<SaveSlot[]>(() => getAllSlots())
@@ -53,12 +52,7 @@ export function TitleScreen() {
   }
 
   // 体験版：シナリオ選択をスキップして固定シナリオ1へ直接遷移する
-  const handleStartTrial = () => {
-    setActiveSaveSlot(0)
-    setScenario(FIXED_SCENARIO)
-    setUseFixedScenario(true)
-    setPhase('scenario_briefing')
-  }
+  const handleStartTrial = () => startScenario(FIXED_SCENARIO)
 
   return (
     <div className="h-full flex flex-col items-center justify-center px-4 relative overflow-hidden">
