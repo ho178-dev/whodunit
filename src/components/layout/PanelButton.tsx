@@ -1,6 +1,5 @@
 // フェーズパネル内共通ボタンコンポーネント。全スロットで横幅・縦サイズを統一する
 import { cn } from '../../utils/cn'
-import { audioManager } from '../../services/audioManager'
 import type { ReactNode } from 'react'
 
 type Variant = 'primary' | 'secondary' | 'danger' | 'glow' | 'dimmed'
@@ -34,14 +33,7 @@ export function PanelButton({
 }: PanelButtonProps) {
   return (
     <button
-      onClick={
-        onClick
-          ? () => {
-              audioManager.playSe('click')
-              onClick()
-            }
-          : undefined
-      }
+      onClick={onClick}
       disabled={disabled}
       className={cn(
         'w-full min-h-[32px] py-2 px-2 font-display text-[10px] tracking-widest transition-all text-center border leading-tight disabled:opacity-40 disabled:cursor-not-allowed',

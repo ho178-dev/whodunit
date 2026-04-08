@@ -30,10 +30,11 @@ export const ENDING_BGM = {
   wrong: assetUrl('/assets/bgm/The One That Got Away.ogg'),
 }
 
-export type SeKey = 'click' | 'move'
+export type SeKey = 'click' | 'move' | 'phase_transition'
 
 /** SEのファイルパス */
 export const SE_PATHS: Record<SeKey, string> = {
   click: assetUrl('/assets/se/click.mp3'),
   move: assetUrl('/assets/se/move.mp3'),
+  phase_transition: assetUrl('/assets/se/phase_transition.mp3'),
 }

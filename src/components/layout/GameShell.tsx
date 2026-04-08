@@ -63,6 +63,17 @@ export function GameShell() {
     return () => window.removeEventListener('resize', update)
   }, [])
 
+  // ゲームコンテナ内の全 button クリックで click SE を再生するグローバルリスナー
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+      if ((e.target as HTMLElement).closest('button')) {
+        audioManager.playSe('click')
+      }
+    }
+    document.addEventListener('click', handleClick)
+    return () => document.removeEventListener('click', handleClick)
+  }, [])
+
   // フェーズ変更時に対応 BGM を再生する
   useEffect(() => {
     const isCorrect = votedSuspectId != null && votedSuspectId === murdererId

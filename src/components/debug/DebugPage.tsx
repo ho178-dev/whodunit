@@ -1,9 +1,8 @@
-// デバッグページ: 画像・BGMアセットおよびシナリオテキストの確認用（開発環境限定）
+// デバッグページ: 画像・BGM・SEアセットおよびシナリオテキストの確認用（開発環境限定）
 // URL: http://localhost:5173/?debug=true
 // 画像はゲーム内と同じピクセル化・配色（ゴシックパレット）・解像度で表示する
 
 import { useState, useRef, useEffect, useLayoutEffect } from 'react'
-import { useGameStore } from '../../stores/gameStore'
 import { PixelImageWithFallback } from '../shared/PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 import {
@@ -12,13 +11,16 @@ import {
   MANSION_ASSETS,
   EVIDENCE_ASSETS,
   BGM_ASSETS,
+  SE_ASSETS,
   type ImageAsset,
   type BgmAsset,
+  type SeAsset,
 } from './assetList'
 import { assetUrl } from '../../utils/assetUrl'
+import { useAudioStore } from '../../stores/audioStore'
 import { ScenarioDebug } from './ScenarioDebug'
 
-type Tab = 'images' | 'bgm' | 'scenario'
+type Tab = 'images' | 'bgm' | 'se' | 'scenario'
 type ImageCategory = 'characters' | 'rooms' | 'mansion' | 'evidence'
 
 const IMAGE_CATEGORY_CONFIG: Record<
@@ -361,14 +363,99 @@ function BgmSection() {
   )
 }
 
+function SeRow({ asset }: { asset: SeAsset }) {
+  const audioRef = useRef<HTMLAudioElement>(null)
+  const [playing, setPlaying] = useState(false)
+
+  function togglePlay() {
+    const audio = audioRef.current
+    if (!audio) return
+    if (playing) {
+      audio.pause()
+      audio.currentTime = 0
+      setPlaying(false)
+    } else {
+      audio.currentTime = 0
+      audio
+        .play()
+        .then(() => setPlaying(true))
+        .catch(() => setPlaying(false))
+    }
+  }
+
+  return (
+    <div className="flex items-center gap-3 rounded border border-gray-700 bg-gray-900 px-3 py-2">
+      <audio ref={audioRef} src={asset.path} onEnded={() => setPlaying(false)} />
+      <button
+        onClick={togglePlay}
+        className="w-16 rounded bg-gray-700 px-2 py-1 text-xs text-gray-200 hover:bg-gray-600"
+      >
+        {playing ? '■ 停止' : '▶ 再生'}
+      </button>
+      <div className="flex-1">
+        <span className="text-sm text-gray-200">{asset.label}</span>
+        <span className="ml-2 text-xs text-gray-500 font-mono">{asset.key}</span>
+      </div>
+      <span className="text-xs text-gray-600">{asset.path.split('/').pop()}</span>
+    </div>
+  )
+}
+
+function SeSection() {
+  return (
+    <div className="flex flex-col gap-2">
+      {SE_ASSETS.map((asset) => (
+        <SeRow key={asset.path} asset={asset} />
+      ))}
+    </div>
+  )
+}
+
+/** BGM・SE音量スライダー（DebugPageヘッダー用） */
+function VolumeControls() {
+  const { bgmVolume, seVolume, setBgmVolume, setSeVolume } = useAudioStore()
+  return (
+    <div className="flex items-center gap-4 ml-auto mr-2">
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-400 w-8">BGM</span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={Math.round(bgmVolume * 100)}
+          onChange={(e) => setBgmVolume(Number(e.target.value) / 100)}
+          className="w-24 accent-blue-500"
+        />
+        <span className="text-xs text-gray-500 w-8 text-right">{Math.round(bgmVolume * 100)}%</span>
+      </div>
+      <div className="flex items-center gap-2">
+        <span className="text-xs text-gray-400 w-6">SE</span>
+        <input
+          type="range"
+          min={0}
+          max={100}
+          value={Math.round(seVolume * 100)}
+          onChange={(e) => setSeVolume(Number(e.target.value) / 100)}
+          className="w-24 accent-blue-500"
+        />
+        <span className="text-xs text-gray-500 w-8 text-right">{Math.round(seVolume * 100)}%</span>
+      </div>
+    </div>
+  )
+}
+
 export function DebugPage() {
-  const setPhase = useGameStore((s) => s.setPhase)
   const [tab, setTab] = useState<Tab>('images')
   const [imageCategory, setImageCategory] = useState<ImageCategory>('characters')
   const [selectedAsset, setSelectedAsset] = useState<{
     asset: ImageAsset
     category: ImageCategory
   } | null>(null)
+
+  /** タイトルへ戻る: ?debug=true を除いたURLへ遷移することで App.tsx の isDebug を再評価させる */
+  function handleGoToTitle() {
+    window.location.href = window.location.pathname
+  }
 
   return (
     <div className="min-h-screen bg-gray-950 text-gray-100">
@@ -387,9 +474,10 @@ export function DebugPage() {
           </span>
           <h1 className="text-base font-bold text-gray-100">デバッグページ</h1>
           <span className="text-xs text-gray-500">WhoDuNit</span>
+          <VolumeControls />
           <button
-            onClick={() => setPhase('title')}
-            className="ml-auto rounded border border-gray-600 bg-gray-800 px-3 py-1 text-xs text-gray-300 transition-colors hover:border-gray-400 hover:text-gray-100"
+            onClick={handleGoToTitle}
+            className="rounded border border-gray-600 bg-gray-800 px-3 py-1 text-xs text-gray-300 transition-colors hover:border-gray-400 hover:text-gray-100"
           >
             タイトルへ戻る
           </button>
@@ -398,7 +486,7 @@ export function DebugPage() {
 
       <div className="border-b border-gray-800 bg-gray-900 px-6">
         <nav className="flex gap-0">
-          {(['images', 'bgm', 'scenario'] as Tab[]).map((t) => (
+          {(['images', 'bgm', 'se', 'scenario'] as Tab[]).map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
@@ -408,7 +496,7 @@ export function DebugPage() {
                   : 'border-transparent text-gray-500 hover:text-gray-300'
               }`}
             >
-              {t === 'images' ? '画像' : t === 'bgm' ? 'BGM' : 'シナリオ'}
+              {t === 'images' ? '画像' : t === 'bgm' ? 'BGM' : t === 'se' ? 'SE' : 'シナリオ'}
             </button>
           ))}
         </nav>
@@ -450,6 +538,16 @@ export function DebugPage() {
               <span className="ml-2 font-normal text-gray-500">{BGM_ASSETS.length}件</span>
             </h2>
             <BgmSection />
+          </>
+        )}
+
+        {tab === 'se' && (
+          <>
+            <h2 className="mb-3 border-b border-gray-700 pb-1 text-sm font-bold text-gray-200">
+              SE
+              <span className="ml-2 font-normal text-gray-500">{SE_ASSETS.length}件</span>
+            </h2>
+            <SeSection />
           </>
         )}
 

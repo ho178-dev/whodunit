@@ -58,6 +58,11 @@ const TAB_BASE = 'flex-1 py-2.5 font-display text-xs tracking-widest transition-
 const TAB_ACTIVE = 'text-gothic-gold border-b-2 border-gothic-gold -mb-px'
 const TAB_INACTIVE = 'text-gothic-muted hover:text-gothic-text'
 
+// セーブ/ロードサブモードボタンの共通スタイル
+const SUB_BTN_BASE = 'flex-1 py-1.5 font-display text-xs tracking-widest transition-colors'
+const SUB_BTN_ACTIVE = 'bg-gothic-panel text-gothic-gold'
+const SUB_BTN_INACTIVE = 'text-gothic-muted hover:text-gothic-text'
+
 const TEXT_SPEED_OPTIONS: { key: TextSpeed; label: string }[] = [
   { key: 'slow', label: 'ゆっくり' },
   { key: 'normal', label: '普通' },
@@ -70,8 +75,8 @@ export function SettingsModal({ onClose, showSave }: Props) {
   const loadSaveSlot = useGameStore((s) => s.loadSaveSlot)
   const setPhase = useGameStore((s) => s.setPhase)
   const { bgmVolume, seVolume, setBgmVolume, setSeVolume } = useAudioStore()
-  const { skipInterlude, textSpeed, setSkipInterlude } = useSettingsStore()
-  const [allSlots] = useState(getAllSlots)
+  const { skipInterlude, textSpeed, setSkipInterlude, setTextSpeed } = useSettingsStore()
+  const allSlots = getAllSlots()
   const slots = allSlots.slice(1)
   const [savedIndex, setSavedIndex] = useState<number | null>(null)
   const [saveSubMode, setSaveSubMode] = useState<'save' | 'load'>('save')
@@ -142,8 +147,8 @@ export function SettingsModal({ onClose, showSave }: Props) {
           ))}
         </div>
 
-        {/* コンテンツ */}
-        <div className="px-6 py-5">
+        {/* コンテンツ: min-h でタブ切り替え時の高さ変動を防ぐ */}
+        <div className="px-6 py-5 min-h-[260px]">
           {tab === 'save' && showSave && (
             <>
               {/* セーブ/ロード切り替えタブ */}
@@ -151,10 +156,8 @@ export function SettingsModal({ onClose, showSave }: Props) {
                 <button
                   onClick={() => setSaveSubMode('save')}
                   className={cn(
-                    'flex-1 py-1.5 font-display text-xs tracking-widest transition-colors',
-                    saveSubMode === 'save'
-                      ? 'bg-gothic-panel text-gothic-gold'
-                      : 'text-gothic-muted hover:text-gothic-text'
+                    SUB_BTN_BASE,
+                    saveSubMode === 'save' ? SUB_BTN_ACTIVE : SUB_BTN_INACTIVE
                   )}
                 >
                   セーブ
@@ -162,10 +165,9 @@ export function SettingsModal({ onClose, showSave }: Props) {
                 <button
                   onClick={() => setSaveSubMode('load')}
                   className={cn(
-                    'flex-1 py-1.5 font-display text-xs tracking-widest transition-colors border-l border-gothic-border',
-                    saveSubMode === 'load'
-                      ? 'bg-gothic-panel text-gothic-gold'
-                      : 'text-gothic-muted hover:text-gothic-text'
+                    SUB_BTN_BASE,
+                    'border-l border-gothic-border',
+                    saveSubMode === 'load' ? SUB_BTN_ACTIVE : SUB_BTN_INACTIVE
                   )}
                 >
                   ロード
@@ -232,24 +234,21 @@ export function SettingsModal({ onClose, showSave }: Props) {
                 </button>
               </div>
 
-              {/* テキスト速度（タイプライター演出実装まで無効） */}
-              <div className="opacity-40">
-                <p className="font-display text-xs text-gothic-muted tracking-widest mb-1">
+              {/* テキスト速度 */}
+              <div>
+                <p className="font-display text-xs text-gothic-muted tracking-widest mb-3">
                   テキスト速度
-                </p>
-                <p className="font-serif text-[10px] text-gothic-muted/60 mb-3">
-                  ※ タイプライター演出実装後に有効化されます
                 </p>
                 <div className="flex gap-2">
                   {TEXT_SPEED_OPTIONS.map(({ key, label }) => (
                     <button
                       key={key}
-                      disabled
+                      onClick={() => setTextSpeed(key)}
                       className={cn(
                         'flex-1 border py-2 font-display text-xs tracking-widest transition-all',
                         textSpeed === key
                           ? 'border-gothic-gold text-gothic-gold bg-gothic-panel'
-                          : 'border-gothic-border text-gothic-muted'
+                          : 'border-gothic-border text-gothic-muted hover:border-gothic-accent hover:text-gothic-text'
                       )}
                     >
                       {label}
@@ -330,9 +329,6 @@ export function SettingsModal({ onClose, showSave }: Props) {
                   )
                 })}
               </div>
-              <p className="text-gothic-muted font-serif text-[10px] text-center mt-4">
-                ※ exe版でウィンドウサイズを変更します
-              </p>
             </>
           )}
         </div>
@@ -367,25 +363,11 @@ export function SettingsModal({ onClose, showSave }: Props) {
               >
                 タイトルへ戻る
               </button>
-              <div className="flex gap-2">
-                <button
-                  onClick={() => window.electronAPI?.windowControls.minimize()}
-                  className="flex-1 border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 transition-all duration-200 hover:border-gothic-accent hover:text-gothic-text"
-                >
-                  最小化
-                </button>
-                <button
-                  onClick={() => window.electronAPI?.windowControls.quit()}
-                  className="flex-1 border border-red-900/60 bg-transparent text-red-400/70 font-serif text-xs py-2 transition-all duration-200 hover:border-red-700 hover:text-red-400"
-                >
-                  ゲームを終了
-                </button>
-              </div>
               <button
-                onClick={onClose}
-                className="w-full border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 transition-all duration-200 hover:border-gothic-accent"
+                onClick={() => window.electronAPI?.windowControls.quit()}
+                className="w-full border border-red-900/60 bg-transparent text-red-400/70 font-serif text-xs py-2 transition-all duration-200 hover:border-red-700 hover:text-red-400"
               >
-                閉じる
+                ゲームを終了
               </button>
             </>
           )}

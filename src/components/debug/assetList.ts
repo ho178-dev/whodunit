@@ -13,7 +13,13 @@ export interface BgmAsset {
   category: string
 }
 
-// assetUrl を適用した ImageAsset / BgmAsset を生成するヘルパー
+export interface SeAsset {
+  path: string
+  label: string
+  key: string
+}
+
+// assetUrl を適用した ImageAsset / BgmAsset / SeAsset を生成するヘルパー
 const img = (path: string, label: string, isDefault?: boolean): ImageAsset => ({
   path: assetUrl(path),
   label,
@@ -23,6 +29,11 @@ const bgm = (path: string, label: string, category: string): BgmAsset => ({
   path: assetUrl(path),
   label,
   category,
+})
+const se = (path: string, label: string, key: string): SeAsset => ({
+  path: assetUrl(path),
+  label,
+  key,
 })
 
 // キャラクター画像
@@ -103,6 +114,15 @@ export const EVIDENCE_ASSETS: ImageAsset[] = [
   img('/assets/evidence/fabric.png', '布・ハンカチ'),
   img('/assets/evidence/fingerprint.png', '指紋'),
   img('/assets/evidence/blood_stain.png', '血痕'),
+]
+
+export const SE_ASSETS: SeAsset[] = [
+  se('/assets/se/click.mp3', 'クリック音', 'click'),
+  se('/assets/se/move.mp3', '移動音', 'move'),
+  se('/assets/se/phase_transition.mp3', '幕間SE', 'phase_transition'),
+  se('/assets/se/combination_discovered.mp3', '組み合わせ発見', 'combination_discovered'),
+  se('/assets/se/evidence_examine.mp3', '証拠調査', 'evidence_examine'),
+  se('/assets/se/fake_revealed.mp3', '偽証暴露', 'fake_revealed'),
 ]
 
 // BGM（将来追加予定）

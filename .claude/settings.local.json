@@ -58,7 +58,9 @@
       "Bash(echo \"exit:$?\")",
       "Bash(echo \"DONE:$?\")",
       "Bash(echo \"TSC:$?\")",
-      "Bash(echo \"exit: $?\")"
+      "Bash(echo \"exit: $?\")",
+      "Bash(sort -t: -k2 -rn)",
+      "Bash(echo \"EXIT:$?\")"
     ]
   }
 }

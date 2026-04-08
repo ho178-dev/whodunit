@@ -1,6 +1,7 @@
 // タイピングアニメーション付きのセリフ表示ボックス。固定2行高さでスクロールボタンにより全文確認できる
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { cn } from '../../utils/cn'
+import { useSettingsStore, TEXT_SPEED_MS } from '../../stores/settingsStore'
 
 // font-serif text-sm leading-relaxed: 14px × 1.625 ≈ 23px/行
 const LINE_HEIGHT_PX = 23
@@ -22,6 +23,10 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
   const rafRef = useRef<number | null>(null)
   const onCompleteRef = useRef(onComplete)
   onCompleteRef.current = onComplete
+  const textSpeed = useSettingsStore((s) => s.textSpeed)
+  // タイプライター速度を ref で保持し、setInterval 内で最新値を参照する（再生成を避けるため）
+  const speedRef = useRef(TEXT_SPEED_MS[textSpeed])
+  speedRef.current = TEXT_SPEED_MS[textSpeed]
 
   const updateScrollState = useCallback(() => {
     const el = scrollRef.current
@@ -46,7 +51,8 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
     if (scrollRef.current) scrollRef.current.scrollTop = 0
 
     let i = 0
-    const interval = setInterval(() => {
+    // setInterval は固定間隔で動作するため、速度変更はタイマー再生成なしに speedRef 経由で反映される
+    const tick = () => {
       i++
       setDisplayed(text.slice(0, i))
 
@@ -64,7 +70,17 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
         setDone(true)
         onCompleteRef.current?.()
       }
-    }, 30)
+    }
+    // setInterval を最小間隔で動かし、speedRef.current ミリ秒ごとに1文字進める
+    let elapsed = 0
+    const TICK_MS = 12
+    const interval = setInterval(() => {
+      elapsed += TICK_MS
+      if (elapsed >= speedRef.current) {
+        elapsed = 0
+        tick()
+      }
+    }, TICK_MS)
     return () => clearInterval(interval)
   }, [text])
 
