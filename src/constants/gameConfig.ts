@@ -20,7 +20,7 @@ export const MURDERER_CONTRADICTION_COUNT = 2
 export const MAX_VISIBLE_TALK_PIPS = 30
 
 // 調査・会話アクション上限（固定値）
-export const ACTIONS = 8
+export const ACTIONS = 15
 export const TALK_ACTIONS = 30
 
 // 議論・告発フェーズの証拠突きつけAP

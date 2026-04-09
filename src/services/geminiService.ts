@@ -169,8 +169,9 @@ ${JSON.stringify(scenario, null, 2)}
 
 ### 対象の選び方
 - **全容疑者**に最低1つの pursuit_questions を設計すること
-- 犯人（murderer_id: ${scenario.murderer_id}）：contradicts_statement_index が設定された evidence_reaction を2〜3個選ぶ。チェーンは有罪に繋がる方向で設計する
-- **非犯人**：contradicts_statement_index が設定された evidence_reaction を1個選ぶ。チェーンは容疑者の秘密や事情を明かすが、最終的に「殺してはいない」と証明される方向にする（フェイクリード）
+- **contradicts_statement_index が設定された evidence_reaction には必ず pursuit_questions を設定すること**（設定漏れはバリデーションエラーになる）
+- 犯人（murderer_id: ${scenario.murderer_id}）：contradicts_statement_index が設定された全ての evidence_reaction に pursuit_questions を設定する。チェーンは有罪に繋がる方向で設計する
+- **非犯人**：contradicts_statement_index が設定された全ての evidence_reaction に pursuit_questions を設定する。チェーンは容疑者の秘密や事情を明かすが、最終的に「殺してはいない」と証明される方向にする（フェイクリード）
 
 ### 質問の構造
 - pursuit_questions は各 evidence_reaction に2個設定する（1個目がルート、2個目が連鎖）

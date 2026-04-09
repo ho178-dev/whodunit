@@ -78,7 +78,7 @@ export function HypothesisNote({ selectedSuspectId }: HypothesisNoteProps) {
               <SuspectProfileFields suspect={selectedSuspect} />
             ) : (
               <p className="text-gothic-muted/60 font-serif text-xs italic">
-                人物の名前をクリックするとプロフィールが記録されます
+                話しかけるとプロフィールが記録されます
               </p>
             )}
           </div>

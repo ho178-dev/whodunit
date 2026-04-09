@@ -1,4 +1,4 @@
-// 設定画面。セーブ・表示・音声・画面サイズの設定を統合する（別画面として表示）
+// 設定画面。セーブ・表示・音声・画面サイズの設定を統合する（全画面表示）
 import { useState, useEffect } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { useAudioStore } from '../../stores/audioStore'
@@ -54,9 +54,10 @@ function applyScreenSize(width: number, height: number) {
 }
 
 // タブボタンの共通スタイル
-const TAB_BASE = 'flex-1 py-2.5 font-display text-xs tracking-widest transition-colors'
-const TAB_ACTIVE = 'text-gothic-gold border-b-2 border-gothic-gold -mb-px'
-const TAB_INACTIVE = 'text-gothic-muted hover:text-gothic-text'
+const TAB_BASE =
+  'px-5 py-3 font-display text-xs tracking-widest transition-colors whitespace-nowrap border-b-2'
+const TAB_ACTIVE = 'text-gothic-gold border-gothic-gold'
+const TAB_INACTIVE = 'text-gothic-muted border-transparent hover:text-gothic-text'
 
 // セーブ/ロードサブモードボタンの共通スタイル
 const SUB_BTN_BASE = 'flex-1 py-1.5 font-display text-xs tracking-widest transition-colors'
@@ -69,7 +70,7 @@ const TEXT_SPEED_OPTIONS: { key: TextSpeed; label: string }[] = [
   { key: 'fast', label: '速い' },
 ]
 
-// セーブ・表示・音声・画面サイズの設定を1つの画面にまとめたコンポーネント
+// セーブ・表示・音声・画面サイズの設定を全画面で表示するコンポーネント
 export function SettingsModal({ onClose, showSave }: Props) {
   const manualSave = useGameStore((s) => s.manualSave)
   const loadSaveSlot = useGameStore((s) => s.loadSaveSlot)
@@ -121,38 +122,38 @@ export function SettingsModal({ onClose, showSave }: Props) {
   ]
 
   return (
-    <div className="h-full flex items-center justify-center bg-gothic-bg">
-      <div className="w-full max-w-md mx-4 border border-gothic-gold/50 bg-gothic-bg">
-        {/* ヘッダー */}
-        <div className="border-b border-gothic-border px-6 py-4 flex items-center justify-between">
-          <p className="font-display text-gothic-gold tracking-widest text-sm">設定</p>
+    <div className="h-full flex flex-col bg-gothic-bg">
+      {/* ヘッダー */}
+      <div className="border-b border-gothic-border px-4 py-3 flex items-center gap-4 flex-shrink-0">
+        <button
+          onClick={onClose}
+          className="text-gothic-muted hover:text-gothic-text font-serif text-xs border border-gothic-border px-3 py-1.5 hover:border-gothic-accent transition-all"
+        >
+          ← 戻る
+        </button>
+        <h2 className="font-display text-gothic-gold tracking-widest text-sm">設定</h2>
+      </div>
+
+      {/* タブ */}
+      <div className="flex border-b border-gothic-border flex-shrink-0">
+        {tabs.map(({ id, label }) => (
           <button
-            onClick={onClose}
-            className="text-gothic-muted hover:text-gothic-gold font-serif text-xs tracking-widest transition-colors"
+            key={id}
+            onClick={() => setTab(id)}
+            className={cn(TAB_BASE, tab === id ? TAB_ACTIVE : TAB_INACTIVE)}
           >
-            閉じる
+            {label}
           </button>
-        </div>
+        ))}
+      </div>
 
-        {/* タブ */}
-        <div className="flex border-b border-gothic-border">
-          {tabs.map(({ id, label }) => (
-            <button
-              key={id}
-              onClick={() => setTab(id)}
-              className={cn(TAB_BASE, tab === id ? TAB_ACTIVE : TAB_INACTIVE)}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {/* コンテンツ: min-h でタブ切り替え時の高さ変動を防ぐ */}
-        <div className="px-6 py-5 min-h-[260px]">
+      {/* コンテンツ */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-xl mx-auto px-8 py-8">
           {tab === 'save' && showSave && (
             <>
               {/* セーブ/ロード切り替えタブ */}
-              <div className="flex border border-gothic-border mb-4">
+              <div className="flex border border-gothic-border mb-6">
                 <button
                   onClick={() => setSaveSubMode('save')}
                   className={cn(
@@ -176,36 +177,27 @@ export function SettingsModal({ onClose, showSave }: Props) {
 
               {saveSubMode === 'save' ? (
                 savedIndex !== null ? (
-                  <div className="h-[156px] flex items-center justify-center">
+                  <div className="py-12 flex items-center justify-center">
                     <p className="text-gothic-gold font-serif text-sm text-center">
                       保存しました（手動 {savedIndex}）
                     </p>
                   </div>
                 ) : (
-                  <div className="h-[156px] overflow-y-auto">
-                    <SaveSlotList
-                      slots={slots}
-                      onSelect={handleSave}
-                      mode="save"
-                      baseSlotIndex={1}
-                    />
-                  </div>
+                  <SaveSlotList slots={slots} onSelect={handleSave} mode="save" baseSlotIndex={1} />
                 )
               ) : (
-                <div className="h-[156px] overflow-y-auto">
-                  <SaveSlotList
-                    slots={allSlots}
-                    onSelect={handleLoad}
-                    mode="load"
-                    baseSlotIndex={0}
-                  />
-                </div>
+                <SaveSlotList
+                  slots={allSlots}
+                  onSelect={handleLoad}
+                  mode="load"
+                  baseSlotIndex={0}
+                />
               )}
             </>
           )}
 
           {tab === 'view' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* 幕間スキップ */}
               <div className="flex items-center justify-between">
                 <div>
@@ -245,7 +237,7 @@ export function SettingsModal({ onClose, showSave }: Props) {
                       key={key}
                       onClick={() => setTextSpeed(key)}
                       className={cn(
-                        'flex-1 border py-2 font-display text-xs tracking-widest transition-all',
+                        'flex-1 border py-2.5 font-display text-xs tracking-widest transition-all',
                         textSpeed === key
                           ? 'border-gothic-gold text-gothic-gold bg-gothic-panel'
                           : 'border-gothic-border text-gothic-muted hover:border-gothic-accent hover:text-gothic-text'
@@ -260,7 +252,7 @@ export function SettingsModal({ onClose, showSave }: Props) {
           )}
 
           {tab === 'audio' && (
-            <div className="space-y-6">
+            <div className="space-y-8">
               {/* BGM音量 */}
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -304,10 +296,10 @@ export function SettingsModal({ onClose, showSave }: Props) {
 
           {tab === 'display' && (
             <>
-              <p className="text-gothic-muted font-serif text-xs tracking-widest text-center mb-4">
+              <p className="text-gothic-muted font-serif text-xs tracking-widest text-center mb-6">
                 ― 画面サイズを選んでください ―
               </p>
-              <div className="space-y-2">
+              <div className="grid grid-cols-2 gap-3">
                 {SCREEN_SIZES.map(({ label, width, height }) => {
                   const isActive = selectedSize?.width === width && selectedSize?.height === height
                   return (
@@ -315,7 +307,7 @@ export function SettingsModal({ onClose, showSave }: Props) {
                       key={label}
                       onClick={() => handleSizeSelect(width, height)}
                       className={cn(
-                        'w-full border px-4 py-3 font-display text-sm tracking-wider transition-all duration-200 text-left',
+                        'border px-4 py-4 font-display text-sm tracking-wider transition-all duration-200 text-left',
                         isActive
                           ? 'border-gothic-gold text-gothic-gold bg-gothic-panel shadow-[0_0_12px_rgba(217,119,6,0.3)]'
                           : 'border-gothic-border text-gothic-muted bg-gothic-panel hover:border-gothic-accent hover:text-gothic-text'
@@ -323,7 +315,7 @@ export function SettingsModal({ onClose, showSave }: Props) {
                     >
                       <span className="flex items-center justify-between">
                         <span>{label}</span>
-                        {isActive && <span className="text-gothic-gold text-xs">✓ 選択中</span>}
+                        {isActive && <span className="text-gothic-gold text-xs">✓</span>}
                       </span>
                     </button>
                   )
@@ -332,46 +324,46 @@ export function SettingsModal({ onClose, showSave }: Props) {
             </>
           )}
         </div>
+      </div>
 
-        {/* フッター */}
-        <div className="border-t border-gothic-border px-6 pb-5 pt-4 space-y-2">
-          {showTitleConfirm ? (
-            <div className="border border-gothic-border bg-gothic-panel/60 px-4 py-3 space-y-2">
-              <p className="text-gothic-muted font-serif text-xs text-center">
-                タイトルに戻りますか？（未セーブの進行は失われます）
-              </p>
-              <div className="flex gap-2">
-                <button
-                  onClick={handleGoToTitle}
-                  className="flex-1 border border-gothic-gold bg-transparent text-gothic-gold font-serif text-xs py-2 transition-all duration-200 hover:bg-gothic-gold/10"
-                >
-                  戻る
-                </button>
-                <button
-                  onClick={() => setShowTitleConfirm(false)}
-                  className="flex-1 border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 transition-all duration-200 hover:border-gothic-accent"
-                >
-                  キャンセル
-                </button>
-              </div>
+      {/* フッター */}
+      <div className="border-t border-gothic-border px-8 py-4 flex-shrink-0 space-y-2">
+        {showTitleConfirm ? (
+          <div className="border border-gothic-border bg-gothic-panel/60 px-4 py-3 space-y-2">
+            <p className="text-gothic-muted font-serif text-xs text-center">
+              タイトルに戻りますか？（未セーブの進行は失われます）
+            </p>
+            <div className="flex gap-2">
+              <button
+                onClick={handleGoToTitle}
+                className="flex-1 border border-gothic-gold bg-transparent text-gothic-gold font-serif text-xs py-2 transition-all duration-200 hover:bg-gothic-gold/10"
+              >
+                戻る
+              </button>
+              <button
+                onClick={() => setShowTitleConfirm(false)}
+                className="flex-1 border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 transition-all duration-200 hover:border-gothic-accent"
+              >
+                キャンセル
+              </button>
             </div>
-          ) : (
-            <>
-              <button
-                onClick={() => setShowTitleConfirm(true)}
-                className="w-full border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 transition-all duration-200 hover:border-gothic-gold hover:text-gothic-gold"
-              >
-                タイトルへ戻る
-              </button>
-              <button
-                onClick={() => window.electronAPI?.windowControls.quit()}
-                className="w-full border border-red-900/60 bg-transparent text-red-400/70 font-serif text-xs py-2 transition-all duration-200 hover:border-red-700 hover:text-red-400"
-              >
-                ゲームを終了
-              </button>
-            </>
-          )}
-        </div>
+          </div>
+        ) : (
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowTitleConfirm(true)}
+              className="flex-1 border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 transition-all duration-200 hover:border-gothic-gold hover:text-gothic-gold"
+            >
+              タイトルへ戻る
+            </button>
+            <button
+              onClick={() => window.electronAPI?.windowControls.quit()}
+              className="flex-1 border border-red-900/60 bg-transparent text-red-400/70 font-serif text-xs py-2 transition-all duration-200 hover:border-red-700 hover:text-red-400"
+            >
+              ゲームを終了
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

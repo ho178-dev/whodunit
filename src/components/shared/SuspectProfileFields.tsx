@@ -10,8 +10,6 @@ export function SuspectProfileFields({ suspect }: SuspectProfileFieldsProps) {
   const fields = [
     { label: '人物像', value: suspect.description },
     { label: '性格', value: suspect.personality },
-    { label: '被害者との関係', value: suspect.relationship_to_victim },
-    { label: 'アリバイ', value: suspect.alibi },
   ]
 
   return (
