@@ -30,6 +30,8 @@ export function EndingScreen() {
   const [confessionStep, setConfessionStep] = useState<'confession' | 'epilogue' | 'done'>(
     'confession'
   )
+  // 惜敗エンド演出のステップインデックス（0 から順に進む）
+  const [nearDefeatStepIndex, setNearDefeatStepIndex] = useState(0)
   // スコア保存済みフラグ（StrictModeの二重発火防止）
   const scoreSaved = useRef(false)
 
@@ -50,6 +52,32 @@ export function EndingScreen() {
 
   const isCorrect = votedSuspectId === scenario.murderer_id
   const murderer = scenario.suspects.find((s) => s.id === scenario.murderer_id)!
+  const voted = scenario.suspects.find((s) => s.id === votedSuspectId)!
+
+  // 惜敗エンド演出データを構築（キャラの言葉 → 地の文の順）
+  const nearDefeatSteps: Array<{ text: string; speakerName: string; showCharacter: boolean }> = []
+  if (murdererEscaped) {
+    // キャラの言葉（証拠不足型: 犯人の逃亡セリフ / 誤告発型: 無実の容疑者の弁明）
+    const charDialogText = isCorrect
+      ? (scenario.accusation_data?.correct.escape_statement ?? '')
+      : (scenario.accusation_data?.incorrect?.[votedSuspectId]?.defense_statement ?? '')
+    if (charDialogText) {
+      nearDefeatSteps.push({
+        text: charDialogText,
+        speakerName: isCorrect ? murderer.name : voted.name,
+        showCharacter: true,
+      })
+    }
+    // 地の文（ナレーション）
+    const narrationText = isCorrect
+      ? (scenario.accusation_data?.correct.near_defeat_evidence_text ?? '')
+      : (scenario.accusation_data?.near_defeat_wrong_suspect_text ?? '')
+    if (narrationText) {
+      nearDefeatSteps.push({ text: narrationText, speakerName: '── 幕', showCharacter: false })
+    }
+  }
+  const currentNearDefeatStep = nearDefeatSteps[nearDefeatStepIndex]
+
   const confessionText =
     isCorrect && !murdererEscaped
       ? (murderer.confession_statement ?? scenario.accusation_data?.correct.breakdown_statement)
@@ -87,9 +115,42 @@ export function EndingScreen() {
     )
   }
 
+  // 惜敗エンド演出（キャラの言葉 → 地の文）
+  if (murdererEscaped && currentNearDefeatStep) {
+    const nearDefeatCharacter = isCorrect ? murderer : voted
+    return (
+      <div className="h-full relative">
+        <MansionSceneBackground
+          phase="ending"
+          fixed
+          mansionBackgroundSrc={resolveMansionAsset(scenario.mansion_background_id)}
+        />
+        <div className="relative z-10 h-full flex flex-col items-center justify-end pb-6 px-4">
+          <div className="w-full max-w-2xl">
+            {currentNearDefeatStep.showCharacter && (
+              <CharacterCard suspect={nearDefeatCharacter} portrait />
+            )}
+            <div className={currentNearDefeatStep.showCharacter ? 'mt-4' : undefined}>
+              <DialogBox
+                key={nearDefeatStepIndex}
+                text={currentNearDefeatStep.text}
+                speakerName={currentNearDefeatStep.speakerName}
+              />
+            </div>
+            <button
+              onClick={() => setNearDefeatStepIndex(nearDefeatStepIndex + 1)}
+              className="mt-4 w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-3 transition-all"
+            >
+              {nearDefeatStepIndex < nearDefeatSteps.length - 1 ? '次へ' : '結末を見る'}
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   // 犯人を正しく特定できたか（完全正解 or 証拠不足で逃亡）
   const isMurdererIdentified = isCorrect || murdererEscaped
-  const voted = scenario.suspects.find((s) => s.id === votedSuspectId)!
 
   // 完勝以外：is_critical な組み合わせのうち未発見のものが「見逃した決定的事実」
   const missedCombinations =

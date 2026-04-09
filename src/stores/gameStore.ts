@@ -66,6 +66,7 @@ export interface GameState {
   confrontationLog: ConfrontationEntry[]
   unlockedPursuitQuestions: UnlockedPursuitQuestion[] // 証言選択成功後にアンロックされた追及質問
   askedPursuitQuestionIds: string[] // 既に質問済みの追及質問ID
+  successfulPursuitSuspectIds: string[] // 議論フェーズで矛盾追及に成功した容疑者IDリスト
   pendingPursuitActivation: PendingPursuitActivation | null // 証言選択待ち状態
   pursuitWrongResult: PursuitWrongResult | null // 誤った証言を選択したときのフィードバック
   viewedSuspectProfileIds: string[] // プロフィール閲覧済みの容疑者ID
@@ -163,6 +164,7 @@ const initialState = {
   confrontationLog: [],
   unlockedPursuitQuestions: [],
   askedPursuitQuestionIds: [],
+  successfulPursuitSuspectIds: [],
   pendingPursuitActivation: null,
   pursuitWrongResult: null,
   viewedSuspectProfileIds: [],
@@ -203,6 +205,7 @@ function buildSaveInput(state: GameState, phase: GamePhase): SaveInput {
     confrontationLog: state.confrontationLog,
     unlockedPursuitQuestions: state.unlockedPursuitQuestions,
     askedPursuitQuestionIds: state.askedPursuitQuestionIds,
+    successfulPursuitSuspectIds: state.successfulPursuitSuspectIds,
     votedSuspectId: state.votedSuspectId,
     hypotheses: state.hypotheses,
     murdererEscaped: state.murdererEscaped,
@@ -327,9 +330,13 @@ export const useGameStore = create<GameState>((set, get) => ({
           evidenceId,
           state.unlockedPursuitQuestions
         )
+        const alreadyRecorded = state.successfulPursuitSuspectIds.includes(pendingSuspectId)
         return {
           pendingPursuitActivation: null,
           pursuitWrongResult: null,
+          ...(!alreadyRecorded && {
+            successfulPursuitSuspectIds: [...state.successfulPursuitSuspectIds, pendingSuspectId],
+          }),
           ...(newUnlocked.length > 0 && {
             unlockedPursuitQuestions: [...state.unlockedPursuitQuestions, ...newUnlocked],
           }),
@@ -399,29 +406,12 @@ export const useGameStore = create<GameState>((set, get) => ({
           hint = true
           continue
         }
-        // 人物条件チェック
-        const suspectsMet =
-          !c.required_suspect_ids ||
-          c.required_suspect_ids.length === 0 ||
-          c.required_suspect_ids.every((suspectId) => {
-            if (!state.viewedSuspectProfileIds.includes(suspectId)) return false
-            const suspect = state.scenario!.suspects.find((s) => s.id === suspectId)
-            if (!suspect) return false
-            const statementCount = suspect.investigation_dialog.statements.length
-            for (let i = 0; i < statementCount; i++) {
-              if (!state.heardStatements.some((h) => h.suspectId === suspectId && h.index === i))
-                return false
-            }
-            return true
-          })
-        if (suspectsMet) {
-          set((s) => ({
-            discoveredCombinationIds: [...s.discoveredCombinationIds, c.id],
-            pendingCombinationIds: [...s.pendingCombinationIds, c.id],
-          }))
-          return { matched: true }
-        }
-        hint = true
+        // 全証拠が検査済みであれば発見
+        set((s) => ({
+          discoveredCombinationIds: [...s.discoveredCombinationIds, c.id],
+          pendingCombinationIds: [...s.pendingCombinationIds, c.id],
+        }))
+        return { matched: true }
       } else if (
         !state.discoveredCombinationIds.includes(c.id) &&
         evidenceIds.every((id) => c.evidence_ids.includes(id)) &&
@@ -584,6 +574,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       confrontationLog: slot.confrontationLog,
       unlockedPursuitQuestions: slot.unlockedPursuitQuestions,
       askedPursuitQuestionIds: slot.askedPursuitQuestionIds,
+      successfulPursuitSuspectIds: slot.successfulPursuitSuspectIds ?? [],
       votedSuspectId: slot.votedSuspectId,
       hypotheses: slot.hypotheses,
       murdererEscaped: slot.murdererEscaped,

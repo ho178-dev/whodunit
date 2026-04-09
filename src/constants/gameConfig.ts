@@ -25,4 +25,4 @@ export const TALK_ACTIONS = 30
 
 // 議論・告発フェーズの証拠突きつけAP
 export const DISCUSSION_CONFRONT_ACTIONS = 6
-export const ACCUSATION_CONFRONT_ACTIONS = 3
+export const ACCUSATION_CONFRONT_ACTIONS = 6

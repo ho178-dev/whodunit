@@ -27,8 +27,17 @@ interface EvidenceSelectMode {
   actionLabel: string
   /** すでに突きつけ済みの証拠ID（dimmed 表示） */
   confrontedEvidenceIds?: string[]
+  /** このIDリストに含まれる証拠のみ表示する（未指定時は全証拠を表示） */
+  filterEvidenceIds?: string[]
   /** 確認ボタン押下時に呼ばれるコールバック（選択した証拠IDを渡す） */
   onConfirm: (evidenceId: string) => void
+  onCancel: () => void
+}
+
+/** 発見済みの推理（決定的事実）を選択するモード（告発フェーズのStep3） */
+interface ReasoningSelectMode {
+  /** 推理が選択されたときのコールバック */
+  onSelect: (combinationId: string) => void
   onCancel: () => void
 }
 
@@ -38,6 +47,8 @@ interface InvestigationNotesProps {
   pursuitMode?: PursuitSelectionMode
   /** 証拠品選択モード（議論・告発フェーズでの突きつけ/反論） */
   evidenceSelectMode?: EvidenceSelectMode
+  /** 推理選択モード（告発フェーズStep3での決定的事実選択） */
+  reasoningSelectMode?: ReasoningSelectMode
 }
 
 const DEFAULT_CHARACTER_IMG = assetUrl('/assets/characters/default_character.png')
@@ -48,6 +59,7 @@ export function InvestigationNotes({
   onClose,
   pursuitMode,
   evidenceSelectMode,
+  reasoningSelectMode,
 }: InvestigationNotesProps) {
   const {
     scenario,
@@ -62,8 +74,14 @@ export function InvestigationNotes({
     tryCombineEvidence,
   } = useGameStore()
 
-  // evidenceSelectMode が有効な場合は証拠品タブを強制表示
-  const defaultTab: Tab = evidenceSelectMode ? 'evidence' : pursuitMode ? 'testimony' : 'timeline'
+  // 各モードに応じてデフォルトタブを決定する
+  const defaultTab: Tab = evidenceSelectMode
+    ? 'evidence'
+    : pursuitMode
+      ? 'testimony'
+      : reasoningSelectMode
+        ? 'discovery'
+        : 'timeline'
   const [tab, setTab] = useState<Tab>(defaultTab)
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null)
   // evidenceSelectMode 使用時に選択中の証拠ID
@@ -80,6 +98,10 @@ export function InvestigationNotes({
   if (!scenario) return null
 
   const discoveredEvidence = scenario.evidence.filter((e) => inspectedEvidenceIds.includes(e.id))
+  // 証拠品タブで表示する証拠（filterEvidenceIds が指定されている場合はフィルタリング）
+  const evidenceTabEvidence = evidenceSelectMode?.filterEvidenceIds
+    ? discoveredEvidence.filter((e) => evidenceSelectMode.filterEvidenceIds!.includes(e.id))
+    : discoveredEvidence
   const discoveredCombinations = (scenario.evidence_combinations ?? []).filter((c) =>
     discoveredCombinationIds.includes(c.id)
   )
@@ -169,7 +191,7 @@ export function InvestigationNotes({
     }
   }
 
-  const isSpecialMode = !!pursuitMode || !!evidenceSelectMode
+  const isSpecialMode = !!pursuitMode || !!evidenceSelectMode || !!reasoningSelectMode
 
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-gothic-bg border border-gothic-gold/50">
@@ -193,12 +215,18 @@ export function InvestigationNotes({
               証拠を選択: {evidenceSelectMode.suspectName}
             </span>
           )}
+          {reasoningSelectMode && (
+            <span className="text-gothic-gold font-serif text-xs border border-gothic-gold/60 px-2 py-0.5 animate-pulse">
+              ⬥ 突きつける推理を選択してください
+            </span>
+          )}
         </div>
         {isSpecialMode && (
           <button
             onClick={() => {
               pursuitMode?.onCancel()
               evidenceSelectMode?.onCancel()
+              reasoningSelectMode?.onCancel()
             }}
             className="text-stone-500 hover:text-stone-300 font-serif text-xs border border-stone-700 px-2 py-0.5 transition-colors"
           >
@@ -351,9 +379,11 @@ export function InvestigationNotes({
 
           {/* 証拠品: evidenceSelectMode 時は突きつけ選択UI、通常時は組み合わせ検討UI */}
           {tab === 'evidence' &&
-            (discoveredEvidence.length === 0 ? (
+            (evidenceTabEvidence.length === 0 ? (
               <p className="text-gothic-muted font-serif text-sm text-center py-8">
-                まだ証拠を発見していません
+                {discoveredEvidence.length === 0
+                  ? 'まだ証拠を発見していません'
+                  : '提示できる証拠品がありません'}
               </p>
             ) : (
               <>
@@ -364,7 +394,7 @@ export function InvestigationNotes({
                   </p>
                 )}
                 <div className="grid grid-cols-2 gap-3">
-                  {discoveredEvidence.map((evidence) => {
+                  {evidenceTabEvidence.map((evidence) => {
                     const examined = examinedEvidenceIds.includes(evidence.id)
                     const imgSrc = resolveEvidenceAsset(evidence.category_id)
                     const isConfronted = evidenceSelectMode?.confrontedEvidenceIds?.includes(
@@ -568,12 +598,26 @@ export function InvestigationNotes({
               </p>
             ) : (
               <div className="space-y-4">
+                {reasoningSelectMode && (
+                  <p className="text-gothic-gold/80 font-serif text-xs border border-gothic-gold/40 bg-gothic-gold/10 px-3 py-2">
+                    証拠を突きつけた根拠となる推理を選択してください
+                  </p>
+                )}
                 {discoveredCombinations.map((combo) => {
                   const evidenceNames = getEvidenceNames(combo.evidence_ids, scenario.evidence)
+                  // reasoningSelectMode 時は発見済みの全組み合わせが選択可
+                  const isSelectable = !!reasoningSelectMode
                   return (
                     <div
                       key={combo.id}
-                      className="border border-gothic-gold/40 p-3 bg-stone-900/30"
+                      onClick={
+                        isSelectable ? () => reasoningSelectMode!.onSelect(combo.id) : undefined
+                      }
+                      className={`border p-3 bg-stone-900/30 transition-all ${
+                        isSelectable
+                          ? 'border-gothic-gold/60 hover:border-gothic-gold hover:bg-stone-800/60 cursor-pointer'
+                          : 'border-gothic-gold/40'
+                      }`}
                     >
                       <div className="flex items-start gap-2 mb-2">
                         <span className="text-gothic-gold font-display text-xs tracking-widest leading-snug">
@@ -582,6 +626,11 @@ export function InvestigationNotes({
                         {combo.is_critical && (
                           <span className="shrink-0 text-xs font-serif border border-gothic-gold/60 text-gothic-gold px-1">
                             重要
+                          </span>
+                        )}
+                        {isSelectable && (
+                          <span className="ml-auto shrink-0 text-xs font-serif border border-gothic-gold text-gothic-gold px-1.5 py-0.5">
+                            この推理を使う
                           </span>
                         )}
                       </div>

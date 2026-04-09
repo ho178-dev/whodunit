@@ -60,7 +60,10 @@
       "Bash(echo \"TSC:$?\")",
       "Bash(echo \"exit: $?\")",
       "Bash(sort -t: -k2 -rn)",
-      "Bash(echo \"EXIT:$?\")"
+      "Bash(echo \"EXIT:$?\")",
+      "Bash(xargs head:*)",
+      "Read(//d D:/workspace/**)",
+      "Bash(node_modules/.bin/tsc --noEmit)"
     ]
   }
 }

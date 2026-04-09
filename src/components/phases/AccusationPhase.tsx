@@ -1,13 +1,14 @@
-// 投票後・結末前に挿入される告発シーン。正解時は犯人との最終対決、不正解時は無実の困惑を演出する
-// 館背景＋被告発者キャラクター＋ダイアログの16:9レイアウトで進行する
-// 証拠選択は左パネルを廃止し捜査メモの証拠品タブで行う
-// 特殊ボタン（この証拠で反論する・真相を見る）はCenterActionAreaに配置する
-import { useState, useEffect } from 'react'
+// 投票後・結末前に挿入される告発シーン。正解時は犯人との最終対決、不正解時も同一フローで進行し
+// APが尽きると惜敗エンド（証拠不足型 or 誤告発型）へ移行する
+// Step1: 証拠提示 → Step2: 反論 → Step3: 推理を突きつける → Step4: 紐づき判定
+// 証拠・推理の選択は推理メモ（InvestigationNotes）上で行う
+import { useState, useEffect, useMemo } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { MansionSceneBackground } from '../shared/MansionBackground'
 import { CharacterCard } from '../shared/CharacterCard'
 import { DialogBox } from '../shared/DialogBox'
 import { InvestigationNotes } from '../investigation/InvestigationNotes'
+import { CombinationDiscovery } from '../investigation/CombinationDiscovery'
 import { cn } from '../../utils/cn'
 import { RightPanel } from '../layout/RightPanel'
 import { CenterActionArea } from '../layout/CenterActionArea'
@@ -15,17 +16,17 @@ import { PanelButton } from '../layout/PanelButton'
 import { NotesIcon } from '../shared/Icons'
 import { resolveMansionAsset } from '../../services/assetResolver'
 import { ACCUSATION_CONFRONT_ACTIONS } from '../../constants/gameConfig'
+import type { EvidenceCombination } from '../../types/scenario'
 
 // 告発シーンの進行ステップ
 type AccusationStep =
   | 'defense'
   | 'select_evidence'
-  | 'wrong_evidence'
+  | 'evidence_rebuttal'
+  | 'select_reasoning'
+  | 'wrong_link'
   | 'refutation'
   | 'breakdown'
-  | 'escape'
-  | 'confusion'
-  | 'alibi_reveal'
 
 interface StepDialog {
   text: string
@@ -39,6 +40,8 @@ export function AccusationPhase() {
     scenario,
     votedSuspectId,
     examinedEvidenceIds,
+    discoveredCombinationIds,
+    successfulPursuitSuspectIds,
     setPhase,
     setMurdererEscaped,
     accusationConfrontActionsRemaining,
@@ -46,11 +49,10 @@ export function AccusationPhase() {
   } = useGameStore()
 
   const isCorrect = votedSuspectId === scenario?.murderer_id
-  const [step, setStep] = useState<AccusationStep>(() => (isCorrect ? 'defense' : 'confusion'))
+  const [step, setStep] = useState<AccusationStep>('defense')
   const [selectedEvidenceId, setSelectedEvidenceId] = useState<string | null>(null)
+  const [selectedCombinationId, setSelectedCombinationId] = useState<string | null>(null)
   const [showNotes, setShowNotes] = useState(false)
-  // refutation/confusion ステップで「続きを聞く」ボタンを表示するためのフラグ
-  // ステップと紐付けることで、ステップ変更時に自動リセット（useEffect不要）
   const [dialogDoneStep, setDialogDoneStep] = useState<AccusationStep | null>(null)
   const dialogDone = dialogDoneStep === step
 
@@ -60,16 +62,26 @@ export function AccusationPhase() {
       ? (accusationData.incorrect[votedSuspectId] ?? null)
       : null
 
-  const selectableEvidence = scenario
-    ? scenario.evidence.filter((e) => examinedEvidenceIds.includes(e.id) && !e.is_fake)
-    : []
+  // 発見済み組み合わせの evidence_ids を収集
+  const discoveredCombinations = useMemo(
+    () =>
+      (scenario?.evidence_combinations ?? []).filter((c) =>
+        discoveredCombinationIds.includes(c.id)
+      ),
+    [scenario?.evidence_combinations, discoveredCombinationIds]
+  )
 
-  const hasDecisiveEvidence = accusationData
-    ? selectableEvidence.some((e) => e.id === accusationData.correct.decisive_evidence_id)
-    : false
+  // Step1 で選択できる証拠（発見済み組み合わせに含まれ、詳しく調べた非偽証拠）
+  const selectableEvidence = useMemo(() => {
+    const discoveredEvidenceIds = new Set(discoveredCombinations.flatMap((c) => c.evidence_ids))
+    return (scenario?.evidence ?? []).filter(
+      (e) => !e.is_fake && examinedEvidenceIds.includes(e.id) && discoveredEvidenceIds.has(e.id)
+    )
+  }, [discoveredCombinations, scenario?.evidence, examinedEvidenceIds])
 
   const shouldSkip =
     !scenario || !votedSuspectId || !accusationData || (!isCorrect && !incorrectData)
+
   useEffect(() => {
     if (shouldSkip) setPhase('ending')
   }, [shouldSkip, setPhase])
@@ -77,15 +89,81 @@ export function AccusationPhase() {
   if (shouldSkip) return null
 
   const votedSuspect = scenario.suspects.find((s) => s.id === votedSuspectId)!
-  const decisiveEvidence = accusationData
-    ? scenario.evidence.find((e) => e.id === accusationData.correct.decisive_evidence_id)
+
+  // Step1 で選択した証拠オブジェクト
+  const selectedEvidence = selectedEvidenceId
+    ? scenario.evidence.find((e) => e.id === selectedEvidenceId)
     : null
+
+  // Step3 で選択した推理（組み合わせ）オブジェクト
+  const selectedCombination = selectedCombinationId
+    ? (scenario.evidence_combinations ?? []).find((c) => c.id === selectedCombinationId)
+    : null
+
+  // 正解判定: 正しい容疑者 かつ 選択した推理が選択した証拠を含む かつ 議論フェーズで犯人追及済み
+  const isCorrectConclusion = (combination: EvidenceCombination): boolean =>
+    isCorrect &&
+    combination.evidence_ids.includes(selectedEvidenceId ?? '') &&
+    successfulPursuitSuspectIds.includes(scenario.murderer_id)
+
+  const getActiveRebuttalText = (): string => {
+    if (isCorrect) return accusationData!.correct.evidence_rebuttal
+    return incorrectData!.evidence_rebuttal
+  }
+
+  const getWrongLinkText = (): string => {
+    if (isCorrect) return accusationData!.correct.wrong_link_rebuttal
+    return incorrectData!.wrong_link_rebuttal
+  }
+
+  // 証拠を選択してStep2へ（AP消費）
+  const handleSelectEvidence = (evidenceId: string) => {
+    consumeAccusationConfrontAction()
+    setSelectedEvidenceId(evidenceId)
+    setDialogDoneStep(null)
+    setStep('evidence_rebuttal')
+  }
+
+  // 推理を選択してStep4（紐づき判定）
+  const handleSelectCombination = (combination: EvidenceCombination) => {
+    setSelectedCombinationId(combination.id)
+    if (isCorrectConclusion(combination)) {
+      setDialogDoneStep(null)
+      setStep('refutation')
+    } else {
+      consumeAccusationConfrontAction()
+      const nextAP = accusationConfrontActionsRemaining - 1
+      if (nextAP <= 0) {
+        triggerNearDefeat()
+      } else {
+        setDialogDoneStep(null)
+        setStep('wrong_link')
+      }
+    }
+  }
+
+  // 惜敗エンドへ移行: EndingScreen に委譲する
+  const triggerNearDefeat = () => {
+    setMurdererEscaped(true)
+    setPhase('ending')
+  }
+
+  // wrong_link から Step1 に戻る（メモを自動で開く）
+  const handleRetryFromWrongLink = () => {
+    setSelectedEvidenceId(null)
+    setSelectedCombinationId(null)
+    setDialogDoneStep(null)
+    setStep('select_evidence')
+    setShowNotes(true)
+  }
 
   const getStepDialog = (): StepDialog => {
     switch (step) {
       case 'defense':
         return {
-          text: accusationData.correct.defense_statement,
+          text: isCorrect
+            ? accusationData!.correct.defense_statement
+            : incorrectData!.defense_statement,
           speakerName: votedSuspect.name,
           borderClass: 'border-gothic-gold',
         }
@@ -93,79 +171,47 @@ export function AccusationPhase() {
         return {
           text:
             selectableEvidence.length === 0
-              ? '提示できる証拠がない——調査が足りなかったようだ。'
-              : `${votedSuspect.name}の弁明を覆す、決定的な証拠を一つ提示せよ。`,
+              ? '提示できる根拠がない——まだ調査が足りないようだ。'
+              : '根拠となる証拠品を捜査メモで選んで提示せよ。',
           speakerName: '── 告発',
           borderClass: 'border-gothic-border',
         }
-      case 'wrong_evidence':
+      case 'evidence_rebuttal':
         return {
-          text: accusationData.correct.wrong_evidence_reaction,
+          text: getActiveRebuttalText(),
+          speakerName: `${votedSuspect.name} ─ 反論`,
+          borderClass: 'border-red-800',
+        }
+      case 'select_reasoning':
+        return {
+          text: `${selectedEvidence?.name ?? '証拠品'}をもとに、捜査メモで探偵の推理を選べ。`,
+          speakerName: '── 推理',
+          borderClass: 'border-gothic-border',
+        }
+      case 'wrong_link':
+        return {
+          text: getWrongLinkText(),
           speakerName: `${votedSuspect.name} ─ 反論`,
           borderClass: 'border-red-800',
         }
       case 'refutation':
         return {
-          text: accusationData.correct.refutation_text,
-          speakerName: decisiveEvidence ? `── 反駁 ─ ${decisiveEvidence.name}` : '── 反駁',
+          text: selectedCombination?.refutation_text ?? accusationData!.correct.refutation_text,
+          speakerName: selectedCombination ? `── 推理 ─ ${selectedCombination.name}` : '── 推理',
           borderClass: 'border-gothic-gold',
         }
       case 'breakdown':
         return {
-          text: accusationData.correct.breakdown_statement,
+          text: accusationData!.correct.breakdown_statement,
           speakerName: `${votedSuspect.name} ─ 独白`,
           borderClass: 'border-gothic-gold',
-        }
-      case 'escape': {
-        const escapeText =
-          accusationData.correct.escape_statement ??
-          '……証拠もなしに犯人呼ばわりとは。疑惑だけでは人を裁けない。——私はここを去らせてもらう。'
-        return {
-          text: escapeText,
-          speakerName: `${votedSuspect.name} ─ 逃亡`,
-          borderClass: 'border-red-900',
-        }
-      }
-      case 'confusion':
-        return {
-          text: incorrectData!.confusion_statement,
-          speakerName: `${votedSuspect.name} ─ 困惑`,
-          borderClass: 'border-gothic-border',
-        }
-      case 'alibi_reveal':
-        return {
-          text: incorrectData!.alibi_reveal,
-          speakerName: '── アリバイ',
-          borderClass: 'border-red-900',
         }
     }
   }
 
   const dialog = getStepDialog()
 
-  // 証拠選択モードでメモを開く
-  const handleOpenEvidenceSelect = () => {
-    setSelectedEvidenceId(null)
-    setShowNotes(true)
-  }
-
-  // 証拠選択後の反論アクション実行
-  const handleRefute = (evidenceId: string) => {
-    consumeAccusationConfrontAction()
-    setSelectedEvidenceId(evidenceId)
-    setShowNotes(false)
-    if (evidenceId === accusationData!.correct.decisive_evidence_id) {
-      setStep('refutation')
-    } else {
-      setStep('wrong_evidence')
-    }
-  }
-
-  const selectedEvidenceItem = selectedEvidenceId
-    ? scenario.evidence.find((e) => e.id === selectedEvidenceId)
-    : null
-
-  // 右パネルのslot3ボタン
+  // 右パネル slot3 ボタン
   const getRightSlot3 = () => {
     switch (step) {
       case 'defense':
@@ -173,8 +219,12 @@ export function AccusationPhase() {
           <PanelButton
             variant="primary"
             onClick={() => {
-              setStep('select_evidence')
-              setShowNotes(true)
+              if (accusationConfrontActionsRemaining <= 0) {
+                triggerNearDefeat()
+              } else {
+                setStep('select_evidence')
+                setShowNotes(true)
+              }
             }}
           >
             証拠を突きつける
@@ -182,66 +232,76 @@ export function AccusationPhase() {
         )
       case 'select_evidence':
         return (
-          <PanelButton variant="secondary" onClick={handleOpenEvidenceSelect}>
-            証拠を選び直す
+          <PanelButton variant="secondary" onClick={() => setShowNotes(true)}>
+            <span className="flex items-center justify-center gap-1.5">
+              <NotesIcon size={13} />
+              <span>捜査メモを開く</span>
+            </span>
           </PanelButton>
         )
-      case 'wrong_evidence':
-        return (
-          <PanelButton
-            variant="secondary"
-            onClick={() => {
-              setSelectedEvidenceId(null)
-              setStep('select_evidence')
-              setShowNotes(true)
-            }}
-          >
-            別の証拠を選ぶ
-          </PanelButton>
-        )
-      case 'escape':
-        return (
+      case 'evidence_rebuttal':
+        return dialogDone ? (
           <PanelButton
             variant="primary"
             onClick={() => {
-              setMurdererEscaped(true)
-              setPhase('ending')
+              setStep('select_reasoning')
+              setShowNotes(true)
             }}
           >
-            結果を見る
+            推理を語る
           </PanelButton>
-        )
-      case 'alibi_reveal':
+        ) : undefined
+      case 'select_reasoning':
         return (
-          <PanelButton variant="primary" onClick={() => setPhase('ending')}>
-            結果を見る
+          <PanelButton variant="secondary" onClick={() => setShowNotes(true)}>
+            <span className="flex items-center justify-center gap-1.5">
+              <NotesIcon size={13} />
+              <span>捜査メモを開く</span>
+            </span>
           </PanelButton>
         )
+      case 'wrong_link':
+        return dialogDone ? (
+          <PanelButton variant="secondary" onClick={handleRetryFromWrongLink}>
+            別の証拠で試す
+          </PanelButton>
+        ) : undefined
+      case 'breakdown':
+        return dialogDone ? (
+          <PanelButton variant="primary" onClick={() => setPhase('ending')}>
+            真相を見る
+          </PanelButton>
+        ) : undefined
       default:
         return undefined
     }
   }
 
+  // 右パネル slot4 ボタン（証拠・推理選択中は「このまま告発する」、それ以外は捜査メモ）
   const getRightSlot4 = () => {
-    if (step === 'wrong_evidence' && !hasDecisiveEvidence) {
+    if (step === 'select_reasoning' || step === 'select_evidence') {
       return (
-        <PanelButton variant="dimmed" onClick={() => setStep('escape')}>
-          これ以上の証拠はない
+        <PanelButton variant="dimmed" onClick={triggerNearDefeat}>
+          このまま告発する
         </PanelButton>
       )
     }
-    if (step === 'select_evidence' && selectableEvidence.length === 0) {
-      return (
-        <PanelButton variant="dimmed" onClick={() => setStep('escape')}>
-          証拠を提示できない
-        </PanelButton>
-      )
-    }
-    return undefined
+    return (
+      <PanelButton variant="secondary" onClick={() => setShowNotes(true)}>
+        <span className="flex items-center justify-center gap-1.5">
+          <NotesIcon size={13} />
+          <span>捜査メモ</span>
+        </span>
+      </PanelButton>
+    )
   }
 
   return (
-    <div className="relative h-full overflow-hidden">
+    <>
+      {/* 組み合わせ発見ダイアログ（z-60でメモの上に重なる） */}
+      <CombinationDiscovery />
+
+      {/* 推理メモ: 証拠・推理選択時は対応するモードで開く */}
       {showNotes && (
         <InvestigationNotes
           onClose={() => setShowNotes(false)}
@@ -249,8 +309,28 @@ export function AccusationPhase() {
             step === 'select_evidence'
               ? {
                   suspectName: votedSuspect.name,
-                  actionLabel: 'この証拠で反論する',
-                  onConfirm: handleRefute,
+                  actionLabel: '証拠を提示する',
+                  filterEvidenceIds: selectableEvidence.map((e) => e.id),
+                  onConfirm: (evidenceId) => {
+                    setShowNotes(false)
+                    handleSelectEvidence(evidenceId)
+                  },
+                  onCancel: () => setShowNotes(false),
+                }
+              : undefined
+          }
+          reasoningSelectMode={
+            step === 'select_reasoning'
+              ? {
+                  onSelect: (combinationId) => {
+                    const combo = (scenario.evidence_combinations ?? []).find(
+                      (c) => c.id === combinationId
+                    )
+                    if (combo) {
+                      setShowNotes(false)
+                      handleSelectCombination(combo)
+                    }
+                  },
                   onCancel: () => setShowNotes(false),
                 }
               : undefined
@@ -258,96 +338,78 @@ export function AccusationPhase() {
         />
       )}
 
-      {/* シナリオの館背景IDを使用して背景画像を表示する */}
-      <MansionSceneBackground
-        phase="accusation"
-        mansionBackgroundSrc={resolveMansionAsset(scenario.mansion_background_id)}
-      />
+      <div className="relative h-full overflow-hidden">
+        {/* 館背景 */}
+        <MansionSceneBackground
+          phase="accusation"
+          mansionBackgroundSrc={resolveMansionAsset(scenario.mansion_background_id)}
+        />
 
-      <div className="absolute inset-x-0 top-1/2 -translate-y-[60%] flex justify-center">
-        <CharacterCard suspect={votedSuspect} portrait selected />
-      </div>
-
-      {/* CenterActionArea: 選択済み証拠での反論ボタン・真相を見るボタン */}
-      <CenterActionArea>
-        {/* select_evidence: 証拠選択後に反論ボタンを表示 */}
-        {step === 'select_evidence' && selectedEvidenceItem && (
-          <button
-            onClick={() => handleRefute(selectedEvidenceId!)}
-            className="bg-gothic-gold/10 border border-gothic-gold text-gothic-gold font-display tracking-widest text-xs px-6 py-2 hover:bg-gothic-gold/20 transition-all hover:shadow-[0_0_12px_rgba(217,119,6,0.4)]"
-          >
-            {selectedEvidenceItem.name} で反論する
-          </button>
-        )}
-
-        {/* breakdown: 真相を見るボタン */}
-        {step === 'breakdown' && (
-          <button
-            onClick={() => setPhase('ending')}
-            className="bg-gothic-gold/20 border border-gothic-gold text-gothic-gold font-display tracking-widest text-xs px-8 py-2.5 hover:bg-gothic-gold/30 transition-all shadow-[0_0_20px_rgba(217,119,6,0.3)] hover:shadow-[0_0_30px_rgba(217,119,6,0.5)]"
-          >
-            真相を見る
-          </button>
-        )}
-      </CenterActionArea>
-
-      <div className="absolute inset-x-0 bottom-0 p-3">
-        <div
-          className={cn(
-            'relative bg-gothic-panel/85 backdrop-blur-sm border-2',
-            dialog.borderClass
-          )}
-        >
-          <DialogBox
-            key={step}
-            text={dialog.text}
-            speakerName={dialog.speakerName}
-            onComplete={() => setDialogDoneStep(step)}
-          />
-          {/* refutation/confusion ステップ: 「続きを聞く」でダイアログ内から次へ進む */}
-          {step === 'refutation' && dialogDone && (
-            <button
-              onClick={() => setStep('breakdown')}
-              className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
-            >
-              続きを聞く →
-            </button>
-          )}
-          {step === 'confusion' && dialogDone && (
-            <button
-              onClick={() => setStep('alibi_reveal')}
-              className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
-            >
-              続きを聞く →
-            </button>
-          )}
+        {/* キャラクターカード */}
+        <div className="absolute inset-x-0 top-1/2 -translate-y-[60%] flex justify-center">
+          <CharacterCard suspect={votedSuspect} portrait selected />
         </div>
-      </div>
 
-      {/* 右パネル */}
-      <RightPanel
-        slot2={
-          <div className="flex items-center gap-2">
-            <span className="text-gothic-muted font-serif text-[clamp(9px,1.3vh,12px)]">
-              突きつけ
-            </span>
-            <span className="text-gothic-gold font-pixel text-[clamp(11px,1.5vh,14px)]">
-              {accusationConfrontActionsRemaining}/{ACCUSATION_CONFRONT_ACTIONS}
-            </span>
+        {/* CenterActionArea: 選択した証拠の確認表示 */}
+        <CenterActionArea>
+          {step === 'evidence_rebuttal' && selectedEvidence && (
+            <div className="bg-gothic-panel/60 border border-gothic-border px-4 py-1.5 text-center">
+              <p className="text-gothic-gold font-display text-[10px] tracking-widest">
+                {selectedEvidence.name}
+              </p>
+            </div>
+          )}
+          {step === 'select_reasoning' && selectedEvidence && (
+            <div className="bg-gothic-panel/60 border border-gothic-gold/40 px-4 py-1.5 text-center">
+              <p className="text-gothic-muted font-serif text-[9px]">提示した証拠</p>
+              <p className="text-gothic-gold font-display text-[10px] tracking-widest">
+                {selectedEvidence.name}
+              </p>
+            </div>
+          )}
+        </CenterActionArea>
+
+        {/* ダイアログボックス */}
+        <div className="absolute inset-x-0 bottom-0 p-3">
+          <div
+            className={cn(
+              'relative bg-gothic-panel/85 backdrop-blur-sm border-2',
+              dialog.borderClass
+            )}
+          >
+            <DialogBox
+              key={step}
+              text={dialog.text}
+              speakerName={dialog.speakerName}
+              onComplete={() => setDialogDoneStep(step)}
+            />
+            {step === 'refutation' && dialogDone && (
+              <button
+                onClick={() => setStep('breakdown')}
+                className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
+              >
+                続きを聞く →
+              </button>
+            )}
           </div>
-        }
-        slot3={getRightSlot3()}
-        slot4={
-          getRightSlot4() ?? (
-            <PanelButton variant="secondary" onClick={() => setShowNotes(true)}>
-              <span className="flex items-center justify-center gap-1.5">
-                <NotesIcon size={13} />
-                <span>捜査メモ</span>
+        </div>
+
+        {/* 右パネル */}
+        <RightPanel
+          slot2={
+            <div className="flex items-center gap-2">
+              <span className="text-gothic-muted font-serif text-[clamp(9px,1.3vh,12px)]">
+                突きつけ
               </span>
-            </PanelButton>
-          )
-        }
-      />
-    </div>
+              <span className="text-gothic-gold font-pixel text-[clamp(11px,1.5vh,14px)]">
+                {accusationConfrontActionsRemaining}/{ACCUSATION_CONFRONT_ACTIONS}
+              </span>
+            </div>
+          }
+          slot3={getRightSlot3()}
+          slot4={getRightSlot4()}
+        />
+      </div>
+    </>
   )
 }

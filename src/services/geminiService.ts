@@ -120,37 +120,38 @@ const PROMPT = `
 - プレイヤーへの攻略ヒントではなく、「こういう推理を積み重ねれば辿り着けた」という事後説明として書くこと
 - シナリオの「truth」フィールドと整合すること
 
-## evidence_combinations の設計（必須・3〜5個）
+## evidence_combinations の設計（必須・上限指定がない場合は5個を目標）
 証拠クロス参照システム。単体では意味が薄い証拠が2〜3個組み合わさって初めて「決定的事実」が解放される仕組み。
 プレイヤーが能動的に論理を組み立てる体験の核となる。
 
 ### 設計原則
 - 各組み合わせは evidence 配列の id を正確に参照すること
 - evidence_ids は2〜3個（タプル形式）
-- 組み合わせの数は3〜5個（多すぎると総当たりになる）
-- **is_critical: true の組み合わせは2個以上必須**（プレイヤーが複数の経路から犯人に辿り着けるようにすること）
+- 組み合わせの数は上限指定がない場合は5個を目標にすること（多すぎると総当たりになるため5個が上限）
+- **is_critical: true の組み合わせは3個以上必須**（プレイヤーが複数の経路から犯人に辿り着けるようにすること）
 - 単体証拠では「何かが繋がる気がする」程度に留め、組み合わせで初めて決定的になること
 
 ### is_critical の設計
 以下のいずれかに該当する場合は必ず is_critical: true とすること：
-- 犯人の名前・イニシャル・特定の人物を指す表現が description に登場する組み合わせ
 - 犯人のアリバイを直接崩す組み合わせ
 - 犯行手段（凶器・毒物・方法）を犯人と結びつける組み合わせ
 - 犯行動機を犯人と確定させる組み合わせ
+- 犯人が現場にいたことを示す組み合わせ
 is_critical: false とするのは、事件の背景・人間関係・被害者情報を補強するに留まる組み合わせのみ。
 
-### 必須の組み合わせパターン（以下のうち最低2つを is_critical: true で含めること）
+### 必須の組み合わせパターン（以下のうち最低3つを is_critical: true で含めること）
 1. 機会を示す組み合わせ：犯人のアリバイの嘘を暴く証拠×2（例：足跡系＋目撃写真）→ is_critical: true
 2. 手段を示す組み合わせ：凶器の入手経路を繋ぐ証拠×2（例：原材料＋精製品）→ is_critical: true
 3. 動機を示す組み合わせ：犯行動機を確定させる証拠×2〜3（例：書類＋日記）→ is_critical: true
+4. 現場証拠の組み合わせ：犯人が現場にいた物証を繋ぐ証拠×2〜3 → is_critical: true
 
 ### フィールド定義
 - id: ユニークな文字列（例: "combo_garden_intruder"）
 - evidence_ids: evidence配列のidから2または3個選択したタプル
-- name: 解放されるファクトの短い名前（10〜20文字）例: "深夜に庭へ出た人物が特定された"
-- description: ファクトの詳細説明（2〜4文）。なぜこの組み合わせが決定的かを明示すること
+- name: 解放されるファクトの短い名前（10〜20文字）。**人物名・固有名詞を含めないこと**。例: "深夜の庭への侵入を示す推理"
+- description: ファクトの詳細説明（2〜4文）。**必ず探偵の推理口調で書くこと**（「〜と考えられる」「〜の可能性が高い」「〜と推察される」等の表現を使い、「〜が特定された」「〜が確定した」等の断定表現は使わない）。**人物の固有名詞・氏名・イニシャルを含めないこと**（「ある人物」「館内の誰か」等の一般表現を使う）
 - is_critical: boolean（上記基準に従うこと）
-- required_suspect_ids: description に特定の容疑者の名前・イニシャルが直接登場する場合のみ設定すること。suspects 配列から該当する容疑者のidを1〜2個選ぶ。「館内の人物」「犯行者」等の一般表現しか含まない場合は省略する。省略した場合は証拠条件のみで発火する。設定した場合は対象容疑者のプロフィール閲覧＋全証言聴取も発火条件に追加される
+- accusation_reaction: is_critical: true の組み合わせに設定することが望ましい（省略可）。告発フェーズでこの推理を突きつけられた時の容疑者の反応（1〜2文）。動揺・言い訳・沈黙を含む自然な反応にすること
 
 JSONのみを返してください。説明文は不要です。
 出力するJSONには必ず "main_reasoning_path" フィールドを含めること。
@@ -285,6 +286,14 @@ function buildAccusationPrompt(scenario: Scenario): string {
     .filter((e) => !e.is_fake)
     .map((e) => `- ${e.id}: ${e.name}`)
     .join('\n')
+  const allCombinations = scenario.evidence_combinations ?? []
+  const combinationList =
+    allCombinations
+      .map(
+        (c) =>
+          `- ${c.id}: ${c.name}（証拠: ${c.evidence_ids.join(', ')}）${c.is_critical ? ' [is_critical]' : ''}`
+      )
+      .join('\n') || '（なし）'
 
   return `
 あなたは日本のマーダーミステリーシナリオ作家です。
@@ -302,20 +311,45 @@ ${suspectList}
 ## 本物の証拠一覧
 ${evidenceList}
 
+## 証拠組み合わせ（推理）一覧
+${combinationList}
+
+## 告発シーンのフロー
+1. プレイヤーが根拠となる証拠品（発見済み推理に含まれるもの）を提示する
+2. 容疑者が反論する（evidence_rebuttal）
+3. プレイヤーが推理（evidence_combination）を突きつける
+4. 提示した証拠を含む推理かつ議論フェーズで犯人追及済みなら → refutation → breakdown → 正解エンド
+5. 証拠と推理が噛み合わなければ → wrong_link_rebuttal → Step1に戻る
+6. APが尽きると惜敗エンドへ（near_defeat_evidence_text）
+
 ## 告発シーンの設計ルール
 
 ### 正解ルート（犯人を正しく指名した場合）
-- defense_statement: 犯人の最終弁明（3〜5文）。アリバイを主張し無実を訴える。ただし微かな動揺を含めること。最後に「証拠があるなら見せてみろ」と挑発で締める
-- decisive_evidence_id: 犯人の弁明を最も効果的に覆せる証拠1つのID。動機を直接証明する証拠を優先する
-- wrong_evidence_reaction: 誤った証拠を選んだ時の犯人の反応（1〜2文）。余裕を見せつつ再挑戦を促す
-- refutation_text: 正しい証拠を突き付けた時のナレーション（3〜4文）。なぜこの証拠が弁明を覆すかを論理的に説明する
-- breakdown_statement: 告発フェーズで証拠を突きつけられた直後の犯人の崩壊（2〜3文、50〜100字程度）。短く劇的に、動揺→観念の流れ。改行で段落を分けること。**エンディングの confession_statement とは異なる内容にすること**（重複禁止）
-- epilogue_text: エンディングの地の文（2〜3文）。confession_statement の直後に表示するナレーション。事件が解決した後の静寂・余韻・不可逆性をテーマにした詩的な文章。ゴシック小説の幕切れのような締まりのある表現にすること
+- defense_statement: 犯人の最終弁明（3〜5文）。アリバイを主張し無実を訴える。微かな動揺を含め、最後に「証拠があるなら見せてみろ」と挑発で締める
+- evidence_rebuttal: 証拠品を提示された直後の反論（1〜2文）。「それが何だと言うんだ」というトーンで余裕を見せつつ動揺を隠す
+- wrong_link_rebuttal: 証拠と推理が噛み合わない時の反論（1〜2文）。論理の穴を突いて余裕を見せる
+- refutation_text: 汎用フォールバック用ナレーション（2〜3文）。証拠と推理が繋がった瞬間の簡潔な劇的説明。推理固有のナレーションが未設定の場合にのみ使用される
+- breakdown_statement: 犯人の崩壊（2〜3文、50〜100字程度）。動揺→観念の流れ。改行で段落を分けること。confession_statement とは異なる内容にすること
+- epilogue_text: エンディングの地の文（2〜3文）。事件解決後の静寂・余韻をテーマにした詩的な文章
+- near_defeat_evidence_text: 証拠不足型惜敗エンドのナレーション（2〜3文）。探偵が推理の輪を繋げられなかった結末。真犯人が逃げ切る余韻を含む
+
+### 推理固有の論駁ナレーション（combination_refutation_texts）
+上記「証拠組み合わせ（推理）一覧」の各組み合わせについて、プレイヤーがその推理で正解ルートに到達した時に表示されるナレーションを設定する。
+- 各 combination_id をキーとした辞書形式で出力する
+- **is_critical の組み合わせは必ず設定すること**
+- is_critical でない組み合わせも可能な範囲で設定すること（省略した場合は refutation_text にフォールバック）
+- 各ナレーションは3〜4文。その組み合わせの証拠が具体的に語られるドラマチックな説明にすること
+- 探偵が「なぜこの証拠の組み合わせが犯人を指し示すか」を断言調で語る形式
+- **人物の固有名詞・氏名を含めてよい**（犯人の名前を含む形での論理の完成を表現すること）
 
 ### 不正解ルート（無実の人物を指名した場合）
-犯人以外の全容疑者について以下を設定する：
-- confusion_statement: 困惑の第一声（2〜3文）。キャラの性格を反映した反応
-- alibi_reveal: アリバイ・動機不在の説明（2〜3文）。なぜこの人物が犯人ではないかを客観的に示す。最後に「真犯人は——別にいる。」で締める
+犯人以外の全容疑者について設定する：
+- defense_statement: 誤告発された容疑者の弁明（2〜3文）。キャラの性格を反映した困惑・怒り・抗議
+- evidence_rebuttal: 証拠品を提示された直後の反論（1〜2文）。「それが私と何の関係があるのか」というトーン
+- wrong_link_rebuttal: 証拠と推理が噛み合わない時の反論（1〜2文）。無実の人物の正当な抗議
+
+### 共通
+- near_defeat_wrong_suspect_text: 誤告発型惜敗エンドのナレーション（2〜3文）。探偵が誤った人物を追い続け、真犯人を逃がした結末
 
 ## 出力形式
 以下のJSON構造のみを返してください。説明文は不要です。
@@ -323,18 +357,26 @@ ${evidenceList}
 {
   "correct": {
     "defense_statement": "...",
-    "decisive_evidence_id": "...",
-    "wrong_evidence_reaction": "...",
+    "evidence_rebuttal": "...",
+    "wrong_link_rebuttal": "...",
     "refutation_text": "...",
     "breakdown_statement": "...",
-    "epilogue_text": "..."
+    "epilogue_text": "...",
+    "near_defeat_evidence_text": "..."
+  },
+  "combination_refutation_texts": {
+${allCombinations.map((c) => `    "${c.id}": "..."`).join(',\n')}
   },
   "incorrect": {
 ${scenario.suspects
   .filter((s) => s.id !== scenario.murderer_id)
-  .map((s) => `    "${s.id}": { "confusion_statement": "...", "alibi_reveal": "..." }`)
+  .map(
+    (s) =>
+      `    "${s.id}": { "defense_statement": "...", "evidence_rebuttal": "...", "wrong_link_rebuttal": "..." }`
+  )
   .join(',\n')}
-  }
+  },
+  "near_defeat_wrong_suspect_text": "..."
 }
 `
 }
@@ -464,11 +506,28 @@ export async function generateScenario(apiKey: string): Promise<Scenario> {
   if (accusationResult.status === 'fulfilled') {
     try {
       const accusationText = accusationResult.value.response.text()
-      const accusationParsed = JSON.parse(
-        accusationText
-      ) as import('../types/accusation').AccusationScenarioData
-      if (accusationParsed.correct?.decisive_evidence_id) {
-        scenario = { ...scenario, accusation_data: accusationParsed }
+      const accusationParsed = JSON.parse(accusationText) as {
+        correct: import('../types/accusation').CorrectAccusationData
+        combination_refutation_texts?: Record<string, string>
+        incorrect: Record<string, import('../types/accusation').IncorrectAccusationData>
+        near_defeat_wrong_suspect_text: string
+      }
+      if (accusationParsed.correct?.breakdown_statement) {
+        const accusationData: import('../types/accusation').AccusationScenarioData = {
+          correct: accusationParsed.correct,
+          incorrect: accusationParsed.incorrect ?? {},
+          near_defeat_wrong_suspect_text: accusationParsed.near_defeat_wrong_suspect_text ?? '',
+        }
+        // combo個別のrefutation_textをevidence_combinationsにマージ
+        const refutationMap = accusationParsed.combination_refutation_texts ?? {}
+        const updatedCombinations = (scenario.evidence_combinations ?? []).map((c) =>
+          refutationMap[c.id] ? { ...c, refutation_text: refutationMap[c.id] } : c
+        )
+        scenario = {
+          ...scenario,
+          accusation_data: accusationData,
+          evidence_combinations: updatedCombinations,
+        }
       }
     } catch {
       // 告発データのパース失敗時は告発フェーズをスキップ
