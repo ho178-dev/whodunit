@@ -7,7 +7,6 @@ import type { Scenario } from '../types/scenario'
 const REGISTRY = new Map<string, Scenario>([
   [FIXED_SCENARIO.title, FIXED_SCENARIO],
   [FIXED_SCENARIO_2.title, FIXED_SCENARIO_2],
-  ['霧の密室', FIXED_SCENARIO_2], // タイトル変更前の旧キーとの後方互換エイリアス
   [FIXED_SCENARIO_3.title, FIXED_SCENARIO_3],
 ])
 

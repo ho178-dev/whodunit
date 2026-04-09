@@ -59,6 +59,7 @@ export function InvestigationNotes({
     hypotheses,
     revealedFakeEvidenceIds,
     askedPursuitQuestionIds,
+    tryCombineEvidence,
   } = useGameStore()
 
   // evidenceSelectMode が有効な場合は証拠品タブを強制表示
@@ -67,6 +68,10 @@ export function InvestigationNotes({
   const [selectedSuspectId, setSelectedSuspectId] = useState<string | null>(null)
   // evidenceSelectMode 使用時に選択中の証拠ID
   const [pendingEvidenceId, setPendingEvidenceId] = useState<string | null>(null)
+  // 証拠品組み合わせ検討モードで選択中の証拠IDリスト
+  const [combinationSelectedIds, setCombinationSelectedIds] = useState<string[]>([])
+  // 組み合わせ検討の結果（no_match: 不一致, hint: 方向性は合っているが情報不足, already: 発見済み）
+  const [combineResult, setCombineResult] = useState<null | 'no_match' | 'hint' | 'already'>(null)
 
   // タイムライン・証言タブの各容疑者セクションへのref（スクロール用）
   const timelineRefs = useRef<Map<string, HTMLDivElement>>(new Map())
@@ -137,6 +142,31 @@ export function InvestigationNotes({
   const handleEvidenceConfirm = () => {
     if (!pendingEvidenceId || !evidenceSelectMode) return
     evidenceSelectMode.onConfirm(pendingEvidenceId)
+  }
+
+  // 組み合わせ検討: 証拠の選択トグル（詳しく調べた証拠のみ選択可能）
+  const toggleCombinationSelect = (evidenceId: string) => {
+    if (!examinedEvidenceIds.includes(evidenceId)) return
+    setCombineResult(null)
+    setCombinationSelectedIds((prev) =>
+      prev.includes(evidenceId) ? prev.filter((id) => id !== evidenceId) : [...prev, evidenceId]
+    )
+  }
+
+  // 組み合わせ検討ボタン押下
+  const handleTryCombine = () => {
+    if (combinationSelectedIds.length < 2) return
+    const result = tryCombineEvidence(combinationSelectedIds)
+    if (result.matched) {
+      setCombinationSelectedIds([])
+      setCombineResult(null)
+    } else if (result.alreadyDiscovered) {
+      setCombineResult('already')
+    } else if (result.hint) {
+      setCombineResult('hint')
+    } else {
+      setCombineResult('no_match')
+    }
   }
 
   const isSpecialMode = !!pursuitMode || !!evidenceSelectMode
@@ -319,85 +349,106 @@ export function InvestigationNotes({
               </div>
             ))}
 
-          {/* 証拠品: evidenceSelectMode 時は選択UI付き */}
+          {/* 証拠品: evidenceSelectMode 時は突きつけ選択UI、通常時は組み合わせ検討UI */}
           {tab === 'evidence' &&
             (discoveredEvidence.length === 0 ? (
               <p className="text-gothic-muted font-serif text-sm text-center py-8">
                 まだ証拠を発見していません
               </p>
             ) : (
-              <div className="grid grid-cols-2 gap-3">
-                {discoveredEvidence.map((evidence) => {
-                  const examined = examinedEvidenceIds.includes(evidence.id)
-                  const imgSrc = resolveEvidenceAsset(evidence.category_id)
-                  const isConfronted = evidenceSelectMode?.confrontedEvidenceIds?.includes(
-                    evidence.id
-                  )
-                  const isSelected = pendingEvidenceId === evidence.id
-                  return (
-                    <div
-                      key={evidence.id}
-                      onClick={
-                        evidenceSelectMode ? () => setPendingEvidenceId(evidence.id) : undefined
-                      }
-                      className={`border p-3 transition-all ${
-                        evidenceSelectMode
-                          ? isSelected
-                            ? 'border-gothic-gold bg-stone-800/60 shadow-[0_0_12px_rgba(217,119,6,0.4)] cursor-pointer'
-                            : 'border-gothic-border hover:border-gothic-gold/50 cursor-pointer'
-                          : 'border-gothic-border'
-                      }`}
-                    >
-                      <div className="flex items-start gap-3 mb-2">
-                        <div className="w-14 h-14 flex-shrink-0 border border-gothic-border/50 bg-stone-900/50 overflow-hidden">
-                          <PixelImageWithFallback
-                            src={imgSrc}
-                            alt={evidence.name}
-                            pixelSize={PIXEL_ART_CONFIG.pixelSize.evidence}
-                            canvasWidth={PIXEL_ART_CONFIG.canvasSize.evidence.width}
-                            canvasHeight={PIXEL_ART_CONFIG.canvasSize.evidence.height}
-                            fallbackSrc={DEFAULT_EVIDENCE_IMG}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center gap-2 mb-1 flex-wrap">
-                            <span className="text-gothic-gold font-display text-xs tracking-widest">
-                              {evidence.name}
-                            </span>
-                            {revealedFakeEvidenceIds.includes(evidence.id) && (
-                              <span className="text-xs text-red-400/70 font-serif border border-red-800/50 px-1">
-                                偽証拠
-                              </span>
-                            )}
-                            {isConfronted && (
-                              <span className="text-xs text-gothic-muted font-serif border border-gothic-border px-1">
-                                突きつけ済
-                              </span>
-                            )}
+              <>
+                {/* 通常モード: 組み合わせ検討の案内 */}
+                {!evidenceSelectMode && (
+                  <p className="text-gothic-muted/70 font-serif text-xs mb-3">
+                    詳しく調べた証拠品を2つ以上選んで「検討する」
+                  </p>
+                )}
+                <div className="grid grid-cols-2 gap-3">
+                  {discoveredEvidence.map((evidence) => {
+                    const examined = examinedEvidenceIds.includes(evidence.id)
+                    const imgSrc = resolveEvidenceAsset(evidence.category_id)
+                    const isConfronted = evidenceSelectMode?.confrontedEvidenceIds?.includes(
+                      evidence.id
+                    )
+                    const isSelectModeSelected = pendingEvidenceId === evidence.id
+                    const isCombineSelected = combinationSelectedIds.includes(evidence.id)
+
+                    const handleClick = evidenceSelectMode
+                      ? () => setPendingEvidenceId(evidence.id)
+                      : examined
+                        ? () => toggleCombinationSelect(evidence.id)
+                        : undefined
+
+                    const isActive = evidenceSelectMode ? isSelectModeSelected : isCombineSelected
+                    const borderClass =
+                      !evidenceSelectMode && !examined
+                        ? 'border-gothic-border opacity-60'
+                        : isActive
+                          ? 'border-gothic-gold bg-stone-800/60 shadow-[0_0_12px_rgba(217,119,6,0.4)] cursor-pointer'
+                          : 'border-gothic-border hover:border-gothic-gold/50 cursor-pointer'
+
+                    return (
+                      <div
+                        key={evidence.id}
+                        onClick={handleClick}
+                        className={`border p-3 transition-all ${borderClass}`}
+                      >
+                        <div className="flex items-start gap-3 mb-2">
+                          <div className="w-14 h-14 flex-shrink-0 border border-gothic-border/50 bg-stone-900/50 overflow-hidden">
+                            <PixelImageWithFallback
+                              src={imgSrc}
+                              alt={evidence.name}
+                              pixelSize={PIXEL_ART_CONFIG.pixelSize.evidence}
+                              canvasWidth={PIXEL_ART_CONFIG.canvasSize.evidence.width}
+                              canvasHeight={PIXEL_ART_CONFIG.canvasSize.evidence.height}
+                              fallbackSrc={DEFAULT_EVIDENCE_IMG}
+                            />
                           </div>
-                          <p className="text-gothic-text font-serif text-xs">
-                            {getInspectionDescription(evidence)}
-                          </p>
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1 flex-wrap">
+                              <span className="text-gothic-gold font-display text-xs tracking-widest">
+                                {evidence.name}
+                              </span>
+                              {revealedFakeEvidenceIds.includes(evidence.id) && (
+                                <span className="text-xs text-red-400/70 font-serif border border-red-800/50 px-1">
+                                  偽証拠
+                                </span>
+                              )}
+                              {isConfronted && (
+                                <span className="text-xs text-gothic-muted font-serif border border-gothic-border px-1">
+                                  突きつけ済
+                                </span>
+                              )}
+                              {!evidenceSelectMode && isCombineSelected && (
+                                <span className="text-xs text-gothic-gold font-serif border border-gothic-gold/60 px-1">
+                                  選択中
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-gothic-text font-serif text-xs">
+                              {getInspectionDescription(evidence)}
+                            </p>
+                          </div>
                         </div>
+                        {examined ? (
+                          <div className="border-t border-gothic-border pt-2">
+                            <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">
+                              調査メモ
+                            </p>
+                            <p className="text-gothic-muted font-serif text-xs leading-relaxed">
+                              {evidence.examination_notes}
+                            </p>
+                          </div>
+                        ) : (
+                          <p className="text-gothic-muted font-serif text-xs italic border-t border-gothic-border pt-2">
+                            詳細調査が必要です
+                          </p>
+                        )}
                       </div>
-                      {examined ? (
-                        <div className="border-t border-gothic-border pt-2">
-                          <p className="text-gothic-gold text-xs font-display tracking-widest mb-1">
-                            調査メモ
-                          </p>
-                          <p className="text-gothic-muted font-serif text-xs leading-relaxed">
-                            {evidence.examination_notes}
-                          </p>
-                        </div>
-                      ) : (
-                        <p className="text-gothic-muted font-serif text-xs italic border-t border-gothic-border pt-2">
-                          詳細調査が必要です
-                        </p>
-                      )}
-                    </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              </>
             ))}
 
           {/* 証言: 全容疑者を一覧表示（左サイドバークリックで該当セクションへスクロール） */}
@@ -513,7 +564,7 @@ export function InvestigationNotes({
           {tab === 'discovery' &&
             (discoveredCombinations.length === 0 ? (
               <p className="text-gothic-muted font-serif text-sm text-center py-8">
-                複数の証拠を詳しく調査すると決定的事実が解放されます
+                証拠品タブで証拠を組み合わせて検討すると決定的事実が解放されます
               </p>
             ) : (
               <div className="space-y-4">
@@ -594,6 +645,41 @@ export function InvestigationNotes({
           ) : (
             <p className="text-gothic-muted font-serif text-xs">証拠品を選択してください</p>
           )}
+        </div>
+      )}
+
+      {/* 証拠品組み合わせ検討フッター（通常モードかつ証拠品タブ表示中） */}
+      {!evidenceSelectMode && tab === 'evidence' && (
+        <div className="flex-shrink-0 border-t border-gothic-border bg-gothic-panel/90 backdrop-blur-sm px-4 py-3 flex items-center justify-between gap-3">
+          <div className="flex-1 min-w-0">
+            {combineResult === 'no_match' && (
+              <p className="text-gothic-muted font-serif text-xs">
+                これらの証拠品に関連性は見つかりませんでした
+              </p>
+            )}
+            {combineResult === 'hint' && (
+              <p className="text-gothic-gold/70 font-serif text-xs italic">
+                何かが足りない気がする...
+              </p>
+            )}
+            {combineResult === 'already' && (
+              <p className="text-gothic-muted font-serif text-xs">すでに発見済みの組み合わせです</p>
+            )}
+            {combineResult === null && (
+              <p className="text-gothic-muted/60 font-serif text-xs">
+                {combinationSelectedIds.length === 0
+                  ? '詳しく調べた証拠品を選んでください'
+                  : `${combinationSelectedIds.length}件選択中`}
+              </p>
+            )}
+          </div>
+          <button
+            onClick={handleTryCombine}
+            disabled={combinationSelectedIds.length < 2}
+            className="bg-gothic-gold/10 border border-gothic-gold text-gothic-gold font-display tracking-widest text-xs px-4 py-2 hover:bg-gothic-gold/20 transition-all whitespace-nowrap disabled:opacity-40 disabled:cursor-not-allowed"
+          >
+            検討する
+          </button>
         </div>
       )}
     </div>

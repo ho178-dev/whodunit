@@ -21,42 +21,19 @@ import type { SaveInput } from '../types/save'
 import { saveToSlot, loadFromSlot } from '../utils/saveLoad'
 import { getFixedScenarioByTitle } from '../utils/scenarioRegistry'
 
-// 詳細調査済みの証拠IDリストとシナリオを元に、新たに発見すべき組み合わせIDを返すヘルパー
-// required_suspect_ids が設定されている場合は、プロフィール閲覧＋全証言聴取も条件に含める
-function checkCombinations(
-  scenario: Scenario | null,
-  examinedIds: string[],
-  alreadyDiscovered: string[],
-  viewedSuspectProfileIds: string[],
-  heardStatements: HeardStatement[]
-): string[] {
-  if (!scenario?.evidence_combinations) return []
-  return scenario.evidence_combinations
-    .filter((c) => {
-      if (alreadyDiscovered.includes(c.id)) return false
-      if (!c.evidence_ids.every((eid) => examinedIds.includes(eid))) return false
-
-      // required_suspect_ids が未設定の場合は証拠条件のみで発火（後方互換）
-      if (!c.required_suspect_ids || c.required_suspect_ids.length === 0) return true
-
-      return c.required_suspect_ids.every((suspectId) => {
-        // プロフィール閲覧済みか
-        if (!viewedSuspectProfileIds.includes(suspectId)) return false
-        // 全証言（greeting含まず statements のみ）を聴取済みか
-        const suspect = scenario.suspects.find((s) => s.id === suspectId)
-        if (!suspect) return false
-        const statementCount = suspect.investigation_dialog.statements.length
-        for (let i = 0; i < statementCount; i++) {
-          if (!heardStatements.some((h) => h.suspectId === suspectId && h.index === i)) return false
-        }
-        return true
-      })
-    })
-    .map((c) => c.id)
-}
-
 // localStorage キー生成（シナリオタイトルをキーとして仮説データを区別する）
 const hypothesesKey = (scenarioTitle: string) => `whodunit_hypotheses_${scenarioTitle}`
+
+// シナリオタイトルに対応する保存済み仮説を localStorage から読み込む
+function loadHypotheses(scenarioTitle: string): SuspectHypothesis[] {
+  try {
+    const stored = localStorage.getItem(hypothesesKey(scenarioTitle))
+    if (stored) return JSON.parse(stored) as SuspectHypothesis[]
+  } catch {
+    /* localStorage が使えない環境では空を返す */
+  }
+  return []
+}
 
 export interface HeardStatement {
   suspectId: string
@@ -121,6 +98,12 @@ export interface GameState {
   clearPursuitWrongResult: () => void
   askPursuitQuestion: (suspectId: string, evidenceId: string, questionId: string) => void
   viewSuspectProfile: (suspectId: string) => void
+  tryCombineEvidence: (evidenceIds: string[]) => {
+    matched: boolean
+    alreadyDiscovered?: boolean
+    /** 証拠の方向性は合っているが情報が不足している（部分一致 or 人物条件未充足） */
+    hint?: boolean
+  }
   setSuspectTalkProgress: (suspectId: string, index: number) => void
   setVotedSuspectId: (id: string) => void
   setMurdererEscaped: (escaped: boolean) => void
@@ -133,6 +116,9 @@ export interface GameState {
   setActiveSaveSlot: (slot: number | null) => void
   loadSaveSlot: (slotIndex: number) => void
   manualSave: (slotIndex: number) => void
+  startScenario: (scenario: Scenario) => void
+  unlockAllForDebug: () => void
+  refillAllAP: () => void
 }
 
 // IDリストへの重複なし追加ヘルパー（既存の場合はearly returnでno-op）
@@ -245,17 +231,7 @@ export const useGameStore = create<GameState>((set, get) => ({
   // 固定シナリオ使用フラグを更新する
   setUseFixedScenario: (use) => set({ useFixedScenario: use }),
   // シナリオデータを設定し、保存済み仮説を localStorage から復元する
-  setScenario: (scenario) =>
-    set(() => {
-      let hypotheses: SuspectHypothesis[] = []
-      try {
-        const stored = localStorage.getItem(hypothesesKey(scenario.title))
-        if (stored) hypotheses = JSON.parse(stored) as SuspectHypothesis[]
-      } catch {
-        /* localStorage が使えない環境では仮説を空のまま初期化 */
-      }
-      return { scenario, hypotheses }
-    }),
+  setScenario: (scenario) => set({ scenario, hypotheses: loadHypotheses(scenario.title) }),
   // 生成中フラグを更新する
   setIsGenerating: (generating) => set({ isGenerating: generating }),
   // 生成エラーメッセージを更新する
@@ -268,26 +244,16 @@ export const useGameStore = create<GameState>((set, get) => ({
       const next = addId(state.inspectedEvidenceIds, evidenceId)
       return next ? { inspectedEvidenceIds: next } : {}
     }),
-  // 証拠を論理的示唆開示済みリストに追加し、組み合わせ発見・偽証拠発覚をチェックする（2段階目）
+  // 証拠を論理的示唆開示済みリストに追加し、偽証拠発覚をチェックする（2段階目）
+  // 組み合わせ発見は手動操作（tryCombineEvidence）に委ねるため自動チェックしない
   examineEvidence: (evidenceId) =>
     set((state) => {
       const next = addId(state.examinedEvidenceIds, evidenceId)
       if (!next) return {}
-      const newlyDiscovered = checkCombinations(
-        state.scenario,
-        next,
-        state.discoveredCombinationIds,
-        state.viewedSuspectProfileIds,
-        state.heardStatements
-      )
       const isFake = state.scenario?.evidence.find((e) => e.id === evidenceId)?.is_fake ?? false
       const isNewFakeReveal = isFake && !state.revealedFakeEvidenceIds.includes(evidenceId)
       return {
         examinedEvidenceIds: next,
-        ...(newlyDiscovered.length > 0 && {
-          discoveredCombinationIds: [...state.discoveredCombinationIds, ...newlyDiscovered],
-          pendingCombinationIds: [...state.pendingCombinationIds, ...newlyDiscovered],
-        }),
         ...(isNewFakeReveal && {
           revealedFakeEvidenceIds: [...state.revealedFakeEvidenceIds, evidenceId],
           pendingFakeRevealId: state.pendingFakeRevealId ?? evidenceId,
@@ -311,28 +277,15 @@ export const useGameStore = create<GameState>((set, get) => ({
       actionsRemaining: Math.max(0, state.actionsRemaining - 1),
     })),
   // 証言を記録してトーク回数を消費する（既聴の場合は消費しない）
-  // 証言追加後、証拠＋人物条件が揃った組み合わせがあれば pending に積む
   hearStatement: (entry) =>
     set((state) => {
       const alreadyHeard = state.heardStatements.some(
         (s) => s.suspectId === entry.suspectId && s.index === entry.index
       )
       if (alreadyHeard) return {}
-      const newHeardStatements = [...state.heardStatements, entry]
-      const newlyDiscovered = checkCombinations(
-        state.scenario,
-        state.examinedEvidenceIds,
-        state.discoveredCombinationIds,
-        state.viewedSuspectProfileIds,
-        newHeardStatements
-      )
       return {
         talkActionsRemaining: Math.max(0, state.talkActionsRemaining - 1),
-        heardStatements: newHeardStatements,
-        ...(newlyDiscovered.length > 0 && {
-          discoveredCombinationIds: [...state.discoveredCombinationIds, ...newlyDiscovered],
-          pendingCombinationIds: [...state.pendingCombinationIds, ...newlyDiscovered],
-        }),
+        heardStatements: [...state.heardStatements, entry],
       }
     }),
   // 容疑者への証拠突きつけ記録をタイムスタンプ付きで追加する（追及質問のアンロックは証言選択後）
@@ -417,26 +370,70 @@ export const useGameStore = create<GameState>((set, get) => ({
       }
     }),
   // 容疑者プロフィールを閲覧済みにする（重複追加しない）
-  // プロフィール追加後、証拠＋人物条件が揃った組み合わせがあれば pending に積む
   viewSuspectProfile: (suspectId) =>
     set((state) => {
       const next = addId(state.viewedSuspectProfileIds, suspectId)
       if (!next) return {}
-      const newlyDiscovered = checkCombinations(
-        state.scenario,
-        state.examinedEvidenceIds,
-        state.discoveredCombinationIds,
-        next,
-        state.heardStatements
-      )
-      return {
-        viewedSuspectProfileIds: next,
-        ...(newlyDiscovered.length > 0 && {
-          discoveredCombinationIds: [...state.discoveredCombinationIds, ...newlyDiscovered],
-          pendingCombinationIds: [...state.pendingCombinationIds, ...newlyDiscovered],
-        }),
-      }
+      return { viewedSuspectProfileIds: next }
     }),
+  // 選択した証拠品の組み合わせを手動で検討する
+  // 組み合わせが新たに解放された場合はpendingに積みtrueを返す。不正解の場合はfalseを返す
+  tryCombineEvidence: (evidenceIds) => {
+    const state = get()
+    if (!state.scenario?.evidence_combinations) return { matched: false }
+
+    const sorted = [...evidenceIds].sort()
+    const sameIds = (comboIds: string[]) => {
+      const cs = [...comboIds].sort()
+      return cs.length === sorted.length && cs.every((id, i) => id === sorted[i])
+    }
+
+    let hint = false
+    for (const c of state.scenario.evidence_combinations) {
+      if (sameIds(c.evidence_ids)) {
+        if (state.discoveredCombinationIds.includes(c.id)) {
+          return { matched: false, alreadyDiscovered: true }
+        }
+        // 証拠未検査の場合はヒント扱い
+        if (!evidenceIds.every((id) => state.examinedEvidenceIds.includes(id))) {
+          hint = true
+          continue
+        }
+        // 人物条件チェック
+        const suspectsMet =
+          !c.required_suspect_ids ||
+          c.required_suspect_ids.length === 0 ||
+          c.required_suspect_ids.every((suspectId) => {
+            if (!state.viewedSuspectProfileIds.includes(suspectId)) return false
+            const suspect = state.scenario!.suspects.find((s) => s.id === suspectId)
+            if (!suspect) return false
+            const statementCount = suspect.investigation_dialog.statements.length
+            for (let i = 0; i < statementCount; i++) {
+              if (!state.heardStatements.some((h) => h.suspectId === suspectId && h.index === i))
+                return false
+            }
+            return true
+          })
+        if (suspectsMet) {
+          set((s) => ({
+            discoveredCombinationIds: [...s.discoveredCombinationIds, c.id],
+            pendingCombinationIds: [...s.pendingCombinationIds, c.id],
+          }))
+          return { matched: true }
+        }
+        hint = true
+      } else if (
+        !state.discoveredCombinationIds.includes(c.id) &&
+        evidenceIds.every((id) => c.evidence_ids.includes(id)) &&
+        evidenceIds.length < c.evidence_ids.length
+      ) {
+        // 選択した全証拠が組み合わせのevidence_idsに含まれるが選択数が不足
+        hint = true
+      }
+    }
+
+    return hint ? { matched: false, hint: true } : { matched: false }
+  },
   // 容疑者ごとの会話進行インデックスを更新する
   setSuspectTalkProgress: (suspectId, index) =>
     set((state) => ({
@@ -499,6 +496,67 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (!state.scenario || !state.useFixedScenario) return
     saveToSlot(slotIndex, buildSaveInput(state, state.phase))
   },
+
+  // シナリオ選択画面からシナリオを開始する。ゲーム状態を完全リセットしてシナリオを設定する
+  startScenario: (scenario) => {
+    const hypotheses = loadHypotheses(scenario.title)
+    set({
+      ...initialState,
+      scenario,
+      hypotheses,
+      useFixedScenario: true,
+      activeSaveSlot: 0,
+      phase: 'scenario_briefing' as GamePhase,
+    })
+  },
+
+  // [dev] 全証拠・全証言をアンロックする（探索フェーズのデバッグ用）
+  unlockAllForDebug: () =>
+    set((state) => {
+      if (!state.scenario) return {}
+      const allEvidenceIds = state.scenario.evidence.map((e) => e.id)
+      const allSuspectIds = state.scenario.suspects.map((s) => s.id)
+      const newStatements: HeardStatement[] = []
+      state.scenario.suspects.forEach((suspect) => {
+        if (!state.heardStatements.some((h) => h.suspectId === suspect.id && h.index === -1)) {
+          newStatements.push({
+            suspectId: suspect.id,
+            suspectName: suspect.name,
+            index: -1,
+            text: suspect.investigation_dialog.greeting,
+          })
+        }
+        suspect.investigation_dialog.statements.forEach((text, i) => {
+          if (!state.heardStatements.some((h) => h.suspectId === suspect.id && h.index === i)) {
+            newStatements.push({ suspectId: suspect.id, suspectName: suspect.name, index: i, text })
+          }
+        })
+      })
+      const mergedStatements = [...state.heardStatements, ...newStatements]
+      // デバッグ全開放: 全組み合わせをpendingなしで直接discoveredに追加する
+      const allCombinationIds = (state.scenario.evidence_combinations ?? [])
+        .filter((c) => !state.discoveredCombinationIds.includes(c.id))
+        .map((c) => c.id)
+      return {
+        inspectedEvidenceIds: allEvidenceIds,
+        examinedEvidenceIds: allEvidenceIds,
+        talkedSuspectIds: allSuspectIds,
+        viewedSuspectProfileIds: allSuspectIds,
+        heardStatements: mergedStatements,
+        ...(allCombinationIds.length > 0 && {
+          discoveredCombinationIds: [...state.discoveredCombinationIds, ...allCombinationIds],
+        }),
+      }
+    }),
+
+  // [dev] 全APを最大値に補充する（各フェーズのデバッグ用）
+  refillAllAP: () =>
+    set({
+      actionsRemaining: ACTIONS,
+      talkActionsRemaining: TALK_ACTIONS,
+      discussionConfrontActionsRemaining: DISCUSSION_CONFRONT_ACTIONS,
+      accusationConfrontActionsRemaining: ACCUSATION_CONFRONT_ACTIONS,
+    }),
 
   // 指定スロットからゲーム状態を復元する。シナリオが見つからない場合は何もしない
   loadSaveSlot: (slotIndex) => {

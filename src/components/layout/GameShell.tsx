@@ -6,7 +6,7 @@ import { audioManager } from '../../services/audioManager'
 import { PHASE_BGM, ACCUSATION_BGM, ENDING_BGM } from '../../services/audioConfig'
 import { FadeTransition } from '../shared/FadeTransition'
 import { PHASE_LABELS } from '../../constants/phaseConfig'
-import { isTrialMode } from '../../constants/salesConfig'
+import { isTrialMode, isDevBuild } from '../../constants/salesConfig'
 import { GAME_BASE_WIDTH, GAME_BASE_HEIGHT } from '../../constants/gameConfig'
 import { TitleScreen } from '../phases/TitleScreen'
 import { ApiKeyInput } from '../phases/ApiKeyInput'
@@ -21,6 +21,8 @@ import { ScenarioSelect } from '../phases/ScenarioSelect'
 import { TrialPreview } from '../phases/TrialPreview'
 import { SettingsModal } from '../shared/SettingsModal'
 import type { GamePhase } from '../../types/game'
+
+const IS_DEV = isDevBuild()
 
 // セーブ機能を有効にするフェーズ
 const MANUAL_SAVE_PHASES = new Set([
@@ -89,6 +91,8 @@ export function GameShell() {
   }, [phase, murdererId, votedSuspectId])
 
   const showSave = useFixedScenario && MANUAL_SAVE_PHASES.has(phase)
+  const unlockAllForDebug = useGameStore((s) => s.unlockAllForDebug)
+  const refillAllAP = useGameStore((s) => s.refillAllAP)
 
   // 現在のフェーズに対応するコンポーネントを返す
   const renderPhase = () => {
@@ -133,41 +137,61 @@ export function GameShell() {
           transformOrigin: 'center center',
         }}
       >
-        <FadeTransition triggerKey={phase} phaseLabel={PHASE_LABELS[phase]}>
-          {renderPhase()}
-        </FadeTransition>
-
-        {/* 右上ヘッダー: フェーズ名バッジ（左）＋設定ボタン（右）。RightPanel幅と一致させる */}
-        <div className="absolute top-2 right-2 z-40 flex gap-1 w-[140px]">
-          {/* フェーズ名バッジ（フェーズ名がある場合のみ表示） */}
-          {PHASE_BADGE_TEXT[phase] && (
-            <div className="flex-1 bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-1.5 text-center">
-              <p className="font-display text-gothic-gold text-xs tracking-widest">
-                {PHASE_BADGE_TEXT[phase]}
-              </p>
-            </div>
-          )}
-          {/* タイトル画面のみシナリオ生成ボタンを表示（体験版では非表示） */}
-          {phase === 'title' && !isTrialMode() && (
-            <button
-              onClick={() => setPhase('api_key_input')}
-              className="flex-1 border border-gothic-gold/60 bg-gothic-bg/80 text-gothic-gold font-serif text-xs px-2 py-1.5 hover:border-gothic-gold hover:bg-stone-900 transition-all duration-200"
-            >
-              AI生成
-            </button>
-          )}
-          {/* 設定ボタン: 全フェーズで表示（セーブ可否はSettingsModal内で制御） */}
-          <button
-            onClick={() => setShowSaveModal(true)}
-            className="border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-2.5 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200 ml-auto"
-            title="設定"
-          >
-            ⚙
-          </button>
-        </div>
-
-        {showSaveModal && (
+        {showSaveModal ? (
           <SettingsModal showSave={showSave} onClose={() => setShowSaveModal(false)} />
+        ) : (
+          <>
+            <FadeTransition triggerKey={phase} phaseLabel={PHASE_LABELS[phase]}>
+              {renderPhase()}
+            </FadeTransition>
+
+            {/* 右上ヘッダー: フェーズ名バッジ（左）＋設定ボタン（右）。RightPanel幅と一致させる */}
+            <div className="absolute top-2 right-2 z-40 flex gap-1 w-[140px]">
+              {/* フェーズ名バッジ（フェーズ名がある場合のみ表示） */}
+              {PHASE_BADGE_TEXT[phase] && (
+                <div className="flex-1 bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 px-3 py-1.5 text-center">
+                  <p className="font-display text-gothic-gold text-xs tracking-widest">
+                    {PHASE_BADGE_TEXT[phase]}
+                  </p>
+                </div>
+              )}
+              {/* タイトル画面のみシナリオ生成ボタンを表示（体験版では非表示） */}
+              {phase === 'title' && !isTrialMode() && (
+                <button
+                  onClick={() => setPhase('api_key_input')}
+                  className="flex-1 border border-gothic-gold/60 bg-gothic-bg/80 text-gothic-gold font-serif text-xs px-2 py-1.5 hover:border-gothic-gold hover:bg-stone-900 transition-all duration-200"
+                >
+                  AI生成
+                </button>
+              )}
+              {/* 設定ボタン: 全フェーズで表示（セーブ可否はSettingsModal内で制御） */}
+              <button
+                onClick={() => setShowSaveModal(true)}
+                className="border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-2.5 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200 ml-auto"
+                title="設定"
+              >
+                ⚙
+              </button>
+            </div>
+
+            {/* [dev] デバッグパネル: dev ビルドのみ左下に表示 */}
+            {IS_DEV && (
+              <div className="absolute bottom-2 left-2 z-40 flex flex-col gap-1">
+                <button
+                  onClick={unlockAllForDebug}
+                  className="border border-purple-700 bg-purple-950/80 text-purple-300 font-display text-[9px] tracking-widest px-2 py-1 hover:bg-purple-900/80 transition-colors"
+                >
+                  [DEV] 全開放
+                </button>
+                <button
+                  onClick={refillAllAP}
+                  className="border border-purple-700 bg-purple-950/80 text-purple-300 font-display text-[9px] tracking-widest px-2 py-1 hover:bg-purple-900/80 transition-colors"
+                >
+                  [DEV] AP補充
+                </button>
+              </div>
+            )}
+          </>
         )}
       </div>
     </div>

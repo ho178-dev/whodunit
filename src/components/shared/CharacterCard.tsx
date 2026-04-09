@@ -13,17 +13,10 @@ interface CharacterCardProps {
   selected?: boolean
   onClick?: () => void
   portrait?: boolean
-  onNameClick?: () => void
 }
 
 // 容疑者の画像・名前・年齢・職業を表示するカード
-export function CharacterCard({
-  suspect,
-  selected,
-  onClick,
-  portrait,
-  onNameClick,
-}: CharacterCardProps) {
+export function CharacterCard({ suspect, selected, onClick, portrait }: CharacterCardProps) {
   const imgSrc = useCharacterAsset(suspect.appearance_id)
 
   // ポートレートモード: 部屋背景前面に配置する額縁風表示
@@ -60,23 +53,18 @@ export function CharacterCard({
             </div>
           </div>
         </div>
-        {/* 名前プレート（クリックで詳細モーダル） */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.stopPropagation()
-            onNameClick?.()
-          }}
+        {/* 名前プレート */}
+        <div
           className={cn(
-            'mt-1.5 px-3 py-0.5 border text-center min-w-20 transition-colors',
+            'mt-1.5 px-3 py-0.5 border text-center min-w-20',
             'bg-gothic-panel/90 backdrop-blur-sm',
             selected
-              ? 'border-gothic-gold/60 text-gothic-gold hover:bg-stone-700/80'
-              : 'border-gothic-border/60 text-gothic-text hover:border-gothic-accent hover:text-gothic-gold'
+              ? 'border-gothic-gold/60 text-gothic-gold'
+              : 'border-gothic-border/60 text-gothic-text'
           )}
         >
           <span className="font-display text-xs tracking-wider">{suspect.name}</span>
-        </button>
+        </div>
       </div>
     )
   }

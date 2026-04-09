@@ -466,13 +466,14 @@ export function DiscussionPhase() {
                   <div className="px-1.5 py-1.5 space-y-1 max-h-32 overflow-y-auto game-scrollbar">
                     {unlockedForCurrent.map(({ questionId }, idx) => {
                       const isAsked = askedPursuitQuestionIds.includes(questionId)
+                      const isBlocked = isAsked || pendingPlayerText !== null
                       return (
                         <button
                           key={questionId}
-                          onClick={() => !isAsked && handleAskPursuit(questionId)}
-                          disabled={isAsked}
+                          onClick={() => !isBlocked && handleAskPursuit(questionId)}
+                          disabled={isBlocked}
                           className={`w-full border px-1.5 py-1 font-display text-[9px] tracking-widest transition-all flex items-center justify-center gap-1 ${
-                            isAsked
+                            isBlocked
                               ? 'border-stone-700 text-stone-600 cursor-default'
                               : 'border-yellow-700 text-yellow-200 hover:bg-yellow-900/20'
                           }`}

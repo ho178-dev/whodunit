@@ -5,40 +5,11 @@ import { useGameStore } from '../../stores/gameStore'
 import { DialogBox } from '../shared/DialogBox'
 import { CharacterCard } from '../shared/CharacterCard'
 import { cn } from '../../utils/cn'
-import { SuspectProfileFields } from '../shared/SuspectProfileFields'
-import type { Suspect } from '../../types/scenario'
 
 interface NpcDialogProps {
   roomId: string
   /** true のとき2名表示の左右インセットを右パネル幅に合わせて広げる */
   hasRightPanel?: boolean
-}
-
-// 容疑者の詳細情報をモーダル表示するコンポーネント
-function SuspectDetailModal({ suspect, onClose }: { suspect: Suspect; onClose: () => void }) {
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
-      <div className="w-full max-w-sm border border-gothic-gold bg-gothic-panel shadow-[0_0_40px_rgba(217,119,6,0.4)] animate-fade-in">
-        <div className="border-b border-gothic-gold px-6 py-4 text-center">
-          <h2 className="font-display text-gothic-gold text-lg tracking-widest">{suspect.name}</h2>
-          <p className="text-gothic-muted font-serif text-xs mt-1">
-            {suspect.age}歳・{suspect.occupation}
-          </p>
-        </div>
-        <div className="px-6 py-4">
-          <SuspectProfileFields suspect={suspect} />
-        </div>
-        <div className="px-6 pb-5 flex justify-end border-t border-gothic-border pt-4">
-          <button
-            onClick={onClose}
-            className="border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-2 px-6 text-sm transition-all hover:shadow-[0_0_15px_rgba(217,119,6,0.3)]"
-          >
-            閉じる
-          </button>
-        </div>
-      </div>
-    </div>
-  )
 }
 
 // 部屋内のキャラクター配置（最大2名左右）とダイアログを統合表示するコンポーネント
@@ -55,7 +26,6 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
   } = useGameStore()
   const [selectedSuspect, setSelectedSuspect] = useState<string | null>(null)
   const [dialogIndex, setDialogIndex] = useState(0)
-  const [detailSuspect, setDetailSuspect] = useState<Suspect | null>(null)
 
   if (!scenario) return null
 
@@ -71,6 +41,7 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
     setDialogIndex(savedIndex)
     if (!talkedSuspectIds.includes(suspect.id)) {
       talkToSuspect(suspect.id)
+      viewSuspectProfile(suspect.id)
     }
     hearStatement({
       suspectId: suspect.id,
@@ -111,10 +82,6 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
 
   return (
     <>
-      {detailSuspect && (
-        <SuspectDetailModal suspect={detailSuspect} onClose={() => setDetailSuspect(null)} />
-      )}
-
       {suspectsHere.length > 0 && (
         <div
           className={cn(
@@ -137,10 +104,6 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
                     ? () => handleTalk(suspect)
                     : undefined
                 }
-                onNameClick={() => {
-                  setDetailSuspect(suspect)
-                  viewSuspectProfile(suspect.id)
-                }}
               />
             </div>
           ))}

@@ -62,10 +62,11 @@ export function validateScenario(data: unknown): Scenario {
 
   // 各容疑者の evidence_reactions における contradicts_statement_index の件数を検証する
   for (const suspect of s.suspects) {
-    const contradictions = Object.values(suspect.evidence_reactions).filter(
-      (r): r is typeof r & { contradicts_statement_index: number } =>
-        r.contradicts_statement_index !== undefined
+    const contradictionEntries = Object.entries(suspect.evidence_reactions).filter(
+      (entry): entry is [string, (typeof entry)[1] & { contradicts_statement_index: number }] =>
+        entry[1].contradicts_statement_index !== undefined
     )
+    const contradictions = contradictionEntries.map(([, r]) => r)
     if (suspect.id === s.murderer_id) {
       if (contradictions.length !== MURDERER_CONTRADICTION_COUNT) {
         throw new Error(
@@ -83,10 +84,15 @@ export function validateScenario(data: unknown): Scenario {
         )
       }
     }
-    for (const r of contradictions) {
+    for (const [evidenceId, r] of contradictionEntries) {
       if (r.contradicts_statement_index < 0 || r.contradicts_statement_index >= STATEMENT_COUNT) {
         throw new Error(
           `容疑者 ${suspect.id} の contradicts_statement_index が範囲外です（0〜${STATEMENT_COUNT - 1}）`
+        )
+      }
+      if (!r.pursuit_questions || r.pursuit_questions.length === 0) {
+        throw new Error(
+          `容疑者 ${suspect.id} の evidence_reaction (証拠: ${evidenceId}) に pursuit_questions が必要です`
         )
       }
     }

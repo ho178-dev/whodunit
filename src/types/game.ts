@@ -12,13 +12,10 @@ export type GamePhase =
   | 'ending'
   | 'trial_preview'
 
-// シナリオのプレイスコア（クリア有無・自己ベストアクション数・ランク）
+// シナリオのプレイスコア（クリア有無・プレイ済みフラグ）
 export interface DifficultyScore {
   cleared: boolean
   played: boolean
-  bestActions?: number
-  bestTalkActions?: number
-  bestRank?: 'S' | 'A' | 'B' | 'C'
 }
 
 export interface ConfrontationEntry {
