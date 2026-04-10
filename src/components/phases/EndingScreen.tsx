@@ -6,7 +6,12 @@ import { GothicPanel } from '../layout/GothicPanel'
 import { MansionSceneBackground } from '../shared/MansionBackground'
 import { CharacterCard } from '../shared/CharacterCard'
 import { DialogBox } from '../shared/DialogBox'
-import { ACTIONS, TALK_ACTIONS } from '../../constants/gameConfig'
+import {
+  ACTIONS,
+  TALK_ACTIONS,
+  DISCUSSION_CONFRONT_ACTIONS,
+  ACCUSATION_CONFRONT_ACTIONS,
+} from '../../constants/gameConfig'
 import { getEvidenceNames } from '../../utils/scenario'
 import { saveScore } from '../../utils/score'
 import { resolveMansionAsset } from '../../services/assetResolver'
@@ -20,6 +25,8 @@ export function EndingScreen() {
     examinedEvidenceIds,
     actionsRemaining,
     talkActionsRemaining,
+    discussionConfrontActionsRemaining,
+    accusationConfrontActionsRemaining,
     useFixedScenario,
     setPhase,
     resetGame,
@@ -38,6 +45,8 @@ export function EndingScreen() {
   const trial = isTrialMode()
   const usedActions = ACTIONS - actionsRemaining
   const usedTalkActions = TALK_ACTIONS - talkActionsRemaining
+  const usedDiscussionConfront = DISCUSSION_CONFRONT_ACTIONS - discussionConfrontActionsRemaining
+  const usedAccusationConfront = ACCUSATION_CONFRONT_ACTIONS - accusationConfrontActionsRemaining
 
   // 固定シナリオかつエンディング到達時にスコアを保存する（1回のみ・early return の前に配置）
   useEffect(() => {
@@ -152,7 +161,7 @@ export function EndingScreen() {
   // 犯人を正しく特定できたか（完全正解 or 証拠不足で逃亡）
   const isMurdererIdentified = isCorrect || murdererEscaped
 
-  // 完勝以外：is_critical な組み合わせのうち未発見のものが「見逃した決定的事実」
+  // 完勝以外：is_critical な組み合わせのうち未発見のものが「見逃した真相の断片」
   const missedCombinations =
     isCorrect && !murdererEscaped
       ? []
@@ -196,27 +205,37 @@ export function EndingScreen() {
       }
 
   // 結果ラベル（ヘッダー用）
-  const resultLabel =
-    isCorrect && !murdererEscaped ? (
-      <div className="flex items-center gap-3">
-        <span className="text-gothic-gold font-display text-2xl">真実</span>
-        <span className="text-gothic-gold font-display text-sm tracking-widest">── 謎は解けた</span>
-      </div>
-    ) : murdererEscaped ? (
-      <div className="flex items-center gap-3">
-        <span className="text-amber-500 font-display text-2xl">惜敗</span>
-        <span className="text-amber-500/70 font-display text-sm tracking-widest">
-          ── あと一歩及ばなかった
-        </span>
-      </div>
-    ) : (
-      <div className="flex items-center gap-3">
-        <span className="text-red-400 font-display text-2xl">誤謬</span>
-        <span className="text-red-400/70 font-display text-sm tracking-widest">
-          ── 真犯人を見逃した
-        </span>
-      </div>
-    )
+  const resultLabelData =
+    isCorrect && !murdererEscaped
+      ? {
+          color: 'text-gothic-gold',
+          subColor: 'text-gothic-gold',
+          label: '真実',
+          subtitle: '── 謎は解けた',
+        }
+      : murdererEscaped
+        ? {
+            color: 'text-amber-500',
+            subColor: 'text-amber-500/70',
+            label: '惜敗',
+            subtitle: '── あと一歩及ばなかった',
+          }
+        : {
+            color: 'text-red-400',
+            subColor: 'text-red-400/70',
+            label: '誤謬',
+            subtitle: '── 真犯人を見逃した',
+          }
+  const resultLabel = (
+    <div className="flex items-center gap-3">
+      <span className={`${resultLabelData.color} font-display text-2xl`}>
+        {resultLabelData.label}
+      </span>
+      <span className={`${resultLabelData.subColor} font-display text-sm tracking-widest`}>
+        {resultLabelData.subtitle}
+      </span>
+    </div>
+  )
 
   return (
     <div className="h-full relative flex flex-col">
@@ -267,7 +286,7 @@ export function EndingScreen() {
               ) : (
                 <>
                   <p className={`font-display text-xs tracking-widest mb-3 ${missedTheme.header}`}>
-                    ── 見逃した決定的事実 ──
+                    ── 見逃した真相の断片 ──
                   </p>
                   <div className="space-y-3">
                     {missedCombinations.map((combo) => (
@@ -390,7 +409,7 @@ export function EndingScreen() {
                   {missedCritical.map((combo) => (
                     <div key={combo.id} className="border-l-2 border-red-800/60 pl-2">
                       <p className="text-red-400/80 font-serif text-[10px]">
-                        見逃した決定的事実：{combo.name}
+                        見逃した真相の断片：{combo.name}
                       </p>
                     </div>
                   ))}
@@ -422,6 +441,26 @@ export function EndingScreen() {
                   <span className="text-gothic-text font-display text-xs">
                     {usedTalkActions}
                     <span className="text-gothic-muted text-[10px]"> / {TALK_ACTIONS}</span>
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gothic-muted font-serif text-[10px]">議論突きつけ</span>
+                  <span className="text-gothic-text font-display text-xs">
+                    {usedDiscussionConfront}
+                    <span className="text-gothic-muted text-[10px]">
+                      {' '}
+                      / {DISCUSSION_CONFRONT_ACTIONS}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gothic-muted font-serif text-[10px]">断罪突きつけ</span>
+                  <span className="text-gothic-text font-display text-xs">
+                    {usedAccusationConfront}
+                    <span className="text-gothic-muted text-[10px]">
+                      {' '}
+                      / {ACCUSATION_CONFRONT_ACTIONS}
+                    </span>
                   </span>
                 </div>
               </div>

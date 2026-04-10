@@ -34,7 +34,7 @@ interface EvidenceSelectMode {
   onCancel: () => void
 }
 
-/** 発見済みの推理（決定的事実）を選択するモード（告発フェーズのStep3） */
+/** 発見済みの推理（真相の断片）を選択するモード（告発フェーズのStep3） */
 interface ReasoningSelectMode {
   /** 推理が選択されたときのコールバック */
   onSelect: (combinationId: string) => void
@@ -47,7 +47,7 @@ interface InvestigationNotesProps {
   pursuitMode?: PursuitSelectionMode
   /** 証拠品選択モード（議論・告発フェーズでの突きつけ/反論） */
   evidenceSelectMode?: EvidenceSelectMode
-  /** 推理選択モード（告発フェーズStep3での決定的事実選択） */
+  /** 推理選択モード（告発フェーズStep3での真相の断片選択） */
   reasoningSelectMode?: ReasoningSelectMode
 }
 
@@ -191,8 +191,6 @@ export function InvestigationNotes({
     }
   }
 
-  const isSpecialMode = !!pursuitMode || !!evidenceSelectMode || !!reasoningSelectMode
-
   return (
     <div className="absolute inset-0 z-50 flex flex-col bg-gothic-bg border border-gothic-gold/50">
       {/* ヘッダー */}
@@ -221,18 +219,6 @@ export function InvestigationNotes({
             </span>
           )}
         </div>
-        {isSpecialMode && (
-          <button
-            onClick={() => {
-              pursuitMode?.onCancel()
-              evidenceSelectMode?.onCancel()
-              reasoningSelectMode?.onCancel()
-            }}
-            className="text-stone-500 hover:text-stone-300 font-serif text-xs border border-stone-700 px-2 py-0.5 transition-colors"
-          >
-            キャンセル
-          </button>
-        )}
       </div>
 
       {/* 被害者情報（3行レイアウト） */}
@@ -594,7 +580,7 @@ export function InvestigationNotes({
           {tab === 'discovery' &&
             (discoveredCombinations.length === 0 ? (
               <p className="text-gothic-muted font-serif text-sm text-center py-8">
-                証拠品タブで証拠を組み合わせて検討すると決定的事実が解放されます
+                証拠品タブで証拠を組み合わせて検討すると真相の断片が解放されます
               </p>
             ) : (
               <div className="space-y-4">

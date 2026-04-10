@@ -1,4 +1,4 @@
-// 複数証拠の組み合わせで決定的事実が解放されたときに表示する発見通知オーバーレイ
+// 複数証拠の組み合わせで真相の断片が解放されたときに表示する発見通知オーバーレイ
 import { useGameStore } from '../../stores/gameStore'
 import { getEvidenceNames } from '../../utils/scenario'
 
@@ -21,7 +21,7 @@ export function CombinationDiscovery() {
         {/* ヘッダー */}
         <div className="border-b border-gothic-gold px-6 py-4 text-center">
           <p className="text-gothic-muted font-serif text-xs tracking-widest mb-1">
-            決定的事実が解放されました
+            真相の断片が解放されました
           </p>
           <h2 className="font-display text-gothic-gold text-lg tracking-widest">
             {combination.name}

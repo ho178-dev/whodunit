@@ -65,29 +65,29 @@ export function InvestigationPhase() {
     <RightPanel
       slot2={apSlot}
       slot3={
-        currentRoomId ? (
-          // 証拠品ボタン: アイコン・名前・カウントを1行にまとめる
-          <PanelButton variant="primary" onClick={() => setShowEvidence(true)}>
-            <span className="flex items-center justify-center gap-1.5">
-              <SearchIcon size={13} />
-              <span>証拠品</span>
-              {roomEvidenceTotal > 0 && (
-                <span className="text-[10px] text-gothic-muted">
-                  {roomEvidenceInspected}/{roomEvidenceTotal}
-                </span>
-              )}
-            </span>
-          </PanelButton>
-        ) : undefined
+        <PanelButton variant="secondary" onClick={() => setShowNotes(true)}>
+          <span className="flex items-center justify-center gap-1.5">
+            <NotesIcon size={13} />
+            <span>捜査メモ</span>
+          </span>
+        </PanelButton>
       }
       slot4={
         <div className="flex flex-col gap-2">
-          <PanelButton variant="secondary" onClick={() => setShowNotes(true)}>
-            <span className="flex items-center justify-center gap-1.5">
-              <NotesIcon size={13} />
-              <span>捜査メモ</span>
-            </span>
-          </PanelButton>
+          {currentRoomId && (
+            // 証拠品ボタン: アイコン・名前・カウントを1行にまとめる
+            <PanelButton variant="primary" onClick={() => setShowEvidence(true)}>
+              <span className="flex items-center justify-center gap-1.5">
+                <SearchIcon size={13} />
+                <span>証拠品</span>
+                {roomEvidenceTotal > 0 && (
+                  <span className="text-[10px] text-gothic-muted">
+                    {roomEvidenceInspected}/{roomEvidenceTotal}
+                  </span>
+                )}
+              </span>
+            </PanelButton>
+          )}
           <PanelButton variant="secondary" onClick={() => setShowMoveModal(true)}>
             <span className="flex items-center justify-center gap-1.5">
               <DoorIcon size={13} />

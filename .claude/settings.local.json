@@ -63,7 +63,8 @@
       "Bash(echo \"EXIT:$?\")",
       "Bash(xargs head:*)",
       "Read(//d D:/workspace/**)",
-      "Bash(node_modules/.bin/tsc --noEmit)"
+      "Bash(node_modules/.bin/tsc --noEmit)",
+      "Bash(head -3 \"D:/workspace/whodunit/src/components/phases/\"*.tsx)"
     ]
   }
 }

@@ -1,4 +1,4 @@
-// 投票後・結末前に挿入される告発シーン。正解時は犯人との最終対決、不正解時も同一フローで進行し
+// 断罪フェーズ。投票後・結末前に挿入される告発シーン。正解時は犯人との最終対決、不正解時も同一フローで進行し
 // APが尽きると惜敗エンド（証拠不足型 or 誤告発型）へ移行する
 // Step1: 証拠提示 → Step2: 反論 → Step3: 推理を突きつける → Step4: 紐づき判定
 // 証拠・推理の選択は推理メモ（InvestigationNotes）上で行う
@@ -18,7 +18,7 @@ import { resolveMansionAsset } from '../../services/assetResolver'
 import { ACCUSATION_CONFRONT_ACTIONS } from '../../constants/gameConfig'
 import type { EvidenceCombination } from '../../types/scenario'
 
-// 告発シーンの進行ステップ
+// 断罪シーンの進行ステップ
 type AccusationStep =
   | 'defense'
   | 'select_evidence'
@@ -34,13 +34,12 @@ interface StepDialog {
   borderClass: string
 }
 
-// 告発シーンのメインコンポーネント。内部ステートマシンで段階的に進行する
+// 断罪シーンのメインコンポーネント。内部ステートマシンで段階的に進行する
 export function AccusationPhase() {
   const {
     scenario,
     votedSuspectId,
-    examinedEvidenceIds,
-    discoveredCombinationIds,
+    inspectedEvidenceIds,
     successfulPursuitSuspectIds,
     setPhase,
     setMurdererEscaped,
@@ -62,22 +61,10 @@ export function AccusationPhase() {
       ? (accusationData.incorrect[votedSuspectId] ?? null)
       : null
 
-  // 発見済み組み合わせの evidence_ids を収集
-  const discoveredCombinations = useMemo(
-    () =>
-      (scenario?.evidence_combinations ?? []).filter((c) =>
-        discoveredCombinationIds.includes(c.id)
-      ),
-    [scenario?.evidence_combinations, discoveredCombinationIds]
-  )
-
-  // Step1 で選択できる証拠（発見済み組み合わせに含まれ、詳しく調べた非偽証拠）
+  // Step1 で選択できる証拠（発見済みの証拠品であれば提示可能）
   const selectableEvidence = useMemo(() => {
-    const discoveredEvidenceIds = new Set(discoveredCombinations.flatMap((c) => c.evidence_ids))
-    return (scenario?.evidence ?? []).filter(
-      (e) => !e.is_fake && examinedEvidenceIds.includes(e.id) && discoveredEvidenceIds.has(e.id)
-    )
-  }, [discoveredCombinations, scenario?.evidence, examinedEvidenceIds])
+    return (scenario?.evidence ?? []).filter((e) => inspectedEvidenceIds.includes(e.id))
+  }, [scenario?.evidence, inspectedEvidenceIds])
 
   const shouldSkip =
     !scenario || !votedSuspectId || !accusationData || (!isCorrect && !incorrectData)
@@ -148,12 +135,22 @@ export function AccusationPhase() {
     setPhase('ending')
   }
 
-  // wrong_link から Step1 に戻る（メモを自動で開く）
-  const handleRetryFromWrongLink = () => {
-    setSelectedEvidenceId(null)
-    setSelectedCombinationId(null)
-    setDialogDoneStep(null)
-    setStep('select_evidence')
+  // 「証拠を突きつける」: 選択状態をリセットして証拠選択へ（AP不足時は惜敗）
+  const handleConfrontAction = () => {
+    if (accusationConfrontActionsRemaining <= 0) {
+      triggerNearDefeat()
+    } else {
+      setSelectedEvidenceId(null)
+      setSelectedCombinationId(null)
+      setDialogDoneStep(null)
+      setStep('select_evidence')
+      setShowNotes(true)
+    }
+  }
+
+  // 「推理を語る」: 推理選択モードで捜査メモを開く
+  const handleReasoningAction = () => {
+    setStep('select_reasoning')
     setShowNotes(true)
   }
 
@@ -173,7 +170,7 @@ export function AccusationPhase() {
             selectableEvidence.length === 0
               ? '提示できる根拠がない——まだ調査が足りないようだ。'
               : '根拠となる証拠品を捜査メモで選んで提示せよ。',
-          speakerName: '── 告発',
+          speakerName: '── 断罪',
           borderClass: 'border-gothic-border',
         }
       case 'evidence_rebuttal':
@@ -211,89 +208,51 @@ export function AccusationPhase() {
 
   const dialog = getStepDialog()
 
-  // 右パネル slot3 ボタン
-  const getRightSlot3 = () => {
-    switch (step) {
-      case 'defense':
-        return (
-          <PanelButton
-            variant="primary"
-            onClick={() => {
-              if (accusationConfrontActionsRemaining <= 0) {
-                triggerNearDefeat()
-              } else {
-                setStep('select_evidence')
-                setShowNotes(true)
-              }
-            }}
-          >
-            証拠を突きつける
-          </PanelButton>
-        )
-      case 'select_evidence':
-        return (
-          <PanelButton variant="secondary" onClick={() => setShowNotes(true)}>
-            <span className="flex items-center justify-center gap-1.5">
-              <NotesIcon size={13} />
-              <span>捜査メモを開く</span>
-            </span>
-          </PanelButton>
-        )
-      case 'evidence_rebuttal':
-        return dialogDone ? (
-          <PanelButton
-            variant="primary"
-            onClick={() => {
-              setStep('select_reasoning')
-              setShowNotes(true)
-            }}
-          >
+  // 捜査メモを開く（stepに応じてモードを自動選択）
+  const handleOpenNotes = () => setShowNotes(true)
+
+  // slot4: 「証拠を突きつける」は常時表示（refutation/breakdown除く）
+  // 「推理を語る」は証拠提示済みかつ推理選択可能な状態のとき表示
+  const getRightSlot4 = () => {
+    if (step === 'refutation' || step === 'breakdown') return undefined
+
+    const showReasoning =
+      selectedEvidenceId !== null &&
+      ((step === 'evidence_rebuttal' && dialogDone) ||
+        step === 'select_reasoning' ||
+        step === 'wrong_link')
+
+    return (
+      <div className="flex flex-col gap-2">
+        <PanelButton variant="primary" onClick={handleConfrontAction}>
+          証拠を突きつける
+        </PanelButton>
+        {showReasoning && (
+          <PanelButton variant="primary" onClick={handleReasoningAction}>
             推理を語る
           </PanelButton>
-        ) : undefined
-      case 'select_reasoning':
-        return (
-          <PanelButton variant="secondary" onClick={() => setShowNotes(true)}>
-            <span className="flex items-center justify-center gap-1.5">
-              <NotesIcon size={13} />
-              <span>捜査メモを開く</span>
-            </span>
-          </PanelButton>
-        )
-      case 'wrong_link':
-        return dialogDone ? (
-          <PanelButton variant="secondary" onClick={handleRetryFromWrongLink}>
-            別の証拠で試す
-          </PanelButton>
-        ) : undefined
-      case 'breakdown':
-        return dialogDone ? (
-          <PanelButton variant="primary" onClick={() => setPhase('ending')}>
-            真相を見る
-          </PanelButton>
-        ) : undefined
-      default:
-        return undefined
-    }
+        )}
+      </div>
+    )
   }
 
-  // 右パネル slot4 ボタン（証拠・推理選択中は「このまま告発する」、それ以外は捜査メモ）
-  const getRightSlot4 = () => {
-    if (step === 'select_reasoning' || step === 'select_evidence') {
+  // slot5: フェーズ遷移ボタン（最下部固定）
+  const getRightSlot5 = () => {
+    if (step === 'select_evidence' || step === 'select_reasoning' || step === 'wrong_link') {
       return (
-        <PanelButton variant="dimmed" onClick={triggerNearDefeat}>
-          このまま告発する
+        <PanelButton variant="secondary" onClick={triggerNearDefeat}>
+          これ以上の証拠はない
         </PanelButton>
       )
     }
-    return (
-      <PanelButton variant="secondary" onClick={() => setShowNotes(true)}>
-        <span className="flex items-center justify-center gap-1.5">
-          <NotesIcon size={13} />
-          <span>捜査メモ</span>
-        </span>
-      </PanelButton>
-    )
+    if (step === 'breakdown' && dialogDone) {
+      return (
+        <PanelButton variant="glow" onClick={() => setPhase('ending')}>
+          真相を見る
+        </PanelButton>
+      )
+    }
+    return undefined
   }
 
   return (
@@ -394,7 +353,7 @@ export function AccusationPhase() {
           </div>
         </div>
 
-        {/* 右パネル */}
+        {/* 右パネル: slot3=捜査メモ固定、slot4=状況依存アクション、slot5=フェーズ遷移 */}
         <RightPanel
           slot2={
             <div className="flex items-center gap-2">
@@ -406,8 +365,16 @@ export function AccusationPhase() {
               </span>
             </div>
           }
-          slot3={getRightSlot3()}
+          slot3={
+            <PanelButton variant="secondary" onClick={handleOpenNotes}>
+              <span className="flex items-center justify-center gap-1.5">
+                <NotesIcon size={13} />
+                <span>捜査メモ</span>
+              </span>
+            </PanelButton>
+          }
           slot4={getRightSlot4()}
+          slot5={getRightSlot5()}
         />
       </div>
     </>

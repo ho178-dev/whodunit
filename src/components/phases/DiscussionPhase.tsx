@@ -301,56 +301,60 @@ export function DiscussionPhase() {
           />
         )}
 
-        {/* 会話モード: 単体キャラクター表示。スライダーと同じ位置（top-1/2 -translate-y-[60%]）に配置 */}
-        {isConversationMode && selectedSuspect && (
-          <div className="absolute inset-x-0 top-1/2 -translate-y-[60%] flex justify-center">
-            <CharacterCard suspect={selectedSuspect} portrait selected />
-          </div>
-        )}
-
-        {/* CenterActionArea: 矛盾警告バナーのみ */}
-        {isConversationMode && hasContradiction && latestReaction && !currentWrongResult && (
-          <CenterActionArea>
-            <div className="bg-yellow-900/60 border border-yellow-500 text-yellow-200 font-serif text-xs px-4 py-2 text-center w-full max-w-md">
-              ⚠ この証拠はあなたが聞いたある証言と矛盾している
+        {/* 会話モード: キャラクター表示
+            バイスタンダーあり → 2人横並び（NpcDialogと同様）: バイスタンダー左・メイン右
+            バイスタンダーなし → メイン容疑者を中央に単体表示 */}
+        {isConversationMode &&
+          selectedSuspect &&
+          (currentBystanderReaction && currentBystanderSuspect ? (
+            <div className="absolute inset-x-0 bottom-28 flex items-end justify-between px-40">
+              <CharacterCard suspect={currentBystanderSuspect} portrait selected />
+              <CharacterCard suspect={selectedSuspect} portrait selected />
             </div>
-          </CenterActionArea>
-        )}
-
-        {/* 矛盾追及成功時の他キャラリアクション表示 */}
-        {currentBystanderReaction && currentBystanderSuspect && (
-          <div className="absolute inset-0 z-30 flex flex-col items-center justify-end pb-2 px-2 bg-black/40">
-            <div className="w-full max-w-lg">
-              <div className="flex justify-center mb-2">
-                <CharacterCard suspect={currentBystanderSuspect} portrait selected />
-              </div>
-              <div className="relative bg-gothic-panel/90 backdrop-blur-sm border-2 border-yellow-600/70">
-                <DialogBox
-                  key={`bystander-${bystanderIndex}`}
-                  text={currentBystanderReaction.text}
-                  speakerName={`${currentBystanderSuspect.name} ─ 反応`}
-                />
-                <button
-                  onClick={() => {
-                    if (isBystanderLast) {
-                      setBystanderReactions([])
-                      setBystanderIndex(0)
-                    } else {
-                      setBystanderIndex((i) => i + 1)
-                    }
-                  }}
-                  className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
-                >
-                  {isBystanderLast ? '閉じる' : '次へ →'}
-                </button>
-              </div>
+          ) : (
+            <div className="absolute inset-x-0 top-1/2 -translate-y-[60%] flex justify-center">
+              <CharacterCard suspect={selectedSuspect} portrait selected />
             </div>
-          </div>
-        )}
+          ))}
 
-        {/* ダイアログエリア（フル幅・下部固定） */}
+        {/* CenterActionArea: 矛盾警告バナーのみ（バイスタンダー表示中は非表示） */}
+        {isConversationMode &&
+          hasContradiction &&
+          latestReaction &&
+          !currentWrongResult &&
+          !currentBystanderReaction && (
+            <CenterActionArea>
+              <div className="bg-yellow-900/60 border border-yellow-500 text-yellow-200 font-serif text-xs px-4 py-2 text-center w-full max-w-md">
+                ⚠ この証拠はあなたが聞いたある証言と矛盾している
+              </div>
+            </CenterActionArea>
+          )}
+
+        {/* ダイアログエリア（フル幅・下部固定）
+            優先順: バイスタンダー反応 > プレイヤー発言 > メイン容疑者反応 > デフォルト */}
         <div className="absolute inset-x-0 bottom-0 p-2">
-          {pendingPlayerText ? (
+          {currentBystanderReaction && currentBystanderSuspect ? (
+            <div className="relative bg-gothic-panel/85 backdrop-blur-sm border-2 border-yellow-600/70">
+              <DialogBox
+                key={`bystander-${bystanderIndex}`}
+                text={currentBystanderReaction.text}
+                speakerName={`${currentBystanderSuspect.name} ─ 反応`}
+              />
+              <button
+                onClick={() => {
+                  if (isBystanderLast) {
+                    setBystanderReactions([])
+                    setBystanderIndex(0)
+                  } else {
+                    setBystanderIndex((i) => i + 1)
+                  }
+                }}
+                className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
+              >
+                {isBystanderLast ? '閉じる' : '次へ →'}
+              </button>
+            </div>
+          ) : pendingPlayerText ? (
             <div className="relative bg-gothic-panel/85 backdrop-blur-sm border-2 border-blue-700/60">
               <DialogBox
                 key={`player-${pendingPlayerText.questionId}`}
@@ -416,26 +420,26 @@ export function DiscussionPhase() {
             </div>
           }
           slot3={
-            <PanelButton variant="primary" onClick={handleOpenEvidenceSelect}>
-              証拠を選ぶ
+            <PanelButton
+              variant="secondary"
+              onClick={() => {
+                setNotesMode('normal')
+                setShowNotes(true)
+              }}
+            >
+              <span className="flex items-center justify-center gap-1.5">
+                <NotesIcon size={13} />
+                <span>捜査メモ</span>
+              </span>
             </PanelButton>
           }
           slot4={
             <div className="flex flex-col gap-2">
-              <PanelButton
-                variant="secondary"
-                onClick={() => {
-                  setNotesMode('normal')
-                  setShowNotes(true)
-                }}
-              >
-                <span className="flex items-center justify-center gap-1.5">
-                  <NotesIcon size={13} />
-                  <span>捜査メモ</span>
-                </span>
+              <PanelButton variant="primary" onClick={handleOpenEvidenceSelect}>
+                証拠を選ぶ
               </PanelButton>
 
-              {/* 矛盾を追求ボタン（捜査メモ直下・質問リスト未解放時） */}
+              {/* 矛盾を追求ボタン（証拠を選ぶ直下・質問リスト未解放時） */}
               {showPursuitButton && !showPursuitList && (
                 <button
                   onClick={handleInitiatePursuit}
@@ -504,7 +508,7 @@ export function DiscussionPhase() {
           }
           slot5={
             <PanelButton variant="glow" onClick={() => setPhase('voting')}>
-              投票へ進む
+              告発へ進む
             </PanelButton>
           }
         />

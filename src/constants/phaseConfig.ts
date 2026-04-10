@@ -30,12 +30,12 @@ export const PHASE_LABELS: Partial<Record<GamePhase, PhaseLabel>> = {
     textColor: 'text-blue-400',
   },
   voting: {
-    text: '投票フェーズ',
+    text: '告発フェーズ',
     subText: '真犯人を指名せよ',
     textColor: 'text-green-400',
   },
   accusation: {
-    text: '告発フェーズ',
+    text: '断罪フェーズ',
     subText: '証拠で追い詰めよ',
     textColor: 'text-red-400',
   },
@@ -55,8 +55,8 @@ export const PHASE_DISPLAY: Partial<Record<GamePhase, string>> = {
   scenario_briefing: 'ブリーフィング',
   investigation: '捜査中',
   discussion: '議論中',
-  voting: '投票中',
-  accusation: '告発中',
+  voting: '告発中',
+  accusation: '断罪中',
   ending: 'エンディング',
 }
 

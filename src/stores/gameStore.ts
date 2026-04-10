@@ -349,6 +349,10 @@ export const useGameStore = create<GameState>((set, get) => ({
       return {
         pendingPursuitActivation: null,
         pursuitWrongResult: { suspectId: suspect.id, response: wrongResponse },
+        discussionConfrontActionsRemaining: Math.max(
+          0,
+          state.discussionConfrontActionsRemaining - 1
+        ),
       }
     }),
   // 証言選択モードをキャンセルする
