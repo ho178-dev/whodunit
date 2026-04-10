@@ -1,5 +1,5 @@
-// 最終投票フェーズの画面。館背景にスライダー形式で容疑者を表示し、犯人を選んで告発する
-// 告発するボタンはキャラ画像とダイアログの間（CenterActionArea）に表示して目立たせる
+// 告発フェーズの画面。館背景にスライダー形式で容疑者を表示し、犯人を選んで告発する
+// 中央のキャラクターが常に選択状態となり、告発ボタンは常時表示する
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { CharacterSlider } from '../shared/CharacterSlider'
@@ -11,30 +11,32 @@ import { NotesIcon } from '../shared/Icons'
 import { InvestigationNotes } from '../investigation/InvestigationNotes'
 import { resolveMansionAsset } from '../../services/assetResolver'
 
-// 容疑者選択と告発確認を行い、告発フェーズへ遷移する最終投票コンポーネント
+// 容疑者選択と告発確認を行い、断罪フェーズへ遷移するコンポーネント
 export function VotingPhase() {
   const { scenario, setVotedSuspectId, setPhase } = useGameStore()
   const [sliderIndex, setSliderIndex] = useState(0)
-  const [selected, setSelected] = useState<string | null>(null)
   const [confirming, setConfirming] = useState(false)
   const [showNotes, setShowNotes] = useState(false)
 
   if (!scenario) return null
 
-  const selectedSuspect = selected ? scenario.suspects.find((s) => s.id === selected) : null
+  // 常に中央（sliderIndex）のキャラクターが選択状態
+  const currentSuspect = scenario.suspects[sliderIndex]
 
   const handleSuspectClick = (suspectId: string) => {
     const idx = scenario.suspects.findIndex((s) => s.id === suspectId)
     if (idx >= 0) setSliderIndex(idx)
-    setSelected(suspectId)
+    setConfirming(false)
+  }
+
+  const handleSliderChange = (index: number) => {
+    setSliderIndex(index)
     setConfirming(false)
   }
 
   const handleVote = () => {
-    if (selected) {
-      setVotedSuspectId(selected)
-      setPhase('accusation')
-    }
+    setVotedSuspectId(currentSuspect.id)
+    setPhase('accusation')
   }
 
   return (
@@ -46,16 +48,16 @@ export function VotingPhase() {
         mansionBackgroundSrc={resolveMansionAsset(scenario.mansion_background_id)}
       />
 
-      {/* スライダー（フル幅） */}
+      {/* スライダー（フル幅）。中央のキャラクターを常にselected状態で表示 */}
       <CharacterSlider
         suspects={scenario.suspects}
         sliderIndex={sliderIndex}
-        onSliderIndexChange={setSliderIndex}
+        onSliderIndexChange={handleSliderChange}
         onSuspectClick={handleSuspectClick}
-        selectedId={selected}
+        selectedId={currentSuspect.id}
       />
 
-      {/* 告発ボタン: キャラクターとダイアログの間・中央に配置 */}
+      {/* 告発ボタン: 常時表示。キャラクターとダイアログの間・中央に配置 */}
       <CenterActionArea>
         {confirming ? (
           <div className="flex gap-2">
@@ -72,37 +74,31 @@ export function VotingPhase() {
               考え直す
             </button>
           </div>
-        ) : selected ? (
+        ) : (
           <button
             onClick={() => setConfirming(true)}
-            className="bg-gothic-gold/10 border border-gothic-gold text-gothic-gold font-display tracking-widest text-xs px-6 py-2 hover:bg-gothic-gold/20 transition-all hover:shadow-[0_0_12px_rgba(217,119,6,0.4)]"
+            className="bg-gothic-gold/30 border-2 border-gothic-gold text-gothic-gold font-display tracking-widest text-xs px-6 py-2 hover:bg-gothic-gold/50 transition-all hover:shadow-[0_0_16px_rgba(217,119,6,0.6)]"
           >
             告発する
           </button>
-        ) : null}
+        )}
       </CenterActionArea>
 
-      {/* 下部ダイアログ（フル幅） */}
+      {/* 下部ダイアログ（フル幅）: 常に現在選択中の容疑者名で表示 */}
       <div className="absolute inset-x-0 bottom-0 p-3">
-        {confirming && selectedSuspect ? (
+        {confirming ? (
           <div className="bg-gothic-panel/85 backdrop-blur-sm border-2 border-gothic-gold p-4 text-center">
             <p className="text-gothic-text font-serif text-sm">
               本当に
-              <span className="text-gothic-gold font-semibold">{selectedSuspect.name}</span>
-              を犯人として告発しますか？
-            </p>
-          </div>
-        ) : selectedSuspect ? (
-          <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-gold p-4 text-center">
-            <p className="text-gothic-text font-serif text-sm">
-              <span className="text-gothic-gold font-semibold">{selectedSuspect.name}</span>
+              <span className="text-gothic-gold font-semibold">{currentSuspect.name}</span>
               を犯人として告発しますか？
             </p>
           </div>
         ) : (
-          <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border p-4">
-            <p className="text-gothic-muted font-serif text-sm text-center">
-              犯人と思われる人物を選んでください
+          <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-gold p-4 text-center">
+            <p className="text-gothic-text font-serif text-sm">
+              <span className="text-gothic-gold font-semibold">{currentSuspect.name}</span>
+              を犯人として告発しますか？
             </p>
           </div>
         )}

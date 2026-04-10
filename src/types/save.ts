@@ -8,7 +8,7 @@ import type {
 import type { HeardStatement } from '../stores/gameStore'
 
 /** セーブデータのスキーマバージョン（型変更時にインクリメントして非互換データを弾く） */
-export const SAVE_VERSION = 2
+export const SAVE_VERSION = 3
 
 /** saveToSlot に渡すデータ（savedAt は saveToSlot 内で自動付与するため不要） */
 export type SaveInput = Omit<SavePayload, 'savedAt'>
@@ -34,6 +34,7 @@ export interface SavePayload {
   confrontationLog: ConfrontationEntry[]
   unlockedPursuitQuestions: UnlockedPursuitQuestion[]
   askedPursuitQuestionIds: string[]
+  successfulPursuitSuspectIds: string[] // 議論フェーズで矛盾追及に成功した容疑者IDリスト
   votedSuspectId: string | null
   hypotheses: SuspectHypothesis[]
   murdererEscaped: boolean // 犯人逃亡フラグ（endingフェーズの表示内容に影響）

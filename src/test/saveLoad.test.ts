@@ -29,6 +29,7 @@ const makeDummyPayload = (title = 'テストシナリオ'): SaveInput => ({
   confrontationLog: [],
   unlockedPursuitQuestions: [],
   askedPursuitQuestionIds: [],
+  successfulPursuitSuspectIds: [],
   votedSuspectId: null,
   hypotheses: [],
   murdererEscaped: false,

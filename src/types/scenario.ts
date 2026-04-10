@@ -84,14 +84,15 @@ export interface BystanderReaction {
   text: string
 }
 
-// 複数証拠の組み合わせで解放される決定的事実
+// 複数証拠の組み合わせで解放される真相の断片
 export interface EvidenceCombination {
   id: string
   evidence_ids: [string, string] | [string, string, string]
-  name: string // 解放されるファクト名（例: "深夜に庭へ出た人物が特定"）
-  description: string // ファクトの詳細説明
+  name: string // 解放されるファクト名（例: "深夜の庭への侵入を示す推理"）
+  description: string // ファクトの詳細説明（推理口調・人物名不使用）
   is_critical: boolean // true = 犯人特定に必須の決定的証拠
-  required_suspect_ids?: string[] // 省略可：発火に必要な容疑者のプロフィール閲覧＋全証言聴取の条件
+  accusation_reaction?: string // 省略可：告発フェーズでこの真相の断片を突きつけた時の容疑者反応
+  refutation_text?: string // 省略可：告発フェーズでこの推理で正解に至った時のナレーション。未設定時はAccusationScenarioData.correct.refutation_textにフォールバック
 }
 
 export interface Suspect {

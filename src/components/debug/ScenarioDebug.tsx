@@ -353,9 +353,9 @@ function AccusationSection({ scenario }: { scenario: Scenario }) {
       <div className="space-y-2">
         <p className="text-xs text-gray-500 font-semibold uppercase tracking-wider">正解ルート</p>
         <InfoRow label="最終弁明" value={data.correct.defense_statement} />
-        <InfoRow label="決定的証拠ID" value={data.correct.decisive_evidence_id} />
-        <InfoRow label="誤証拠リアクション" value={data.correct.wrong_evidence_reaction} />
-        <InfoRow label="反駁ナレーション" value={data.correct.refutation_text} />
+        <InfoRow label="証拠提示反論" value={data.correct.evidence_rebuttal} />
+        <InfoRow label="推理不一致反論" value={data.correct.wrong_link_rebuttal} />
+        <InfoRow label="汎用反駁ナレーション" value={data.correct.refutation_text} />
         <InfoRow label="犯人独白" value={data.correct.breakdown_statement} />
         {data.correct.epilogue_text && (
           <InfoRow label="エピローグ（地の文）" value={data.correct.epilogue_text} />
@@ -372,8 +372,9 @@ function AccusationSection({ scenario }: { scenario: Scenario }) {
           const suspect = scenario.suspects.find((s) => s.id === suspectId)
           return (
             <Accordion key={suspectId} title={suspect?.name ?? suspectId}>
-              <InfoRow label="困惑セリフ" value={inc.confusion_statement} />
-              <InfoRow label="アリバイ" value={inc.alibi_reveal} />
+              <InfoRow label="弁明" value={inc.defense_statement} />
+              <InfoRow label="証拠提示反論" value={inc.evidence_rebuttal} />
+              <InfoRow label="推理不一致反論" value={inc.wrong_link_rebuttal} />
             </Accordion>
           )
         })}
@@ -423,18 +424,10 @@ function CombinationsSection({ scenario }: { scenario: Scenario }) {
                 </span>
               ))}
             </div>
-            {combo.required_suspect_ids && combo.required_suspect_ids.length > 0 && (
-              <div className="flex gap-2 text-xs flex-wrap">
-                <span className="text-gray-500">発火条件容疑者:</span>
-                {combo.required_suspect_ids.map((sid) => {
-                  const suspect = scenario.suspects.find((s) => s.id === sid)
-                  return (
-                    <span key={sid} className="text-purple-300">
-                      {suspect?.name ?? sid}
-                    </span>
-                  )
-                })}
-              </div>
+            {combo.refutation_text && (
+              <p className="text-gray-400 text-xs italic border-t border-gray-700 pt-2">
+                反駁: {combo.refutation_text}
+              </p>
             )}
           </div>
         ))}

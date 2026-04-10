@@ -37,8 +37,8 @@ const MANUAL_SAVE_PHASES = new Set([
 const PHASE_BADGE_TEXT: Partial<Record<GamePhase, string>> = {
   investigation: '探索',
   discussion: '議論',
-  voting: '投票',
-  accusation: '告発',
+  voting: '告発',
+  accusation: '断罪',
 }
 
 // ゲームのルートレイアウト。フェーズに応じた画面を切り替えてレンダリングする
@@ -47,6 +47,7 @@ export function GameShell() {
   const useFixedScenario = useGameStore((s) => s.useFixedScenario)
   const murdererId = useGameStore((s) => s.scenario?.murderer_id)
   const votedSuspectId = useGameStore((s) => s.votedSuspectId)
+  const murdererEscaped = useGameStore((s) => s.murdererEscaped)
   const setPhase = useGameStore((s) => s.setPhase)
   const [showSaveModal, setShowSaveModal] = useState(false)
   const [scale, setScale] = useState(1)
@@ -83,12 +84,13 @@ export function GameShell() {
     if (phase === 'accusation') {
       path = isCorrect ? ACCUSATION_BGM.correct : ACCUSATION_BGM.wrong
     } else if (phase === 'ending') {
-      path = isCorrect ? ENDING_BGM.correct : ENDING_BGM.wrong
+      // 惜敗（証拠不足逃亡）も不正解BGMを使用する
+      path = isCorrect && !murdererEscaped ? ENDING_BGM.correct : ENDING_BGM.wrong
     } else {
       path = PHASE_BGM[phase]
     }
     if (path) audioManager.playBgm(path)
-  }, [phase, murdererId, votedSuspectId])
+  }, [phase, murdererId, votedSuspectId, murdererEscaped])
 
   const showSave = useFixedScenario && MANUAL_SAVE_PHASES.has(phase)
   const unlockAllForDebug = useGameStore((s) => s.unlockAllForDebug)

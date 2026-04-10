@@ -124,7 +124,6 @@ export function validateScenario(data: unknown): Scenario {
   if (s.evidence_combinations !== undefined) {
     if (!Array.isArray(s.evidence_combinations))
       throw new Error('evidence_combinationsは配列である必要があります')
-    const suspectIds = new Set(s.suspects.map((sus) => sus.id))
     for (const combo of s.evidence_combinations) {
       if (!combo.id || !combo.name || !combo.description)
         throw new Error(`evidence_combination "${combo.id}" の必須フィールドが不正です`)
@@ -140,19 +139,6 @@ export function validateScenario(data: unknown): Scenario {
             `evidence_combination "${combo.id}" の証拠ID "${eid}" が証拠リストに存在しません`
           )
       }
-      // required_suspect_ids は省略可。存在する場合は各IDが容疑者リストに含まれることを確認
-      if (combo.required_suspect_ids !== undefined) {
-        if (!Array.isArray(combo.required_suspect_ids))
-          throw new Error(
-            `evidence_combination "${combo.id}" のrequired_suspect_idsは配列である必要があります`
-          )
-        for (const sid of combo.required_suspect_ids) {
-          if (!suspectIds.has(sid))
-            throw new Error(
-              `evidence_combination "${combo.id}" の容疑者ID "${sid}" が容疑者リストに存在しません`
-            )
-        }
-      }
     }
 
     // is_critical な組み合わせが2個以上存在するか確認する
@@ -161,13 +147,6 @@ export function validateScenario(data: unknown): Scenario {
       throw new Error(
         `is_critical な evidence_combinations は2個以上必要です（現在: ${criticalCount} 個）`
       )
-  }
-
-  // accusation_data が存在する場合、decisive_evidence_id が証拠リストに含まれるか確認する
-  if (s.accusation_data !== undefined) {
-    const decId = s.accusation_data.correct?.decisive_evidence_id
-    if (decId && !evidenceIds.has(decId))
-      throw new Error(`accusation_data.decisive_evidence_id "${decId}" が証拠リストに存在しません`)
   }
 
   return s
