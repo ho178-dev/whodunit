@@ -69,7 +69,8 @@ export function GameShell() {
   // ゲームコンテナ内の全 button クリックで click SE を再生するグローバルリスナー
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
-      if ((e.target as HTMLElement).closest('button')) {
+      const button = (e.target as HTMLElement).closest('button')
+      if (button && !button.hasAttribute('data-no-click-se')) {
         audioManager.playSe('click')
       }
     }

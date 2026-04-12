@@ -3,6 +3,7 @@
 // タイムライン・証言タブは全容疑者を一覧表示し、左サイドバークリックで該当セクションへスクロール
 import { useRef, useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
+import { audioManager } from '../../services/audioManager'
 import { getEvidenceNames, getInspectionDescription } from '../../utils/scenario'
 import { HypothesisNote } from './HypothesisNote'
 import { isHypothesisFilled } from '../../types/game'
@@ -180,6 +181,7 @@ export function InvestigationNotes({
     if (combinationSelectedIds.length < 2) return
     const result = tryCombineEvidence(combinationSelectedIds)
     if (result.matched) {
+      audioManager.playSe('combination_discovered')
       setCombinationSelectedIds([])
       setCombineResult(null)
     } else if (result.alreadyDiscovered) {

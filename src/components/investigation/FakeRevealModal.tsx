@@ -1,9 +1,16 @@
 // 偽証拠の2段階目調査時に「欺瞞を見破った！」体験を演出するモーダルコンポーネント
+import { useEffect } from 'react'
 import { useGameStore } from '../../stores/gameStore'
-import { getInspectionDescription } from '../../utils/scenario'
+import { audioManager } from '../../services/audioManager'
 
 export function FakeRevealModal() {
   const { scenario, pendingFakeRevealId, clearFakeReveal } = useGameStore()
+
+  useEffect(() => {
+    if (pendingFakeRevealId) {
+      audioManager.playSe('fake_revealed')
+    }
+  }, [pendingFakeRevealId])
 
   if (!pendingFakeRevealId || !scenario) return null
 
@@ -28,17 +35,8 @@ export function FakeRevealModal() {
           </span>
         </div>
 
-        {/* Before / After 二段構成 */}
-        <div className="px-6 py-4 space-y-3">
-          <div className="border border-gothic-border/40 bg-stone-950/60 p-3">
-            <p className="text-gothic-muted font-display text-xs tracking-widest mb-2">
-              ◀ あなたが見ていたもの
-            </p>
-            <p className="text-gothic-text/70 font-serif text-sm leading-relaxed italic">
-              「{getInspectionDescription(evidence)}」
-            </p>
-          </div>
-
+        {/* 真実 */}
+        <div className="px-6 py-4">
           <div className="border border-red-800/40 bg-red-950/20 p-3">
             <p className="text-red-400/80 font-display text-xs tracking-widest mb-2">▶ 真実</p>
             <p className="text-gothic-text font-serif text-sm leading-relaxed">

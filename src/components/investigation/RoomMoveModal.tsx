@@ -32,6 +32,7 @@ export function RoomMoveModal({ onClose }: RoomMoveModalProps) {
           {scenario.rooms.map((room) => (
             <button
               key={room.id}
+              data-no-click-se
               onClick={() => handleSelect(room.id)}
               className={cn(
                 'w-full text-left border px-4 py-3 transition-all duration-200 font-serif',
