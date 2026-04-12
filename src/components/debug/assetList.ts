@@ -119,10 +119,10 @@ export const EVIDENCE_ASSETS: ImageAsset[] = [
 export const SE_ASSETS: SeAsset[] = [
   se('/assets/se/click.mp3', 'クリック音', 'click'),
   se('/assets/se/move.mp3', '移動音', 'move'),
-  se('/assets/se/phase_transition.mp3', '幕間SE', 'phase_transition'),
   se('/assets/se/combination_discovered.mp3', '組み合わせ発見', 'combination_discovered'),
   se('/assets/se/evidence_examine.mp3', '証拠調査', 'evidence_examine'),
   se('/assets/se/fake_revealed.mp3', '偽証暴露', 'fake_revealed'),
+  se('/assets/se/confront.mp3', '証拠突きつけ', 'confront'),
 ]
 
 // BGM（将来追加予定）

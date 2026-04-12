@@ -1,6 +1,7 @@
 // 部屋内の証拠品一覧の表示と、証拠調査インタラクション（2段階アクション消費・展開）を管理するコンポーネント
 import { useState } from 'react'
 import { useGameStore } from '../../stores/gameStore'
+import { audioManager } from '../../services/audioManager'
 import { EvidenceCard } from '../shared/EvidenceCard'
 import type { Evidence } from '../../types/scenario'
 import { getInspectionDescription } from '../../utils/scenario'
@@ -43,6 +44,7 @@ export function EvidenceList({ roomId }: EvidenceListProps) {
   // アクションを消費して証拠の論理的示唆（examination_notes）を開示する（2段階目）
   const handleDeepExamine = (evidenceId: string) => {
     if (actionsRemaining > 0 && !examinedEvidenceIds.includes(evidenceId)) {
+      audioManager.playSe('evidence_examine')
       examineEvidence(evidenceId)
       consumeAction()
     }
@@ -102,6 +104,7 @@ export function EvidenceList({ roomId }: EvidenceListProps) {
                     </div>
                   ) : (
                     <button
+                      data-no-click-se
                       onClick={() => handleDeepExamine(evidence.id)}
                       disabled={actionsRemaining <= 0}
                       className="w-full border border-gothic-accent text-gothic-muted font-serif text-xs py-2 hover:text-gothic-text hover:border-gothic-gold transition-colors disabled:opacity-40"

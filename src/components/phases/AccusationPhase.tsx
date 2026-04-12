@@ -4,6 +4,7 @@
 // 証拠・推理の選択は推理メモ（InvestigationNotes）上で行う
 import { useState, useEffect, useMemo } from 'react'
 import { useGameStore } from '../../stores/gameStore'
+import { audioManager } from '../../services/audioManager'
 import { MansionSceneBackground } from '../shared/MansionBackground'
 import { CharacterCard } from '../shared/CharacterCard'
 import { DialogBox } from '../shared/DialogBox'
@@ -105,6 +106,7 @@ export function AccusationPhase() {
 
   // 証拠を選択してStep2へ（AP消費）
   const handleSelectEvidence = (evidenceId: string) => {
+    audioManager.playSe('confront')
     consumeAccusationConfrontAction()
     setSelectedEvidenceId(evidenceId)
     setDialogDoneStep(null)
@@ -113,6 +115,7 @@ export function AccusationPhase() {
 
   // 推理を選択してStep4（紐づき判定）
   const handleSelectCombination = (combination: EvidenceCombination) => {
+    audioManager.playSe('confront')
     setSelectedCombinationId(combination.id)
     if (isCorrectConclusion(combination)) {
       setDialogDoneStep(null)
