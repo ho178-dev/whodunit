@@ -673,6 +673,7 @@ export function InvestigationNotes({
                 {evidenceSelectMode.suspectName}
               </span>
               <button
+                data-no-click-se
                 onClick={handleEvidenceConfirm}
                 className="bg-gothic-gold/10 border border-gothic-gold text-gothic-gold font-display tracking-widest text-xs px-4 py-2 hover:bg-gothic-gold/20 transition-all whitespace-nowrap"
               >
