@@ -257,7 +257,7 @@ export function EndingScreen() {
             </div>
           )}
 
-          {murdererEscaped && (
+          {murdererEscaped && isCorrect && (
             <GothicPanel className="border-amber-900/60">
               <p className="text-gothic-muted font-serif text-xs leading-relaxed">
                 犯人は <span className="text-amber-500">{murderer.name}</span>
