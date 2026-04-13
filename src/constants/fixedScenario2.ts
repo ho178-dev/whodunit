@@ -30,6 +30,8 @@ const FIXED_ACCUSATION_DATA_2: AccusationScenarioData = {
         '……それが私の犯行を示す証拠になるとでも？（眉をひそめる）関連性が見えない。',
       wrong_link_rebuttal:
         '（悲しそうに）証拠と推理が繋がっていない。私を犯人にしたいだけでしょう。',
+      defeat_statement:
+        '（疲れた様子で）……父を失った悲しみの中で犯人扱いまでされて。証明できなかったでしょ。もう話すことはありません。',
     },
     ozawa_ryota: {
       defense_statement:
@@ -37,24 +39,32 @@ const FIXED_ACCUSATION_DATA_2: AccusationScenarioData = {
       evidence_rebuttal: '……え、それが僕に何の関係があるんですか？（困惑した表情で）',
       wrong_link_rebuttal:
         '（焦った様子で）証拠と推理が全く繋がっていない！もっと論理的に考えてください！',
+      defeat_statement:
+        '（息をついて）……僕が犯人じゃないってわかってもらえましたよね？ もう……本当に疲れました。',
     },
     fujita_nao: {
       defense_statement:
         '……私を疑っているの？ 確かに昔の関係は複雑だったけれど、今は仕事上の付き合いよ。動機がないのよ。',
       evidence_rebuttal: '……それで？ 私への疑いとどう繋がるの？（冷静に問い返す）',
       wrong_link_rebuttal: '（静かに）証拠と結論の間に飛躍がある。感情で判断しないでください。',
+      defeat_statement:
+        '（冷静に立ち上がる）……証明できなかったのね。そう——わかった。これ以上付き合う理由はないわ。',
     },
     tanaka_goro: {
       defense_statement:
         '……わしが啓一を？ 50年来の友人だぞ！ それにこの老体に、あんな力業ができると思うか！',
       evidence_rebuttal: '……そんなもので、わしを犯人にするつもりか。（不快そうに）',
       wrong_link_rebuttal: '（呆れた様子で）証拠と推理が繋がっとらん。わしは何もしていない。',
+      defeat_statement:
+        '（ふんと鼻を鳴らして）儂への疑いを証明できんかったじゃろ。——もうええ。これ以上付き合う気はない。',
     },
     kagawa_misaki: {
       defense_statement:
         'え……私が！？ おじいちゃんを……？ そんなこと絶対にしていません！ 七海おばさんと一緒にいたことを聞いてください！',
       evidence_rebuttal: '……そ、それが私と何の関係があるんですか！？（戸惑った様子で）',
       wrong_link_rebuttal: '（涙声で）証拠と推理が繋がっていない……私は本当に何もしていない。',
+      defeat_statement:
+        '（涙を拭いて）……私が無実だって、少しでもわかってくれましたよね。もう休ませてください。',
     },
   },
   near_defeat_wrong_suspect_text:
