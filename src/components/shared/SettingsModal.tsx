@@ -46,11 +46,7 @@ function loadScreenSize(): { width: number; height: number } | null {
 // 画面サイズをlocalStorageに保存してウィンドウをリサイズする（Electron専用。ブラウザでは無視）
 function applyScreenSize(width: number, height: number) {
   localStorage.setItem(SCREEN_SIZE_KEY, JSON.stringify({ width, height }))
-  try {
-    window.resizeTo(width, height)
-  } catch {
-    // ブラウザのセキュリティ制限により失敗する場合は無視する
-  }
+  window.electronAPI?.windowControls.setContentSize(width, height)
 }
 
 // タブボタンの共通スタイル

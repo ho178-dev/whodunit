@@ -3,6 +3,7 @@ interface WindowElectronAPI {
   windowControls: {
     minimize: () => void
     quit: () => void
+    setContentSize: (width: number, height: number) => void
   }
 }
 

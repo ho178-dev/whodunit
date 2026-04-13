@@ -8,5 +8,6 @@ contextBridge.exposeInMainWorld('electronAPI', {
   windowControls: {
     minimize: () => ipcRenderer.send('win:minimize'),
     quit: () => ipcRenderer.send('win:close'),
+    setContentSize: (w, h) => ipcRenderer.send('win:setContentSize', w, h),
   },
 })
