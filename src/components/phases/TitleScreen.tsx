@@ -4,7 +4,6 @@ import { useGameStore } from '../../stores/gameStore'
 import { getAllSlots, deleteSlot } from '../../utils/saveLoad'
 import { SaveSlotList } from '../shared/SaveSlotList'
 import { MansionSceneBackground } from '../shared/MansionBackground'
-import { TutorialOverlay } from './TutorialOverlay'
 import type { SaveSlot } from '../../types/save'
 import { isTrialMode, isDevBuild } from '../../constants/salesConfig'
 import { assetUrl } from '../../utils/assetUrl'
@@ -26,7 +25,6 @@ const TITLE_MANSION_IDS = [
 export function TitleScreen() {
   const { setPhase, loadSaveSlot, startScenario } = useGameStore()
   const [showContinue, setShowContinue] = useState(false)
-  const [showTutorial, setShowTutorial] = useState(false)
   const [slots, setSlots] = useState<SaveSlot[]>(() => getAllSlots())
 
   // useState の初期化関数で1度だけランダムIDを決定し、以降は変化させない
@@ -56,8 +54,6 @@ export function TitleScreen() {
 
   return (
     <div className="h-full flex flex-col items-center justify-center px-4 relative overflow-hidden">
-      {showTutorial && <TutorialOverlay onClose={() => setShowTutorial(false)} />}
-
       {/* 館背景（ランダム選択） */}
       <MansionSceneBackground phase="title" fixed mansionBackgroundSrc={randomMansionSrc} />
 
@@ -110,7 +106,7 @@ export function TitleScreen() {
             </button>
 
             <button
-              onClick={() => setShowTutorial(true)}
+              onClick={() => setPhase('tutorial')}
               className="w-full border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 px-8 transition-all duration-200 hover:border-gothic-accent"
             >
               遊び方

@@ -28,6 +28,7 @@ export function EndingScreen() {
     discussionConfrontActionsRemaining,
     accusationConfrontActionsRemaining,
     useFixedScenario,
+    isTutorialScenario,
     setPhase,
     resetGame,
   } = useGameStore()
@@ -440,12 +441,21 @@ export function EndingScreen() {
             次のシナリオ予告
           </button>
         )}
-        <button
-          onClick={() => setPhase('title')}
-          className="flex-1 border border-gothic-border text-gothic-muted font-serif text-xs py-2 hover:border-gothic-accent transition-all"
-        >
-          タイトルへ戻る
-        </button>
+        {isTutorialScenario ? (
+          <button
+            onClick={() => setPhase('tutorial')}
+            className="flex-1 border border-gothic-gold text-gothic-gold font-display tracking-widest text-xs py-2 hover:bg-stone-800 transition-all"
+          >
+            チュートリアルに戻る
+          </button>
+        ) : (
+          <button
+            onClick={() => setPhase('title')}
+            className="flex-1 border border-gothic-border text-gothic-muted font-serif text-xs py-2 hover:border-gothic-accent transition-all"
+          >
+            タイトルへ戻る
+          </button>
+        )}
       </div>
     </div>
   )

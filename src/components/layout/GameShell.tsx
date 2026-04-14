@@ -19,6 +19,7 @@ import { AccusationPhase } from '../phases/AccusationPhase'
 import { EndingScreen } from '../phases/EndingScreen'
 import { ScenarioSelect } from '../phases/ScenarioSelect'
 import { TrialPreview } from '../phases/TrialPreview'
+import { TutorialPhase } from '../phases/TutorialPhase'
 import { SettingsModal } from '../shared/SettingsModal'
 import type { GamePhase } from '../../types/game'
 
@@ -102,6 +103,8 @@ export function GameShell() {
     switch (phase) {
       case 'title':
         return <TitleScreen />
+      case 'tutorial':
+        return <TutorialPhase />
       case 'scenario_select':
         return <ScenarioSelect />
       case 'api_key_input':
