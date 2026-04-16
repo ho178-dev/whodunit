@@ -38,7 +38,9 @@ function createWindow() {
 ipcMain.on('win:minimize', () => win?.minimize())
 ipcMain.on('win:close', () => win?.close())
 // タイトルバー分のズレを回避するためコンテンツ領域サイズを直接設定する
-ipcMain.on('win:setContentSize', (_e, w, h) => { win?.setContentSize(w, h) })
+ipcMain.on('win:setContentSize', (_e, w, h) => {
+  win?.setContentSize(w, h)
+})
 
 app.whenReady().then(() => {
   createWindow()
