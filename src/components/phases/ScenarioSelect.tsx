@@ -46,7 +46,7 @@ export function ScenarioSelect() {
               <button
                 key={scenario.title}
                 onClick={() => handleScenarioClick(scenario)}
-                className="w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-4 px-6 transition-all duration-200 hover:shadow-[0_0_20px_rgba(217,119,6,0.3)] text-left"
+                className="game-button w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-4 px-6 transition-all duration-200 hover:shadow-[0_0_20px_rgba(217,119,6,0.3)] text-left"
               >
                 <div className="flex items-start justify-between gap-2">
                   <div>
@@ -76,7 +76,7 @@ export function ScenarioSelect() {
 
         <button
           onClick={() => setPhase('title')}
-          className="w-full mt-4 border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 px-8 transition-all duration-200 hover:border-gothic-accent"
+          className="game-button w-full mt-4 border border-gothic-border bg-gothic-panel/80 text-gothic-muted font-serif text-xs py-2 px-8 transition-all duration-200 hover:border-gothic-accent"
         >
           戻る
         </button>

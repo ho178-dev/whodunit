@@ -9,7 +9,7 @@ interface EvidenceModalProps {
 // 証拠品一覧をモーダル表示するコンポーネント
 export function EvidenceModal({ roomId, onClose }: EvidenceModalProps) {
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 noise-overlay">
       <div className="w-full max-w-lg border border-gothic-gold bg-gothic-panel shadow-[0_0_40px_rgba(217,119,6,0.4)] animate-fade-in max-h-[80vh] flex flex-col">
         {/* ヘッダー */}
         <div className="flex items-center justify-between border-b border-gothic-gold px-6 py-4">

@@ -63,13 +63,13 @@ export function VotingPhase() {
           <div className="flex gap-2">
             <button
               onClick={handleVote}
-              className="bg-red-900/80 border border-red-600 text-red-200 font-display tracking-widest text-xs px-6 py-2 hover:bg-red-800/80 transition-all"
+              className="game-button bg-red-900/80 border border-red-600 text-red-200 font-display tracking-widest text-xs px-6 py-2 hover:bg-red-800/80 transition-all"
             >
               告発確定
             </button>
             <button
               onClick={() => setConfirming(false)}
-              className="bg-gothic-panel/85 border border-gothic-border text-gothic-muted font-display tracking-widest text-xs px-4 py-2 hover:border-gothic-accent transition-all"
+              className="game-button bg-gothic-panel border border-gothic-border text-gothic-muted font-display tracking-widest text-xs px-4 py-2 hover:border-gothic-accent transition-all"
             >
               考え直す
             </button>
@@ -77,7 +77,7 @@ export function VotingPhase() {
         ) : (
           <button
             onClick={() => setConfirming(true)}
-            className="bg-gothic-gold/30 border-2 border-gothic-gold text-gothic-gold font-display tracking-widest text-xs px-6 py-2 hover:bg-gothic-gold/50 transition-all hover:shadow-[0_0_16px_rgba(217,119,6,0.6)]"
+            className="game-button bg-stone-900 border-2 border-gothic-gold text-gothic-gold font-display tracking-widest text-xs px-6 py-2 hover:bg-stone-800 transition-all hover:shadow-[0_0_16px_rgba(217,119,6,0.6)]"
           >
             告発する
           </button>

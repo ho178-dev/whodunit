@@ -230,7 +230,7 @@ export function TutorialPhase() {
         <div className="flex items-center px-4 border-b border-gothic-border/50 bg-gothic-panel/70 backdrop-blur-sm flex-shrink-0 h-12">
           <button
             onClick={() => setPhase('title')}
-            className="border border-gothic-border text-gothic-muted font-serif text-xs py-1 px-3 hover:border-gothic-accent hover:text-gothic-text transition-all"
+            className="game-button border border-gothic-border bg-gothic-panel/80 text-gothic-muted font-serif text-xs py-1 px-3 hover:border-gothic-accent hover:text-gothic-text transition-all"
           >
             ← 戻る
           </button>
@@ -332,7 +332,7 @@ export function TutorialPhase() {
                 <div className="pt-4 border-t border-gothic-border/30">
                   <button
                     onClick={startTutorialScenario}
-                    className="w-full border border-gothic-gold bg-gothic-gold/10 hover:bg-gothic-gold/20 text-gothic-gold font-display tracking-widest py-3 px-6 transition-all hover:shadow-[0_0_15px_rgba(217,119,6,0.3)]"
+                    className="game-button w-full border border-gothic-gold bg-gothic-gold/20 hover:bg-gothic-gold/30 text-gothic-gold font-display tracking-widest py-3 px-6 transition-all hover:shadow-[0_0_15px_rgba(217,119,6,0.3)]"
                   >
                     練習シナリオを始める
                     <span className="block text-xs text-gothic-muted mt-1 font-serif tracking-normal">
@@ -350,21 +350,21 @@ export function TutorialPhase() {
           <button
             onClick={() => setCurrentStep((s) => Math.max(0, s - 1))}
             disabled={currentStep === 0}
-            className="border border-gothic-border text-gothic-muted font-serif text-xs py-1 px-4 disabled:opacity-30 hover:border-gothic-accent hover:text-gothic-text transition-all disabled:cursor-not-allowed"
+            className="game-button border border-gothic-border bg-gothic-panel/80 text-gothic-muted font-serif text-xs py-1 px-4 disabled:opacity-30 hover:border-gothic-accent hover:text-gothic-text transition-all disabled:cursor-not-allowed"
           >
             ← 前へ
           </button>
           {!isLastStep ? (
             <button
               onClick={() => setCurrentStep((s) => Math.min(TUTORIAL_STEPS.length - 1, s + 1))}
-              className="border border-gothic-gold text-gothic-gold font-display tracking-widest text-xs py-1 px-6 hover:bg-stone-800 transition-all"
+              className="game-button border border-gothic-gold bg-gothic-panel text-gothic-gold font-display tracking-widest text-xs py-1 px-6 hover:bg-stone-800 transition-all"
             >
               次へ →
             </button>
           ) : (
             <button
               onClick={() => setPhase('title')}
-              className="border border-gothic-border text-gothic-muted font-serif text-xs py-1 px-4 hover:border-gothic-accent hover:text-gothic-text transition-all"
+              className="game-button border border-gothic-border bg-gothic-panel/80 text-gothic-muted font-serif text-xs py-1 px-4 hover:border-gothic-accent hover:text-gothic-text transition-all"
             >
               タイトルへ戻る
             </button>

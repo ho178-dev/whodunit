@@ -20,7 +20,7 @@ export function RoomMoveModal({ onClose }: RoomMoveModalProps) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 noise-overlay">
       <div className="w-full max-w-md border border-gothic-gold bg-gothic-panel shadow-[0_0_40px_rgba(217,119,6,0.4)] animate-fade-in">
         {/* ヘッダー */}
         <div className="border-b border-gothic-gold px-6 py-4 text-center">

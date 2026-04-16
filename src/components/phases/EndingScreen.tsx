@@ -116,7 +116,7 @@ export function EndingScreen() {
             </div>
             <button
               onClick={() => setConfessionStep(!isEpilogue && epilogueText ? 'epilogue' : 'done')}
-              className="mt-4 w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-3 transition-all"
+              className="game-button mt-4 w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-3 transition-all"
             >
               {isEpilogue ? '真相を見る' : '次へ'}
             </button>
@@ -150,7 +150,7 @@ export function EndingScreen() {
             </div>
             <button
               onClick={() => setDefeatStepIndex(defeatStepIndex + 1)}
-              className="mt-4 w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-3 transition-all"
+              className="game-button mt-4 w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-3 transition-all"
             >
               {defeatStepIndex < defeatSteps.length - 1 ? '次へ' : '結末を見る'}
             </button>
@@ -420,14 +420,14 @@ export function EndingScreen() {
       <div className="relative z-10 flex-shrink-0 px-3 py-2 border-t border-gothic-border bg-gothic-panel/80 backdrop-blur-sm flex gap-2">
         <button
           onClick={() => resetGame()}
-          className="flex-1 border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest text-xs py-2 transition-all"
+          className="game-button flex-1 border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest text-xs py-2 transition-all"
         >
           {isVictory ? '同じシナリオでリトライ' : 'リトライ'}
         </button>
         {!isVictory && !showTruth && (
           <button
             onClick={() => setShowTruth(true)}
-            className="flex-1 border border-gothic-accent bg-gothic-panel hover:bg-stone-800 text-gothic-text font-display tracking-widest text-xs py-2 transition-all"
+            className="game-button flex-1 border border-gothic-accent bg-gothic-panel hover:bg-stone-800 text-gothic-text font-display tracking-widest text-xs py-2 transition-all"
           >
             真相を見る
           </button>
@@ -436,7 +436,7 @@ export function EndingScreen() {
         {trial && useFixedScenario && (
           <button
             onClick={() => setPhase('trial_preview')}
-            className="flex-1 border border-gothic-gold bg-gothic-gold/10 hover:bg-gothic-gold/20 text-gothic-gold font-display tracking-widest text-xs py-2 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
+            className="game-button flex-1 border border-gothic-gold bg-gothic-gold/20 hover:bg-gothic-gold/30 text-gothic-gold font-display tracking-widest text-xs py-2 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
           >
             次のシナリオ予告
           </button>
@@ -444,14 +444,14 @@ export function EndingScreen() {
         {isTutorialScenario ? (
           <button
             onClick={() => setPhase('tutorial')}
-            className="flex-1 border border-gothic-gold text-gothic-gold font-display tracking-widest text-xs py-2 hover:bg-stone-800 transition-all"
+            className="game-button flex-1 border border-gothic-gold bg-gothic-panel text-gothic-gold font-display tracking-widest text-xs py-2 hover:bg-stone-800 transition-all"
           >
             チュートリアルに戻る
           </button>
         ) : (
           <button
             onClick={() => setPhase('title')}
-            className="flex-1 border border-gothic-border text-gothic-muted font-serif text-xs py-2 hover:border-gothic-accent transition-all"
+            className="game-button flex-1 border border-gothic-border bg-gothic-panel text-gothic-muted font-serif text-xs py-2 hover:border-gothic-accent transition-all"
           >
             タイトルへ戻る
           </button>
