@@ -509,11 +509,18 @@ export const useGameStore = create<GameState>((set, get) => ({
   },
 
   // シナリオ選択画面からシナリオを開始する。ゲーム状態を完全リセットしてシナリオを設定する
+  // suspects 配列を Fisher-Yates シャッフルして犯人が常に先頭になる偏りを解消する
   startScenario: (scenario) => {
-    const hypotheses = loadHypotheses(scenario.title)
+    const suspects = [...scenario.suspects]
+    for (let i = suspects.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[suspects[i], suspects[j]] = [suspects[j], suspects[i]]
+    }
+    const shuffledScenario = { ...scenario, suspects }
+    const hypotheses = loadHypotheses(shuffledScenario.title)
     set({
       ...initialState,
-      scenario,
+      scenario: shuffledScenario,
       hypotheses,
       useFixedScenario: true,
       activeSaveSlot: 0,

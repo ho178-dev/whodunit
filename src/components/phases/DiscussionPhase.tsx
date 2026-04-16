@@ -2,7 +2,7 @@
 // 一覧モード（スライダー）と会話モード（選択キャラ中央表示）を切り替える
 // 証拠選択は捜査メモの証拠品タブで行い、EvidenceSelectModal は廃止
 // 矛盾を追求ボタン・追及質問リストは CenterActionArea に集約
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { getRootQuestionIds } from '../../utils/scenario'
 import { InvestigationNotes } from '../investigation/InvestigationNotes'
@@ -10,7 +10,7 @@ import { CombinationDiscovery } from '../investigation/CombinationDiscovery'
 import { FakeRevealModal } from '../investigation/FakeRevealModal'
 import { CharacterCard } from '../shared/CharacterCard'
 import { CharacterSlider } from '../shared/CharacterSlider'
-import { DialogBox } from '../shared/DialogBox'
+import { DialogBox, type DialogBoxHandle } from '../shared/DialogBox'
 import { MansionSceneBackground } from '../shared/MansionBackground'
 import { behaviorBorderColors, behaviorLabel } from '../../constants/npcBehavior'
 import { cn } from '../../utils/cn'
@@ -54,14 +54,25 @@ export function DiscussionPhase() {
     text: string
     questionId: string
   } | null>(null)
-  // 続きを聞くボタンの表示制御（追及質問の返答アニメーション完了後に表示）
+  // 「追求する」ボタンの表示制御（プレイヤー発言ダイアログのタイプライター完了後に進行可能）
   const [playerDialogDone, setPlayerDialogDone] = useState(false)
   // 矛盾追及成功時に表示する他キャラのリアクション
   const [bystanderReactions, setBystanderReactions] = useState<BystanderReaction[]>([])
   const [bystanderIndex, setBystanderIndex] = useState(0)
+  // 容疑者返答ダイアログのタイプライター完了状態（次の追求ボタン表示に使用）
+  const [dialogReactionDone, setDialogReactionDone] = useState(false)
+  // プレイヤー発言ダイアログのref（タイプライター中にボタンからスキップするために使用）
+  const playerDialogRef = useRef<DialogBoxHandle>(null)
 
   // 追及質問モードのメモ表示（pursuitMode が有効な場合はノーマルモードを上書き）
   const shouldShowNotes = showNotes || pendingPursuitActivation !== null
+
+  const dialogReactionKey = `${selectedSuspectId ?? ''}-${selectedEvidenceId ?? ''}-${confrontationLog.length}-${askedPursuitQuestionIds.length}-${pursuitWrongResult ? 'w' : 'n'}`
+  const [prevDialogReactionKey, setPrevDialogReactionKey] = useState(dialogReactionKey)
+  if (dialogReactionKey !== prevDialogReactionKey) {
+    setPrevDialogReactionKey(dialogReactionKey)
+    setDialogReactionDone(false)
+  }
 
   if (!scenario) return null
 
@@ -106,23 +117,9 @@ export function DiscussionPhase() {
         )
       : []
 
-  const hasPursuitQuestions =
-    !!selectedSuspect &&
-    !!selectedEvidenceId &&
-    !!selectedSuspect.evidence_reactions[selectedEvidenceId]?.pursuit_questions?.length
-
   const allQuestionsAsked =
     unlockedForCurrent.length > 0 &&
     unlockedForCurrent.every(({ questionId }) => askedPursuitQuestionIds.includes(questionId))
-
-  const rootIds =
-    isConversationMode && selectedSuspect && selectedEvidenceId
-      ? getRootQuestionIds(
-          selectedSuspect.evidence_reactions[selectedEvidenceId]?.pursuit_questions ?? []
-        )
-      : []
-  const allRootUnlocked =
-    rootIds.length > 0 && rootIds.every((id) => unlockedForCurrent.some((u) => u.questionId === id))
 
   const lastAskedQuestion = unlockedForCurrent
     .filter((u) => askedPursuitQuestionIds.includes(u.questionId))
@@ -224,9 +221,27 @@ export function DiscussionPhase() {
 
   // 追及質問リストをCenterActionAreaに表示するかどうか
   const showPursuitList = unlockedForCurrent.length > 0
-  // 矛盾を追求ボタンを表示するかどうか
+  // 矛盾を追求ボタンを表示するかどうか（突きつけ済み・追求質問あり・未開放時のみ）
   const showPursuitButton =
-    !!latestReaction && (hasPursuitQuestions ? !allRootUnlocked : !currentWrongResult)
+    !!latestReaction &&
+    !!selectedSuspect &&
+    !!selectedEvidenceId &&
+    !!selectedSuspect.evidence_reactions[selectedEvidenceId]?.pursuit_questions?.length &&
+    !unlockedPursuitQuestions.some(
+      (u) => u.suspectId === selectedSuspectId && u.evidenceId === selectedEvidenceId
+    )
+  // 次に聞ける追及質問（解放済みかつ未回答の最初の質問）
+  const nextPursuitQuestion =
+    unlockedForCurrent.find((u) => !askedPursuitQuestionIds.includes(u.questionId)) ?? null
+
+  // 追求状態バナーの内容（追求完了 > 追求中 > 矛盾警告 の優先順）
+  const pursuitBanner = allQuestionsAsked
+    ? { green: true, text: '追求完了' }
+    : showPursuitList
+      ? { green: false, text: '追求中' }
+      : hasContradiction
+        ? { green: false, text: '⚠ この証拠はあなたが聞いたある証言と矛盾している' }
+        : null
 
   const currentBystanderReaction = bystanderReactions[bystanderIndex] ?? null
   const currentBystanderSuspect = currentBystanderReaction
@@ -250,7 +265,8 @@ export function DiscussionPhase() {
                     const pending = pendingPursuitActivation
                     selectTestimonyForPursuit(suspectId, statementIndex)
                     // 成功判定: 追及後に pursuitWrongResult が null のまま → 正解
-                    const { pursuitWrongResult: wr } = useGameStore.getState()
+                    const { pursuitWrongResult: wr, unlockedPursuitQuestions: newUnlocked } =
+                      useGameStore.getState()
                     if (!wr && pending) {
                       const suspect = scenario.suspects.find((s) => s.id === pending.suspectId)
                       const reactions =
@@ -258,6 +274,25 @@ export function DiscussionPhase() {
                       if (reactions.length > 0) {
                         setBystanderReactions(reactions)
                         setBystanderIndex(0)
+                        // バイスタンダー表示後に追求Q1を自動表示する（閉じるボタンで処理）
+                      } else {
+                        // バイスタンダーなし: 追求Q1を即時自動表示
+                        const pqs =
+                          suspect?.evidence_reactions[pending.evidenceId]?.pursuit_questions ?? []
+                        const rootQIds = getRootQuestionIds(pqs)
+                        const firstRoot = newUnlocked.find(
+                          (u) =>
+                            u.suspectId === pending.suspectId &&
+                            u.evidenceId === pending.evidenceId &&
+                            rootQIds.includes(u.questionId)
+                        )
+                        if (firstRoot) {
+                          const qData = pqs.find((q) => q.id === firstRoot.questionId)
+                          if (qData) {
+                            setPendingPlayerText({ text: qData.text, questionId: qData.id })
+                            setPlayerDialogDone(false)
+                          }
+                        }
                       }
                     }
                     setShowNotes(false)
@@ -317,16 +352,25 @@ export function DiscussionPhase() {
             </div>
           ))}
 
-        {/* CenterActionArea: 矛盾警告バナーのみ（バイスタンダー表示中は非表示） */}
+        {/* CenterActionArea: 追求状態バナー（バイスタンダー表示中は非表示）
+            追求完了 > 追求中 > 矛盾警告 の優先順で表示 */}
         {isConversationMode &&
-          hasContradiction &&
           latestReaction &&
           !currentWrongResult &&
           !currentBystanderReaction && (
             <CenterActionArea>
-              <div className="bg-yellow-900/60 border border-yellow-500 text-yellow-200 font-serif text-xs px-4 py-2 text-center w-full max-w-md">
-                ⚠ この証拠はあなたが聞いたある証言と矛盾している
-              </div>
+              {pursuitBanner && (
+                <div
+                  className={cn(
+                    'font-serif text-xs px-4 py-2 text-center w-full max-w-md',
+                    pursuitBanner.green
+                      ? 'bg-green-900/60 border border-green-500 text-green-200'
+                      : 'bg-yellow-900/60 border border-yellow-500 text-yellow-200'
+                  )}
+                >
+                  {pursuitBanner.text}
+                </div>
+              )}
             </CenterActionArea>
           )}
 
@@ -345,36 +389,46 @@ export function DiscussionPhase() {
                   if (isBystanderLast) {
                     setBystanderReactions([])
                     setBystanderIndex(0)
+                    // バイスタンダー終了後、未回答の追求質問があれば自動表示
+                    if (nextPursuitQuestion && selectedSuspect && selectedEvidenceId) {
+                      handleAskPursuit(nextPursuitQuestion.questionId)
+                    }
                   } else {
                     setBystanderIndex((i) => i + 1)
                   }
                 }}
                 className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
               >
-                {isBystanderLast ? '閉じる' : '次へ →'}
+                続きを聞く →
               </button>
             </div>
           ) : pendingPlayerText ? (
             <div className="relative bg-gothic-panel/85 backdrop-blur-sm border-2 border-blue-700/60">
               <DialogBox
+                ref={playerDialogRef}
                 key={`player-${pendingPlayerText.questionId}`}
                 text={`「${pendingPlayerText.text}」`}
                 speakerName="あなた"
                 onComplete={() => setPlayerDialogDone(true)}
               />
-              {playerDialogDone && (
-                <button
-                  onClick={handlePlayerDialogAdvance}
-                  className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
-                >
-                  続きを聞く →
-                </button>
-              )}
+              {/* タイプライタ中: クリックで全文表示 / 完了後: 容疑者の返答へ進む */}
+              <button
+                onClick={() => {
+                  if (!playerDialogDone) {
+                    playerDialogRef.current?.skip()
+                  } else {
+                    handlePlayerDialogAdvance()
+                  }
+                }}
+                className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
+              >
+                追求する →
+              </button>
             </div>
           ) : dialogReaction && selectedSuspect ? (
             <div
               className={cn(
-                'bg-gothic-panel/85 backdrop-blur-sm border-2',
+                'relative bg-gothic-panel/85 backdrop-blur-sm border-2',
                 behaviorBorderColors[dialogReaction.behavior]
               )}
             >
@@ -382,7 +436,20 @@ export function DiscussionPhase() {
                 key={`${selectedSuspectId}-${selectedEvidenceId}-${confrontationLog.length}-${currentWrongResult ? 'wrong' : ''}`}
                 text={dialogReaction.reaction}
                 speakerName={`${selectedSuspect.name} ─ ${currentWrongResult ? '的外れ' : behaviorLabel[dialogReaction.behavior]}`}
+                onComplete={() => setDialogReactionDone(true)}
               />
+              {/* 容疑者返答完了後、次の追求質問があればダイアログ上から直接進める */}
+              {dialogReactionDone && nextPursuitQuestion && !pendingPlayerText && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    handleAskPursuit(nextPursuitQuestion.questionId)
+                  }}
+                  className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
+                >
+                  追求する →
+                </button>
+              )}
             </div>
           ) : (
             <div className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border p-4">
@@ -439,8 +506,8 @@ export function DiscussionPhase() {
                 証拠を選ぶ
               </PanelButton>
 
-              {/* 矛盾を追求ボタン（証拠を選ぶ直下・質問リスト未解放時） */}
-              {showPursuitButton && !showPursuitList && (
+              {/* 矛盾を追及ボタン（追求質問解放前のみ表示） */}
+              {showPursuitButton && (
                 <button
                   onClick={handleInitiatePursuit}
                   className="w-full bg-yellow-950/70 backdrop-blur-sm border border-yellow-700 hover:bg-yellow-900/50 text-yellow-300 font-display tracking-widest py-2 transition-all text-[10px] flex items-center justify-center gap-1"
@@ -448,61 +515,6 @@ export function DiscussionPhase() {
                   <span>⚑</span>
                   <span>矛盾を追及</span>
                 </button>
-              )}
-
-              {/* 追及質問リスト（捜査メモ直下・質問解放後） */}
-              {showPursuitList && (
-                <div className="bg-stone-900/80 backdrop-blur-sm border border-yellow-700/50">
-                  <div className="flex items-center justify-between px-2 py-1.5 border-b border-yellow-700/40">
-                    <p className="font-display text-yellow-400 text-[9px] tracking-widest flex items-center gap-1">
-                      <span>⚑</span>
-                      <span>追及質問</span>
-                    </p>
-                    {showPursuitButton && (
-                      <button
-                        onClick={handleInitiatePursuit}
-                        className="bg-yellow-950/70 border border-yellow-700 hover:bg-yellow-900/50 text-yellow-300 font-display tracking-widest py-0.5 px-1.5 transition-all text-[9px]"
-                      >
-                        ＋追及
-                      </button>
-                    )}
-                  </div>
-                  <div className="px-1.5 py-1.5 space-y-1 max-h-32 overflow-y-auto game-scrollbar">
-                    {unlockedForCurrent.map(({ questionId }, idx) => {
-                      const isAsked = askedPursuitQuestionIds.includes(questionId)
-                      const isBlocked = isAsked || pendingPlayerText !== null
-                      return (
-                        <button
-                          key={questionId}
-                          onClick={() => !isBlocked && handleAskPursuit(questionId)}
-                          disabled={isBlocked}
-                          className={`w-full border px-1.5 py-1 font-display text-[9px] tracking-widest transition-all flex items-center justify-center gap-1 ${
-                            isBlocked
-                              ? 'border-stone-700 text-stone-600 cursor-default'
-                              : 'border-yellow-700 text-yellow-200 hover:bg-yellow-900/20'
-                          }`}
-                        >
-                          {isAsked ? (
-                            <>
-                              <span>✓</span>
-                              <span>追及済み {idx + 1}</span>
-                            </>
-                          ) : (
-                            <>
-                              <span>⚑</span>
-                              <span>追及する {idx + 1}</span>
-                            </>
-                          )}
-                        </button>
-                      )
-                    })}
-                  </div>
-                  {allQuestionsAsked && (
-                    <p className="text-center text-yellow-500/70 font-display text-[9px] tracking-widest py-1.5 border-t border-yellow-700/30">
-                      ── 追及完了 ──
-                    </p>
-                  )}
-                </div>
               )}
             </div>
           }

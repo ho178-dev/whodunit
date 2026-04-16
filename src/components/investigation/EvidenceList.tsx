@@ -35,6 +35,7 @@ export function EvidenceList({ roomId }: EvidenceListProps) {
   // アクションを消費して証拠の外観（description）を開示する（1段階目）
   const handleInspect = (evidenceId: string) => {
     if (actionsRemaining > 0 && !inspectedEvidenceIds.includes(evidenceId)) {
+      audioManager.playSe('click')
       inspectEvidence(evidenceId)
       consumeAction()
       setExpandedId(evidenceId)
