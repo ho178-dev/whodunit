@@ -1,7 +1,12 @@
 // タイピングアニメーション付きのセリフ表示ボックス。固定2行高さでスクロールボタンにより全文確認できる
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react'
 import { cn } from '../../utils/cn'
 import { useSettingsStore, TEXT_SPEED_MS } from '../../stores/settingsStore'
+
+// 外部からタイプライターをスキップできるハンドル
+export interface DialogBoxHandle {
+  skip: () => void
+}
 
 // font-serif text-sm leading-relaxed: 14px × 1.625 ≈ 23px/行
 const LINE_HEIGHT_PX = 23
@@ -14,7 +19,10 @@ interface DialogBoxProps {
 }
 
 // 固定2行ダイアログ。タイピング完了後にテキストが溢れる場合は▼/▲でスクロールする
-export function DialogBox({ text, speakerName, className, onComplete }: DialogBoxProps) {
+export const DialogBox = forwardRef<DialogBoxHandle, DialogBoxProps>(function DialogBox(
+  { text, speakerName, className, onComplete },
+  ref
+) {
   const [displayed, setDisplayed] = useState('')
   const [done, setDone] = useState(false)
   const [canScrollDown, setCanScrollDown] = useState(false)
@@ -108,6 +116,9 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
     }
   }
 
+  // 外部ボタンからタイプライターをスキップできるようにハンドルを公開する
+  useImperativeHandle(ref, () => ({ skip: handleClick }))
+
   // direction: 1=下, -1=上
   const handleScroll = (e: React.MouseEvent, direction: 1 | -1) => {
     e.stopPropagation()
@@ -163,4 +174,4 @@ export function DialogBox({ text, speakerName, className, onComplete }: DialogBo
       </div>
     </div>
   )
-}
+})

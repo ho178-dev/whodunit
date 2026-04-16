@@ -1,6 +1,7 @@
 // ゲームフェーズ・スコア・対決ログエントリ・仮説エントリの型定義
 export type GamePhase =
   | 'title'
+  | 'tutorial'
   | 'scenario_select'
   | 'api_key_input'
   | 'generating'

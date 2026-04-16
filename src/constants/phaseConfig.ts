@@ -14,6 +14,11 @@ export interface PhaseOverlay {
 }
 
 export const PHASE_LABELS: Partial<Record<GamePhase, PhaseLabel>> = {
+  tutorial: {
+    text: '遊び方',
+    textColor: 'text-gothic-gold',
+    duration: 800,
+  },
   scenario_select: {
     text: 'シナリオ選択',
     textColor: 'text-gothic-muted',
@@ -63,6 +68,7 @@ export const PHASE_DISPLAY: Partial<Record<GamePhase, string>> = {
 /** フェーズ別の背景色調オーバーレイ設定マップ */
 export const PHASE_OVERLAYS: Partial<Record<GamePhase, PhaseOverlay>> = {
   title: { className: 'bg-black/40' }, // ロゴ・ボタンの視認性確保のため暗め
+  tutorial: { className: 'bg-black/40' }, // テキスト可読性確保のため暗め
   discussion: { className: 'bg-blue-900/15' },
   voting: { className: 'bg-green-900/15' },
   accusation: { className: 'bg-red-900/20' },

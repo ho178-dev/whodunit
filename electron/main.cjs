@@ -9,16 +9,17 @@ let win = null
 
 /**
  * ゲームウィンドウを生成する
- * 初期サイズ 960×540・リサイズ可・OSネイティブフレーム表示
- * innerHeight は titlebar を除いたコンテンツ領域を示すため、スケール計算はそのまま正確に動作する
+ * useContentSize: true によりwidth/heightはコンテンツ領域サイズを指す
+ * タイトルバー分のズレなしにスケール計算が正確に動作する
  */
 function createWindow() {
   win = new BrowserWindow({
     width: 960,
-    height: 580,
+    height: 540,
     minWidth: 640,
     minHeight: 400,
     resizable: true,
+    useContentSize: true,
     webPreferences: {
       preload: path.join(__dirname, 'preload.cjs'),
       contextIsolation: true,
@@ -36,6 +37,10 @@ function createWindow() {
 // ウィンドウ操作 IPC ハンドラ（レンダラーの windowControls API から呼び出される）
 ipcMain.on('win:minimize', () => win?.minimize())
 ipcMain.on('win:close', () => win?.close())
+// タイトルバー分のズレを回避するためコンテンツ領域サイズを直接設定する
+ipcMain.on('win:setContentSize', (_e, w, h) => {
+  win?.setContentSize(w, h)
+})
 
 app.whenReady().then(() => {
   createWindow()

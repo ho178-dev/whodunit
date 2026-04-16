@@ -14,9 +14,10 @@ export interface CorrectAccusationData {
 
 // 無実（不正解）ルートの告発データ
 export interface IncorrectAccusationData {
-  defense_statement: string // 誤告発された容疑者の弁明
+  defense_statement: string // 誤告発された容疑者の弁明（告発フェーズ冒頭の対決セリフ）
   evidence_rebuttal: string // Step2: 証拠提示後の反論
   wrong_link_rebuttal: string // Step4: 証拠と推理が紐づかない時の反論
+  defeat_statement?: string // 敗北エンド演出の最終一言（未設定時は defense_statement にフォールバック）
 }
 
 // シナリオ全体の告発データ

@@ -1,8 +1,8 @@
 // 捜査フェーズで部屋内の容疑者に話しかけ、証言を順番に聞き出すコンポーネント
 // アドベンチャーゲーム風に、キャラクターを左右に配置しダイアログを下部に表示する
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useGameStore } from '../../stores/gameStore'
-import { DialogBox } from '../shared/DialogBox'
+import { DialogBox, type DialogBoxHandle } from '../shared/DialogBox'
 import { CharacterCard } from '../shared/CharacterCard'
 import { cn } from '../../utils/cn'
 
@@ -26,6 +26,14 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
   } = useGameStore()
   const [selectedSuspect, setSelectedSuspect] = useState<string | null>(null)
   const [dialogIndex, setDialogIndex] = useState(0)
+  const [dialogDone, setDialogDone] = useState(false)
+  const dialogRef = useRef<DialogBoxHandle>(null)
+  const dialogKey = `${selectedSuspect ?? ''}-${dialogIndex}`
+  const [prevDialogKey, setPrevDialogKey] = useState(dialogKey)
+  if (dialogKey !== prevDialogKey) {
+    setPrevDialogKey(dialogKey)
+    setDialogDone(false)
+  }
 
   if (!scenario) return null
 
@@ -114,21 +122,27 @@ export function NpcDialog({ roomId, hasRightPanel }: NpcDialogProps) {
         {currentSuspect && currentDialog ? (
           <div className="relative">
             <DialogBox
+              ref={dialogRef}
               text={currentDialog}
               speakerName={currentSuspect.name}
               className="bg-gothic-panel/85 backdrop-blur-sm"
-              onComplete={() => {}}
+              onComplete={() => setDialogDone(true)}
             />
-            {hasMoreDialog && (
+            {/* タイプライタ中: クリックで全文表示 / 完了後: 続きへ進む（hasMoreDialogのとき） */}
+            {(!dialogDone || hasMoreDialog) && (
               <button
                 onClick={(e) => {
                   e.stopPropagation()
-                  handleNext()
+                  if (!dialogDone) {
+                    dialogRef.current?.skip()
+                  } else {
+                    handleNext()
+                  }
                 }}
-                disabled={!canTalkMore}
+                disabled={dialogDone && !canTalkMore}
                 className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors disabled:opacity-40"
               >
-                続きを聞く →{!canTalkMore && '（会話回数上限）'}
+                続きを聞く →{dialogDone && !canTalkMore && '（会話回数上限）'}
               </button>
             )}
           </div>

@@ -321,7 +321,7 @@ ${combinationList}
 3. プレイヤーが推理（evidence_combination）を突きつける
 4. 提示した証拠を含む推理かつ議論フェーズで犯人追及済みなら → refutation → breakdown → 正解エンド
 5. 証拠と推理が噛み合わなければ → wrong_link_rebuttal → Step1に戻る
-6. APが尽きると惜敗エンドへ（near_defeat_evidence_text）
+6. APが尽きると敗北エンドへ（near_defeat_evidence_text → 結果画面）
 
 ## 告発シーンの設計ルール
 
@@ -332,7 +332,8 @@ ${combinationList}
 - refutation_text: 汎用フォールバック用ナレーション（2〜3文）。証拠と推理が繋がった瞬間の簡潔な劇的説明。推理固有のナレーションが未設定の場合にのみ使用される
 - breakdown_statement: 犯人の崩壊（2〜3文、50〜100字程度）。動揺→観念の流れ。改行で段落を分けること。confession_statement とは異なる内容にすること
 - epilogue_text: エンディングの地の文（2〜3文）。事件解決後の静寂・余韻をテーマにした詩的な文章
-- near_defeat_evidence_text: 証拠不足型惜敗エンドのナレーション（2〜3文）。探偵が推理の輪を繋げられなかった結末。真犯人が逃げ切る余韻を含む
+- escape_statement: 証拠不足で逃げ切る時の犯人の最終一言（1〜2文）。余裕を見せながら立ち去るセリフ
+- near_defeat_evidence_text: 敗北エンド共通のナレーション（2〜3文）。探偵が真相に辿り着けなかった結末。犯人が逃げ切る余韻を含む。正解・誤告発どちらの敗北エンドでも使用される。**人物の固有名詞・氏名を含めないこと**（特定の容疑者名を入れると誤告発時に文脈が壊れる）
 
 ### 推理固有の論駁ナレーション（combination_refutation_texts）
 上記「証拠組み合わせ（推理）一覧」の各組み合わせについて、プレイヤーがその推理で正解ルートに到達した時に表示されるナレーションを設定する。
@@ -345,12 +346,10 @@ ${combinationList}
 
 ### 不正解ルート（無実の人物を指名した場合）
 犯人以外の全容疑者について設定する：
-- defense_statement: 誤告発された容疑者の弁明（2〜3文）。キャラの性格を反映した困惑・怒り・抗議
+- defense_statement: 誤告発された容疑者の弁明（2〜3文）。キャラの性格を反映した困惑・怒り・抗議。告発フェーズ冒頭の対決セリフ
 - evidence_rebuttal: 証拠品を提示された直後の反論（1〜2文）。「それが私と何の関係があるのか」というトーン
 - wrong_link_rebuttal: 提示された物と話の繋がりがない時の反論（1〜2文）。無実の人物の正当な抗議。「証言」「証拠」「矛盾」「推理」などのゲーム用語を使わないこと
-
-### 共通
-- near_defeat_wrong_suspect_text: 誤告発型惜敗エンドのナレーション（2〜3文）。探偵が誤った人物を追い続け、真犯人を逃がした結末
+- defeat_statement: 敗北エンド演出の最終一言（1〜2文）。APが尽きた後に表示される。defense_statement とは異なり、疑いが証明できなかった後の一言。キャラの性格を反映した「疑いを晴らした安堵・呆れ・怒りの余韻」で締める
 
 ## 出力形式
 以下のJSON構造のみを返してください。説明文は不要です。
@@ -363,6 +362,7 @@ ${combinationList}
     "refutation_text": "...",
     "breakdown_statement": "...",
     "epilogue_text": "...",
+    "escape_statement": "...",
     "near_defeat_evidence_text": "..."
   },
   "combination_refutation_texts": {
@@ -373,11 +373,10 @@ ${scenario.suspects
   .filter((s) => s.id !== scenario.murderer_id)
   .map(
     (s) =>
-      `    "${s.id}": { "defense_statement": "...", "evidence_rebuttal": "...", "wrong_link_rebuttal": "..." }`
+      `    "${s.id}": { "defense_statement": "...", "evidence_rebuttal": "...", "wrong_link_rebuttal": "...", "defeat_statement": "..." }`
   )
   .join(',\n')}
-  },
-  "near_defeat_wrong_suspect_text": "..."
+  }
 }
 `
 }

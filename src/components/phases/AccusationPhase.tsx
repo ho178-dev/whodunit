@@ -132,9 +132,9 @@ export function AccusationPhase() {
     }
   }
 
-  // 惜敗エンドへ移行: EndingScreen に委譲する
+  // 証拠不足でエンディングへ移行: 正しい容疑者のみ inescaped フラグを立てる
   const triggerNearDefeat = () => {
-    setMurdererEscaped(true)
+    if (isCorrect) setMurdererEscaped(true)
     setPhase('ending')
   }
 

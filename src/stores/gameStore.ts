@@ -20,6 +20,7 @@ import { SAVE_VERSION } from '../types/save'
 import type { SaveInput } from '../types/save'
 import { saveToSlot, loadFromSlot } from '../utils/saveLoad'
 import { getFixedScenarioByTitle } from '../utils/scenarioRegistry'
+import { TUTORIAL_SCENARIO } from '../constants/tutorialScenario'
 
 // localStorage キー生成（シナリオタイトルをキーとして仮説データを区別する）
 const hypothesesKey = (scenarioTitle: string) => `whodunit_hypotheses_${scenarioTitle}`
@@ -74,6 +75,7 @@ export interface GameState {
   murdererEscaped: boolean // 犯人特定したが証拠不足で逃亡したか
   hypotheses: SuspectHypothesis[] // 容疑者ごとの仮説メモ
   activeSaveSlot: number | null // 現在書き込み先のスロット番号（null = セーブ無効）
+  isTutorialScenario: boolean // チュートリアル用練習シナリオ中フラグ（セーブ不要）
 
   // Actions
   setPhase: (phase: GamePhase) => void
@@ -118,6 +120,7 @@ export interface GameState {
   loadSaveSlot: (slotIndex: number) => void
   manualSave: (slotIndex: number) => void
   startScenario: (scenario: Scenario) => void
+  startTutorialScenario: () => void
   unlockAllForDebug: () => void
   refillAllAP: () => void
 }
@@ -172,6 +175,7 @@ const initialState = {
   murdererEscaped: false,
   hypotheses: [],
   activeSaveSlot: null,
+  isTutorialScenario: false,
 }
 
 // 自動セーブ対象フェーズ（title / scenario_select / api_key_input / generating への遷移時は保存しない）
@@ -478,6 +482,7 @@ export const useGameStore = create<GameState>((set, get) => ({
         apiKey: state.apiKey,
         useFixedScenario: state.useFixedScenario,
         activeSaveSlot: state.activeSaveSlot,
+        isTutorialScenario: state.isTutorialScenario,
       }
     }),
 
@@ -491,12 +496,31 @@ export const useGameStore = create<GameState>((set, get) => ({
     saveToSlot(slotIndex, buildSaveInput(state, state.phase))
   },
 
-  // シナリオ選択画面からシナリオを開始する。ゲーム状態を完全リセットしてシナリオを設定する
-  startScenario: (scenario) => {
-    const hypotheses = loadHypotheses(scenario.title)
+  // チュートリアル用練習シナリオを開始する。セーブなし・isTutorialScenario=trueで開始する
+  startTutorialScenario: () => {
     set({
       ...initialState,
-      scenario,
+      scenario: TUTORIAL_SCENARIO,
+      useFixedScenario: true,
+      isTutorialScenario: true,
+      activeSaveSlot: null,
+      phase: 'scenario_briefing' as GamePhase,
+    })
+  },
+
+  // シナリオ選択画面からシナリオを開始する。ゲーム状態を完全リセットしてシナリオを設定する
+  // suspects 配列を Fisher-Yates シャッフルして犯人が常に先頭になる偏りを解消する
+  startScenario: (scenario) => {
+    const suspects = [...scenario.suspects]
+    for (let i = suspects.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1))
+      ;[suspects[i], suspects[j]] = [suspects[j], suspects[i]]
+    }
+    const shuffledScenario = { ...scenario, suspects }
+    const hypotheses = loadHypotheses(shuffledScenario.title)
+    set({
+      ...initialState,
+      scenario: shuffledScenario,
       hypotheses,
       useFixedScenario: true,
       activeSaveSlot: 0,

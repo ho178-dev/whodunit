@@ -64,7 +64,11 @@
       "Bash(xargs head:*)",
       "Read(//d D:/workspace/**)",
       "Bash(node_modules/.bin/tsc --noEmit)",
-      "Bash(head -3 \"D:/workspace/whodunit/src/components/phases/\"*.tsx)"
+      "Bash(head -3 \"D:/workspace/whodunit/src/components/phases/\"*.tsx)",
+      "Bash(cd /d D:/workspace/whodunit)",
+      "Bash(powershell:*)",
+      "Bash(D:/workspace/whodunit/node_modules/.bin/tsc --noEmit --project D:/workspace/whodunit/tsconfig.json)",
+      "Bash(git:*)"
     ]
   }
 }

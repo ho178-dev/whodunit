@@ -29,6 +29,8 @@ const FIXED_ACCUSATION_DATA_3: AccusationScenarioData = {
       evidence_rebuttal: '……ふふ。その証拠が私に何を示すというんですか。（余裕の笑みで）',
       wrong_link_rebuttal:
         '……証拠と推理が噛み合っていない。もっと核心に迫るものを持ってきてほしい。',
+      defeat_statement:
+        '（静かに微笑む）……証明できなかったか。今夜は、あなたの負けだ。——お疲れ様でした。',
     },
     shiraha_seira: {
       defense_statement:
@@ -36,6 +38,8 @@ const FIXED_ACCUSATION_DATA_3: AccusationScenarioData = {
       evidence_rebuttal: '……それが私の有罪を示す証拠になるとでも？（首を振る）見当違いです。',
       wrong_link_rebuttal:
         '（静かに）証拠と結論の間に論理的な繋がりが成立していない。もう一度考えてください。',
+      defeat_statement:
+        '（疲れた目で）……証拠が足りなかった。でも、人狼はまだここにいる。気をつけて。',
     },
     tamura_shou: {
       defense_statement:
@@ -43,6 +47,8 @@ const FIXED_ACCUSATION_DATA_3: AccusationScenarioData = {
       evidence_rebuttal: '……え、それが僕への証拠なんですか！？（声が上ずる）',
       wrong_link_rebuttal:
         '（焦った様子で）証拠と推理が全く繋がっていない！アリバイを確認してください！',
+      defeat_statement:
+        '（息をついて）……証拠が揃わなかったんですね。わかりました。でも本当に違いますから。',
     },
     mizusawa_kana: {
       defense_statement:
@@ -50,6 +56,8 @@ const FIXED_ACCUSATION_DATA_3: AccusationScenarioData = {
       evidence_rebuttal: '……それが私と何の関係があるって言うんですか。（困惑した表情で）',
       wrong_link_rebuttal:
         '（悲しそうに）証拠と推理が繋がっていない……私は正直に話しているだけです。',
+      defeat_statement:
+        '（ほっとした様子で）……やっと、わかってもらえましたか。正直に話していただけですから。',
     },
     odo_saburo: {
       defense_statement:
@@ -57,6 +65,8 @@ const FIXED_ACCUSATION_DATA_3: AccusationScenarioData = {
       evidence_rebuttal: '……その証拠を持ってきてどうしようというのか。（静かに問う）',
       wrong_link_rebuttal:
         '（淡々と）証拠と推理の間に論理的な繋がりがない。60年の経験から申し上げます。',
+      defeat_statement:
+        '（静かに目を閉じて）……証拠が不十分だった。60年の経験からひとつだけ言えることがある——真実は、逃げない。',
     },
   },
   near_defeat_wrong_suspect_text:
