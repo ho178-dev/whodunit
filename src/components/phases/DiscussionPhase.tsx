@@ -378,7 +378,7 @@ export function DiscussionPhase() {
             優先順: バイスタンダー反応 > プレイヤー発言 > メイン容疑者反応 > デフォルト */}
         <div className="absolute inset-x-0 bottom-0 p-2">
           {currentBystanderReaction && currentBystanderSuspect ? (
-            <div className="relative bg-gothic-panel/85 backdrop-blur-sm border-2 border-yellow-600/70">
+            <div className="relative bg-gothic-panel/85 backdrop-blur-sm border-2 border-yellow-600/70 outline outline-1 outline-yellow-600/20 [outline-offset:-4px]">
               <DialogBox
                 key={`bystander-${bystanderIndex}`}
                 text={currentBystanderReaction.text}
@@ -403,7 +403,7 @@ export function DiscussionPhase() {
               </button>
             </div>
           ) : pendingPlayerText ? (
-            <div className="relative bg-gothic-panel/85 backdrop-blur-sm border-2 border-blue-700/60">
+            <div className="relative bg-gothic-panel/85 backdrop-blur-sm border-2 border-blue-700/60 outline outline-1 outline-blue-700/20 [outline-offset:-4px]">
               <DialogBox
                 ref={playerDialogRef}
                 key={`player-${pendingPlayerText.questionId}`}
@@ -467,7 +467,7 @@ export function DiscussionPhase() {
           <LeftSpecialPanel>
             <button
               onClick={handleBackToList}
-              className="bg-gothic-panel/85 backdrop-blur-sm border border-gothic-border/60 hover:border-gothic-accent px-3 py-2 text-gothic-muted hover:text-gothic-text font-serif text-xs transition-all text-left w-full"
+              className="game-button bg-gothic-panel border border-gothic-border/60 hover:border-gothic-accent px-3 py-2 text-gothic-muted hover:text-gothic-text font-serif text-xs transition-all text-left w-full"
             >
               ← 容疑者一覧
             </button>
@@ -510,7 +510,7 @@ export function DiscussionPhase() {
               {showPursuitButton && (
                 <button
                   onClick={handleInitiatePursuit}
-                  className="w-full bg-yellow-950/70 backdrop-blur-sm border border-yellow-700 hover:bg-yellow-900/50 text-yellow-300 font-display tracking-widest py-2 transition-all text-[10px] flex items-center justify-center gap-1"
+                  className="game-button w-full bg-yellow-950/80 backdrop-blur-sm border border-yellow-700 hover:bg-yellow-900/70 text-yellow-300 font-display tracking-widest py-2 transition-all text-[10px] flex items-center justify-center gap-1"
                 >
                   <span>⚑</span>
                   <span>矛盾を追及</span>

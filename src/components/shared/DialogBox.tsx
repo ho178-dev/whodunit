@@ -132,11 +132,16 @@ export const DialogBox = forwardRef<DialogBoxHandle, DialogBoxProps>(function Di
 
   return (
     <div
-      className={cn('border border-gothic-border bg-gothic-panel/90 p-2 cursor-pointer', className)}
+      className={cn(
+        'border border-gothic-border bg-gothic-panel/90 p-2 cursor-pointer outline outline-1 outline-gothic-border/20 [outline-offset:-3px]',
+        className
+      )}
       onClick={handleClick}
     >
       {speakerName && (
-        <div className="text-gothic-gold font-display text-xs mb-1.5">{speakerName}</div>
+        <div className="text-gothic-gold font-display text-xs mb-1.5 speaker-decorated">
+          {speakerName}
+        </div>
       )}
 
       {/* 固定2行エリア: overflow-hidden でスクロールはJSのみで制御 */}

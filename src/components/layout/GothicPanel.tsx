@@ -10,7 +10,12 @@ interface GothicPanelProps {
 
 export function GothicPanel({ children, title, className }: GothicPanelProps) {
   return (
-    <div className={cn('border border-gothic-border bg-gothic-panel', className)}>
+    <div
+      className={cn(
+        'border border-gothic-border bg-gothic-panel gothic-noise-bg outline outline-1 outline-gothic-border/30 [outline-offset:-3px]',
+        className
+      )}
+    >
       {title && (
         <div className="border-b border-gothic-border px-6 py-3">
           <h2 className="font-display text-gothic-gold text-lg tracking-widest">{title}</h2>

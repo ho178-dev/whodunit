@@ -86,7 +86,7 @@ export function TitleScreen() {
                   setSlots(getAllSlots())
                   setShowContinue(true)
                 }}
-                className="w-full border border-gothic-gold bg-gothic-gold/10 hover:bg-gothic-gold/20 text-gothic-gold font-display tracking-widest py-4 px-8 transition-all duration-200 hover:shadow-[0_0_20px_rgba(217,119,6,0.4)]"
+                className="game-button w-full border border-gothic-gold bg-gothic-gold/20 hover:bg-gothic-gold/30 text-gothic-gold font-display tracking-widest py-4 px-8 transition-all duration-200 hover:shadow-[0_0_20px_rgba(217,119,6,0.4)]"
               >
                 続きから
                 <span className="block text-xs text-gothic-muted mt-1 font-serif">
@@ -97,7 +97,7 @@ export function TitleScreen() {
 
             <button
               onClick={trial ? handleStartTrial : () => setPhase('scenario_select')}
-              className="w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-4 px-8 transition-all duration-200 hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
+              className="game-button w-full border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest py-4 px-8 transition-all duration-200 hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
             >
               シナリオを選ぶ
               <span className="block text-xs text-gothic-muted mt-1 font-serif">
@@ -107,7 +107,7 @@ export function TitleScreen() {
 
             <button
               onClick={() => setPhase('tutorial')}
-              className="w-full border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 px-8 transition-all duration-200 hover:border-gothic-accent"
+              className="game-button w-full border border-gothic-border bg-gothic-panel/80 text-gothic-muted font-serif text-xs py-2 px-8 transition-all duration-200 hover:border-gothic-accent"
             >
               遊び方
             </button>
@@ -134,7 +134,7 @@ export function TitleScreen() {
             <SaveSlotList slots={slots} onSelect={handleSelectSlot} onDelete={handleDeleteSlot} />
             <button
               onClick={() => setShowContinue(false)}
-              className="w-full mt-4 border border-gothic-border bg-transparent text-gothic-muted font-serif text-xs py-2 px-8 transition-all duration-200 hover:border-gothic-accent"
+              className="game-button w-full mt-4 border border-gothic-border bg-gothic-panel/80 text-gothic-muted font-serif text-xs py-2 px-8 transition-all duration-200 hover:border-gothic-accent"
             >
               戻る
             </button>

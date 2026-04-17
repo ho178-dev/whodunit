@@ -64,6 +64,4 @@ export const FIXED_ACCUSATION_DATA: AccusationScenarioData = {
         '（静かに俯いて）……それでも、私への疑いは晴れませんか。……わかりました。もう構いません。',
     },
   },
-  near_defeat_wrong_suspect_text:
-    '探偵の推理は誤った方向を向いていた。\n真犯人は気づかれることなく、晩餐会の夜の闇に溶けていった。\n館は静寂を取り戻したが、それは解決の静けさではなく、真実が葬られた沈黙だった。',
 }
