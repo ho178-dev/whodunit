@@ -510,13 +510,11 @@ export async function generateScenario(apiKey: string): Promise<Scenario> {
         correct: import('../types/accusation').CorrectAccusationData
         combination_refutation_texts?: Record<string, string>
         incorrect: Record<string, import('../types/accusation').IncorrectAccusationData>
-        near_defeat_wrong_suspect_text: string
       }
       if (accusationParsed.correct?.breakdown_statement) {
         const accusationData: import('../types/accusation').AccusationScenarioData = {
           correct: accusationParsed.correct,
           incorrect: accusationParsed.incorrect ?? {},
-          near_defeat_wrong_suspect_text: accusationParsed.near_defeat_wrong_suspect_text ?? '',
         }
         // combo個別のrefutation_textをevidence_combinationsにマージ
         const refutationMap = accusationParsed.combination_refutation_texts ?? {}

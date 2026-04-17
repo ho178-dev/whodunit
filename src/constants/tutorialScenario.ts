@@ -298,6 +298,5 @@ export const TUTORIAL_SCENARIO: Scenario = {
           '（ほっとした様子で）……信じてもらえましたか。ただ庭師として働いていただけなのに、怖かった。',
       },
     },
-    near_defeat_wrong_suspect_text: '探偵は真犯人に迫れなかった。田中一郎は静かに館を後にした。',
   },
 }

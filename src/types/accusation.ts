@@ -24,5 +24,4 @@ export interface IncorrectAccusationData {
 export interface AccusationScenarioData {
   correct: CorrectAccusationData
   incorrect: Record<string, IncorrectAccusationData> // suspect_id → データ
-  near_defeat_wrong_suspect_text: string // 誤告発型惜敗エンドのナレーション
 }
