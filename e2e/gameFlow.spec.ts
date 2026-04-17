@@ -1,9 +1,9 @@
 // Playwright E2E テスト: ゲームフロー クリティカルパス
 // 対象: タイトル画面の表示確認、完勝・誤謬エンディングのUIレンダリング確認
-import { test, expect } from '@playwright/test'
+import { test, expect, type Page } from '@playwright/test'
 
 // ウィンドウにストアが公開されるまで待機するヘルパー
-async function waitForStore(page: Parameters<typeof test>[1]['page']) {
+async function waitForStore(page: Page) {
   await page.waitForFunction(
     () =>
       !!(window as unknown as Record<string, unknown>).__gameStore &&
@@ -13,21 +13,21 @@ async function waitForStore(page: Parameters<typeof test>[1]['page']) {
 }
 
 // エンディングフェーズへ遷移するためのセットアップ
-async function gotoEndingPhase(
-  page: Parameters<typeof test>[1]['page'],
-  scenarioTitle: string,
-  options: { correct: boolean }
-) {
+async function gotoEndingPhase(page: Page, scenarioTitle: string, options: { correct: boolean }) {
   await page.evaluate(
-    ({ scenarioTitle, correct }) => {
-      const w = window as unknown as Record<string, { getState: () => Record<string, unknown> }>
-      const gameStore = w.__gameStore.getState() as {
+    ({ scenarioTitle, correct }: { scenarioTitle: string; correct: boolean }) => {
+      const w = window as unknown as Record<string, unknown>
+      const gameStore = (
+        w.__gameStore as { getState: () => Record<string, unknown> }
+      ).getState() as {
         startScenario: (s: unknown) => void
         setVotedSuspectId: (id: string) => void
         setMurdererEscaped: (v: boolean) => void
         setPhase: (p: string) => void
       }
-      const settingsStore = w.__settingsStore.getState() as {
+      const settingsStore = (
+        w.__settingsStore as { getState: () => Record<string, unknown> }
+      ).getState() as {
         setSkipInterlude: (v: boolean) => void
       }
       const registry = w.__scenarioRegistry as {
@@ -58,14 +58,16 @@ async function gotoEndingPhase(
 
 // 独白・敗北ダイアログのステップをクリックスルーして結果ヘッダーを表示させるヘルパー
 // EndingScreen は告白→エピローグ→結果 or 敗北ダイアログ→結果 の順に進む
-async function advanceToResultScreen(page: Parameters<typeof test>[1]['page']) {
+async function advanceToResultScreen(page: Page) {
   // 「次へ」「真相を見る」「結末を見る」ボタンが見えなくなるまでクリックを繰り返す
+  // 同名ボタンが連続するダイアログステップで即座に再レンダリングされるため、
+  // イベントベース待機は機能しない。固定待機で React の再レンダリングサイクルを確保する
   const advanceButtonPattern = /次へ|真相を見る|結末を見る/
   for (let i = 0; i < 10; i++) {
     const btn = page.getByRole('button', { name: advanceButtonPattern })
     if (!(await btn.isVisible())) break
     await btn.click()
-    await btn.waitFor({ state: 'hidden' })
+    await page.waitForTimeout(500)
   }
 }
 
@@ -102,12 +104,14 @@ test('捜査AP枯渇時に「議論へ進む」ボタンが表示される（ソ
   await waitForStore(page)
 
   await page.evaluate(() => {
-    const w = window as unknown as Record<string, { getState: () => Record<string, unknown> }>
-    const gameStore = w.__gameStore.getState() as {
+    const w = window as unknown as Record<string, unknown>
+    const gameStore = (w.__gameStore as { getState: () => Record<string, unknown> }).getState() as {
       startScenario: (s: unknown) => void
       setPhase: (p: string) => void
     }
-    const settingsStore = w.__settingsStore.getState() as {
+    const settingsStore = (
+      w.__settingsStore as { getState: () => Record<string, unknown> }
+    ).getState() as {
       setSkipInterlude: (v: boolean) => void
     }
     const scenario = (
@@ -117,7 +121,7 @@ test('捜査AP枯渇時に「議論へ進む」ボタンが表示される（ソ
     settingsStore.setSkipInterlude(true)
     gameStore.startScenario(scenario)
     // AP=0 で捜査フェーズへ: canProceed = actionsRemaining === 0 → true
-    ;(w.__gameStore as unknown as { setState: (s: Record<string, unknown>) => void }).setState({
+    ;(w.__gameStore as { setState: (s: Record<string, unknown>) => void }).setState({
       actionsRemaining: 0,
       talkActionsRemaining: 0,
     })
