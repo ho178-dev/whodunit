@@ -1,6 +1,7 @@
 // セーブスロット一覧表示コンポーネント（続きから/手動セーブの両用途に使用）
 import type { SaveSlot } from '../../types/save'
 import { PHASE_DISPLAY } from '../../constants/phaseConfig'
+import { cn } from '../../utils/cn'
 
 interface Props {
   slots: SaveSlot[]
@@ -35,27 +36,22 @@ export function SaveSlotList({
             <button
               onClick={() => isClickable && onSelect(actualIndex)}
               disabled={!isClickable}
-              className={[
+              className={cn(
                 'flex-1 border text-left px-4 py-3 font-serif transition-all duration-200',
                 isClickable
                   ? 'border-gothic-gold bg-gothic-panel hover:bg-stone-800 hover:shadow-[0_0_20px_rgba(217,119,6,0.3)] cursor-pointer'
-                  : 'border-gothic-border bg-gothic-panel/50 cursor-default opacity-50',
-              ].join(' ')}
+                  : 'border-gothic-border bg-gothic-panel/50 cursor-default opacity-50'
+              )}
             >
               {slot ? (
-                <div>
-                  <div className="flex items-center justify-between gap-2">
-                    <span className="text-gothic-gold font-display tracking-wider text-sm">
-                      {slot.scenarioTitle}
-                    </span>
-                    <span className="text-gothic-muted text-xs shrink-0">{slotLabel}</span>
-                  </div>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-gothic-muted text-xs">
-                      {PHASE_DISPLAY[slot.phase] ?? slot.phase}
-                    </span>
-                    <span className="text-gothic-border text-xs">·</span>
-                    <span className="text-gothic-muted text-xs">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-gothic-gold font-display tracking-wider text-sm truncate">
+                    {slot.scenarioTitle}
+                  </span>
+                  <span className="flex items-center gap-2 shrink-0 text-gothic-muted text-xs">
+                    <span>{PHASE_DISPLAY[slot.phase] ?? slot.phase}</span>
+                    <span className="text-gothic-border">·</span>
+                    <span>
                       {new Date(slot.savedAt).toLocaleString('ja-JP', {
                         month: 'numeric',
                         day: 'numeric',
@@ -63,8 +59,9 @@ export function SaveSlotList({
                         minute: '2-digit',
                       })}
                     </span>
-                    <span className="text-gothic-border text-xs">·</span>
-                  </div>
+                    <span className="text-gothic-border">·</span>
+                    <span>{slotLabel}</span>
+                  </span>
                 </div>
               ) : (
                 <div className="flex items-center justify-between">

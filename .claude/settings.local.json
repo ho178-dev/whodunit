@@ -68,7 +68,12 @@
       "Bash(cd /d D:/workspace/whodunit)",
       "Bash(powershell:*)",
       "Bash(D:/workspace/whodunit/node_modules/.bin/tsc --noEmit --project D:/workspace/whodunit/tsconfig.json)",
-      "Bash(git:*)"
+      "Bash(git:*)",
+      "Bash(cmd *)",
+      "Bash(/c/nvm4w/nodejs/npm.cmd run *)",
+      "Bash(export PATH=\"$PATH:/c/nvm4w/nodejs:/c/Users/hiro/AppData/Roaming/npm\")",
+      "Bash(export PATH=\"$PATH:/c/nvm4w/nodejs\")",
+      "Bash(export PATH=\"$PATH:/c/Program Files/Git/cmd\")"
     ]
   }
 }

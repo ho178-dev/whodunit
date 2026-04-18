@@ -9,18 +9,17 @@ const FIXED_ACCUSATION_DATA_2: AccusationScenarioData = {
       '……西村が犯人？ 馬鹿げている。私は22時以降ずっと書斎にいた。会長の部屋には近づいていない。マスターキーは借りているが、昨夜は使っていない。——証拠があるなら、見せてもらおうか。',
     evidence_rebuttal:
       '……それが私を追い詰める証拠になるとでも？ 甘い見立てだ。もっと核心を突くものを持ってきてほしい。',
-    wrong_link_rebuttal:
-      '（静かに笑う）……証拠と推理の繋がりが見えていない。論理が完成していなければ、私は崩れない。',
+    wrong_link_rebuttal: '（静かに笑う）……何の話をしているんだ。その推量に根拠はない',
     refutation_text:
       '探偵は証拠と推理を西村の前に並べた。積み上げられた論理は冷徹で、どこにも逃げ場がなかった。長い沈黙の後、西村の表情が静かに崩れていった。',
     breakdown_statement:
       '（西村の表情が崩れ、長い沈黙が続く）\n……そうだ。先生は全てを知っていた。15年間、少しずつ……。あの夜、先生に呼ばれた。「明日、弁護士に渡す」と言われた瞬間、全てが終わると思った。\n……絹の紐は、カーテンを留めるものだった。気がついたら、握っていた。窓から出て、外から鍵を閉めた。吹雪の中を素足で歩いた。それだけだ。',
     epilogue_text:
-      '吹雪はすでに止んでいた。廊下に残っていた足跡も、今は捜査員の靴底に踏み荒らされている。\n十五年間の嘘が積み上げた密室は、一本の絹紐とカフスボタンの落とし忘れによって、静かに開かれた。\n白河邸の長い夜は終わった——だが、失われた命は、どんな吹雪にも戻ってこない。',
+      '吹雪はすでに止んでいた。廊下に残っていた足跡も、今は捜査員の靴底に踏み荒らされている。\n十五年間の嘘が積み上げた密室は、一本の絹紐とカフスボタンの落とし忘れによって、静かに開かれた。\n白河邸の長い夜は終わった——だが、失われた命は、どんな吹雪にも戻ってこない。\n七海は父の後を継いで白河財閥の経営に専念することを決めた。藤田は10年前から自ら選んだ沈黙を、今度は真実として語る準備を始めた。吾郎は旧友の墓前に立つ日を静かに待っている。\n雪は止んだ。だが、啓一のいない山荘の朝は、どれほどの陽光が差しても、どこか白々しかった',
     escape_statement:
       '（西村は薄く笑みを浮かべる）\n……状況証拠だけで人を裁けると思っているのか？ このカフスボタンが私のものという証明は？ 雪の足跡のサイズが一致するだけでは有罪にはならない。\n——私はここを去らせてもらう。止める根拠が、あなたにはない。',
     near_defeat_evidence_text:
-      '探偵は真相に手が届く場所まで来ていた——しかし、証拠と推理の輪を繋げることができなかった。\n西村は冷静な表情のまま白河邸を後にし、吹雪がその足跡を消した。\n密室の秘密は、解かれぬまま雪の下に埋もれていった。',
+      '探偵は真相に手が届く場所まで来ていた——しかし、証拠と推理の輪を繋げることができなかった。\n西村は冷静な表情のまま白河邸を後にし、吹雪がその足跡を消した。\n密室の秘密は、解かれぬまま雪の下に埋もれていった。\n吹雪が止んだ朝、廊下の雪の足跡はまだ残っていた。あなたはそれに気づいていた——だが、指摘する最後のひとかけらが、どうしても繋がらなかった',
   },
   incorrect: {
     shirakawa_nanami: {
@@ -28,8 +27,7 @@ const FIXED_ACCUSATION_DATA_2: AccusationScenarioData = {
         '……私が父を？ 確かに遺産の件で揉めていたけれど、だからって殺すなんて……！ 美咲と同室だったことを確認してください！',
       evidence_rebuttal:
         '……それが私の犯行を示す証拠になるとでも？（眉をひそめる）関連性が見えない。',
-      wrong_link_rebuttal:
-        '（悲しそうに）証拠と推理が繋がっていない。私を犯人にしたいだけでしょう。',
+      wrong_link_rebuttal: '（悲しそうに）……何を言っているの？ 筋が通らないわ',
       defeat_statement:
         '（疲れた様子で）……父を失った悲しみの中で犯人扱いまでされて。証明できなかったでしょ。もう話すことはありません。',
     },
@@ -38,7 +36,7 @@ const FIXED_ACCUSATION_DATA_2: AccusationScenarioData = {
         '……え、僕が？ 会長には本当にお世話になっていて、殺す理由なんて……！ 藤田さんと一緒に図書室にいたことを確認してください！',
       evidence_rebuttal: '……え、それが僕に何の関係があるんですか？（困惑した表情で）',
       wrong_link_rebuttal:
-        '（焦った様子で）証拠と推理が全く繋がっていない！もっと論理的に考えてください！',
+        '（焦った様子で）え、それって本当に関係あるんですか？ 論点が違うと思います！',
       defeat_statement:
         '（息をついて）……僕が犯人じゃないってわかってもらえましたよね？ もう……本当に疲れました。',
     },
@@ -46,7 +44,7 @@ const FIXED_ACCUSATION_DATA_2: AccusationScenarioData = {
       defense_statement:
         '……私を疑っているの？ 確かに昔の関係は複雑だったけれど、今は仕事上の付き合いよ。動機がないのよ。',
       evidence_rebuttal: '……それで？ 私への疑いとどう繋がるの？（冷静に問い返す）',
-      wrong_link_rebuttal: '（静かに）証拠と結論の間に飛躍がある。感情で判断しないでください。',
+      wrong_link_rebuttal: '（静かに）論拠が不足しています。もう一度ご検討ください',
       defeat_statement:
         '（冷静に立ち上がる）……証明できなかったのね。そう——わかった。これ以上付き合う理由はないわ。',
     },
@@ -54,7 +52,7 @@ const FIXED_ACCUSATION_DATA_2: AccusationScenarioData = {
       defense_statement:
         '……わしが啓一を？ 50年来の友人だぞ！ それにこの老体に、あんな力業ができると思うか！',
       evidence_rebuttal: '……そんなもので、わしを犯人にするつもりか。（不快そうに）',
-      wrong_link_rebuttal: '（呆れた様子で）証拠と推理が繋がっとらん。わしは何もしていない。',
+      wrong_link_rebuttal: '（呆れた様子で）筋が通らんじゃろう。儂には理解できん話じゃ',
       defeat_statement:
         '（ふんと鼻を鳴らして）儂への疑いを証明できんかったじゃろ。——もうええ。これ以上付き合う気はない。',
     },
@@ -62,7 +60,7 @@ const FIXED_ACCUSATION_DATA_2: AccusationScenarioData = {
       defense_statement:
         'え……私が！？ おじいちゃんを……？ そんなこと絶対にしていません！ 七海おばさんと一緒にいたことを聞いてください！',
       evidence_rebuttal: '……そ、それが私と何の関係があるんですか！？（戸惑った様子で）',
-      wrong_link_rebuttal: '（涙声で）証拠と推理が繋がっていない……私は本当に何もしていない。',
+      wrong_link_rebuttal: '（涙声で）何それ……意味わからないよ……本当に何もしていないんだから',
       defeat_statement:
         '（涙を拭いて）……私が無実だって、少しでもわかってくれましたよね。もう休ませてください。',
     },
@@ -88,9 +86,9 @@ export const FIXED_SCENARIO_2: Scenario = {
   murderer_id: 'nishimura_kenji',
   motive: '15年にわたる横領が会長に発覚し、翌朝弁護士に証拠書類を渡されることを阻止するため。',
   truth:
-    '西村健二は白河財閥の経理部長として15年間横領を続けていた。会長がその証拠（横領帳簿のコピー）を翌朝弁護士に提出すると告げたため、深夜に合鍵で部屋へ侵入してカーテンの絹紐で絞殺した。その後、窓から脱出して外側から工具で施錠し密室を偽装。吹雪の中を歩いて書斎に戻ったが、廊下の雪の足跡とカフスボタンの落とし忘れが決定的証拠となった。',
+    '西村健二は白河財閥の経理部長として15年間横領を続けていた。会長がその証拠（横領帳簿のコピー）を翌朝弁護士に提出すると告げたため、深夜に合鍵で部屋へ侵入してカーテンの絹紐で絞殺した。その後、窓から脱出して外側から工具で施錠し密室を偽装。吹雪の中を歩いて書斎に戻ったが、被害者の部屋に落としたカフスボタンと廊下に残った雪の足跡が決定的証拠となった。',
   main_reasoning_path:
-    '① 横領帳簿コピーに対する「そんなものは存在しないはずだ」という反応が矛盾（清廉なら不存在と言い切れるはずがない）\n② 西村の「23時以降は書斎を出ていない」→ 寝室棟廊下に残る雪の足跡（サイズ・靴底パターン一致）で崩れる\n③ マスターキー所持 → 密室は窓から外側施錠により偽装\n④ 現場のカフスボタン → 西村のものと特定',
+    '① 横領帳簿コピーに対する「そんなものは存在しないはずだ」という反応が矛盾（清廉なら不存在と言い切れるはずがない）\n② 西村の「23時以降は書斎を出ていない」→ 寝室棟廊下に残る雪の足跡（サイズ・靴底パターン一致）で崩れる\n③ マスターキー所持 → 被害者の部屋への侵入が可能\n④ 窓枠の工具痕 → 殺害後に窓から脱出して外側から施錠することで密室を偽装したトリックが判明\n⑤ 現場のカフスボタン → 西村のものと特定',
   suspects: [
     {
       id: 'nishimura_kenji',
@@ -105,8 +103,7 @@ export const FIXED_SCENARIO_2: Scenario = {
       secret: '15年間にわたる横領総額は3億円を超える。証拠書類の存在を会長から直接告げられていた。',
       relationship_to_victim: '経理部長。20年来の信頼関係にあったが、実際は横領を続けていた。',
       room_id: 'room_study',
-      timeline:
-        '21:00 食後に書斎へ → 会長に呼び出され寝室棟へ向かう（時刻を明かさない） → 23:30 書斎に戻ったと主張',
+      timeline: '21:00 食後に書斎へ → 22:00以降ずっと書斎で資料整理（本人主張）→ 翌朝',
       timeline_has_contradiction: true,
       investigation_dialog: {
         greeting:
@@ -120,9 +117,9 @@ export const FIXED_SCENARIO_2: Scenario = {
         ],
       },
       default_wrong_pursuit_response:
-        'その証拠と私の行動を結びつけるのは論理の飛躍があるように思います。',
+        '……話が繋がっていないように思えますが。もう一度整理してみていただけますか',
       confession_statement:
-        '……（目を閉じ、深く息を吐く）15年だ。15年間、誰にも知られずにやり遂げてきた。会長に呼ばれたあの夜、全ての計画が崩れていくのを感じた。翌朝、あの帳簿を弁護士に渡されたら終わりだった。——だから、止めるしかなかった。それだけのことだ。',
+        '……（目を閉じ、深く息を吐く）15年だ。15年間、誰にも気づかれずに続けてきた。最初はほんの出来心だった。会社の金を、少しだけ——。それが積み重なって、引き返せなくなった。\n会長は優しい方だった。20年、信じてくれた。その信頼を裏切り続けた罪悪感が、毎朝の挨拶のたびに胸を刺した。\nあの夜、呼ばれて——「明日、弁護士に渡す」と言われた瞬間、視界が暗くなった。カーテンの紐が目に入った。気がついたら、握っていた。\n……私は、もう15年前から死んでいたのかもしれない',
       evidence_reactions: {
         silk_cord: {
           reaction: '……絹の紐ですか。カーテンの飾り紐ですね。私には関係ない。',
@@ -132,8 +129,7 @@ export const FIXED_SCENARIO_2: Scenario = {
           reaction: '……それは……どこから出てきたんですか。そんなものは存在しないはずだ。',
           behavior: 'nervous',
           contradicts_statement_index: 4,
-          wrong_testimony_response:
-            'その証言と帳簿内容の矛盾を直接示すのは難しいのではありませんか。',
+          wrong_testimony_response: '……帳簿のどこに、私への矛盾が書いてあるというんですか',
           pursuit_questions: [
             {
               id: 'nishimura_pq_ledger_1',
@@ -170,7 +166,8 @@ export const FIXED_SCENARIO_2: Scenario = {
           reaction: '……雪の足跡？ 廊下を歩いた人間は複数います。なぜ私のものと断定できるのですか。',
           behavior: 'nervous',
           contradicts_statement_index: 1,
-          wrong_testimony_response: '足跡の位置と私の証言を結びつけるのは飛躍があります。',
+          wrong_testimony_response:
+            '足跡が書斎方向から来ているからといって、私のものとは限りませんよ',
           pursuit_questions: [
             {
               id: 'nishimura_pq_mud_1',
@@ -187,10 +184,30 @@ export const FIXED_SCENARIO_2: Scenario = {
               behavior: 'nervous',
             },
           ],
+          bystander_reactions: [
+            {
+              suspectId: 'shirakawa_nanami',
+              text: '（立ち上がる）……西村さん、雪の足跡は父の部屋に向かっていた。嘘をついていたのね',
+            },
+            {
+              suspectId: 'tanaka_goro',
+              text: '（低い声で）西村……お前が書斎から出ていたなら、行き先はひとつしかないじゃろう',
+            },
+          ],
         },
         cufflink_gold: {
           reaction: '……金のカフスボタン？ 似たものを持っている方は多いでしょう。',
           behavior: 'evasive',
+          bystander_reactions: [
+            {
+              suspectId: 'shirakawa_nanami',
+              text: '（青ざめて）このカフスボタン……父が誕生日に西村さんに贈ったものと同じデザインです',
+            },
+            {
+              suspectId: 'fujita_nao',
+              text: '（冷静に）「N.K.」は西村健二さんのイニシャルを逆順にしたもの——無視できない物証です',
+            },
+          ],
         },
         victim_note: {
           reaction: '……会長のメモですか。筆跡は間違いなく会長のものですね。',
@@ -248,8 +265,7 @@ export const FIXED_SCENARIO_2: Scenario = {
           'マスターキーは西村さんが持っていると聞いています。彼だけが自由に部屋を出入りできます。',
         ],
       },
-      default_wrong_pursuit_response:
-        'その証拠が私の行動と結びつくとは思えません。もう少し論理的に考えてください。',
+      default_wrong_pursuit_response: '……どう結びつくのか、私には見えませんが',
       evidence_reactions: {
         silk_cord: {
           reaction: '……カーテンの紐ですね。父の部屋のものでしょうか。',
@@ -259,7 +275,7 @@ export const FIXED_SCENARIO_2: Scenario = {
           reaction: '……これが父の言っていた証拠書類ですか。やはり横領は本当だったんですね。',
           behavior: 'calm',
           contradicts_statement_index: 3,
-          wrong_testimony_response: 'その証言と帳簿の内容を私と結びつけるのは無理があります。',
+          wrong_testimony_response: '……その言葉と帳簿の内容——私の行動に結びつく道筋が見えません',
           pursuit_questions: [
             {
               id: 'nanami_pq_ledger_1',
@@ -343,8 +359,7 @@ export const FIXED_SCENARIO_2: Scenario = {
           '22時以降は自分の部屋に戻りました。廊下で誰かが急いで歩く足音が聞こえた気がします。',
         ],
       },
-      default_wrong_pursuit_response:
-        'その証拠と私の行動の関連性が見えません。別の視点から考えてみてください。',
+      default_wrong_pursuit_response: 'え、それって僕と関係あるんですか？ よく分からないんですが',
       evidence_reactions: {
         silk_cord: {
           reaction: 'カーテンの紐で……。会長がそんな形で逝かれるとは。',
@@ -362,7 +377,8 @@ export const FIXED_SCENARIO_2: Scenario = {
           reaction: '雪の足跡……廊下に。22時以降に誰かが外に出たということでしょうか。',
           behavior: 'calm',
           contradicts_statement_index: 4,
-          wrong_testimony_response: 'この足跡と私が聞いた足音が同一人物かどうかは分かりません。',
+          wrong_testimony_response:
+            '足音を聞いたことと足跡が繋がる、ということですか？ 私には分かりかねます',
           pursuit_questions: [
             {
               id: 'ozawa_pq_mud_1',
@@ -439,8 +455,7 @@ export const FIXED_SCENARIO_2: Scenario = {
           '22時以降、自室に戻りました。吹雪の音以外は特に聞こえませんでした。',
         ],
       },
-      default_wrong_pursuit_response:
-        '法律家として申し上げますが、その推論には論理的な飛躍があります。',
+      default_wrong_pursuit_response: '論拠が不十分です。別の観点からご検討ください',
       evidence_reactions: {
         silk_cord: {
           reaction: '……カーテンの飾り紐が凶器に。密室での犯行とは、計画的ですね。',
@@ -451,7 +466,8 @@ export const FIXED_SCENARIO_2: Scenario = {
             'これが横領の証拠書類ですか。私も内容の確認を依頼されていましたが……実物は初めて見ます。',
           behavior: 'calm',
           contradicts_statement_index: 2,
-          wrong_testimony_response: 'その証言と書類の内容が矛盾するとは思えませんが。',
+          wrong_testimony_response:
+            'その発言と書類が矛盾する、とはどういう意味ですか。法的には別問題です',
           pursuit_questions: [
             {
               id: 'fujita_pq_ledger_1',
@@ -540,7 +556,7 @@ export const FIXED_SCENARIO_2: Scenario = {
         ],
       },
       default_wrong_pursuit_response:
-        'わしにはそんな細かいことは分からんが、それが証拠になるのかね。',
+        'わしにはそんな細かいことは分からんが、そりゃ筋が通らん話じゃろう',
       evidence_reactions: {
         silk_cord: {
           reaction: '紐で……。啓一め、苦しかっただろう。絶対に許さんぞ、犯人めが。',
@@ -567,7 +583,7 @@ export const FIXED_SCENARIO_2: Scenario = {
           behavior: 'calm',
           contradicts_statement_index: 4,
           wrong_testimony_response:
-            '啓一が横領を知らなかったとは言っておらん。今日知ったのはわしだという話だ。',
+            '啓一が横領を知らなかったとは言っておらんぞ。今日知ったのはわし自身のことじゃ',
           pursuit_questions: [
             {
               id: 'tanaka_pq_note_1',
@@ -637,7 +653,7 @@ export const FIXED_SCENARIO_2: Scenario = {
           'おじいちゃんが「誰かを信用できなくなってしまった」と言っていたのを聞いてしまいました。',
         ],
       },
-      default_wrong_pursuit_response: 'えっと……それが私と関係あるんですか？ よく分からないです。',
+      default_wrong_pursuit_response: 'えっと……それが私と関係あるんですか？ よく分からないです',
       evidence_reactions: {
         silk_cord: { reaction: 'これで……おじいちゃんを……。（涙をこらえる）', behavior: 'sad' },
         ledger_copy: {
@@ -669,7 +685,8 @@ export const FIXED_SCENARIO_2: Scenario = {
           reaction: '入金明細……数字がいっぱい。これって悪いことに使われたお金ですか？',
           behavior: 'calm',
           contradicts_statement_index: 4,
-          wrong_testimony_response: 'その証言とこの明細書の関係がよく分かりません。',
+          wrong_testimony_response:
+            'えっと……その言葉と、この書類、どう関係するんですか。分からないです',
           pursuit_questions: [
             {
               id: 'kagawa_pq_receipt_1',

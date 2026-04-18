@@ -5,7 +5,7 @@ import { resolveMansionAsset } from '../../services/assetResolver'
 
 // 事件概要（タイトル・あらすじ・舞台・被害者）を表示し、捜査フェーズへ誘導するコンポーネント
 export function ScenarioBriefing() {
-  const { scenario, setPhase } = useGameStore()
+  const { scenario, setPhase, isTutorialScenario } = useGameStore()
   if (!scenario) return null
 
   return (
@@ -51,14 +51,14 @@ export function ScenarioBriefing() {
         {/* ボタン行 */}
         <div className="flex items-center justify-between flex-shrink-0">
           <button
-            onClick={() => setPhase('scenario_select')}
-            className="border border-gothic-border text-gothic-muted font-serif text-xs py-2 px-6 hover:border-gothic-accent hover:text-gothic-text transition-all"
+            onClick={() => setPhase(isTutorialScenario ? 'tutorial' : 'scenario_select')}
+            className="game-button border border-gothic-border bg-gothic-panel text-gothic-muted font-serif text-xs py-2 px-6 hover:border-gothic-accent hover:text-gothic-text transition-all"
           >
             ← 戻る
           </button>
           <button
             onClick={() => setPhase('investigation')}
-            className="border border-gothic-gold bg-gothic-panel/80 hover:bg-stone-800 text-gothic-gold font-display tracking-widest text-xs py-3 px-10 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
+            className="game-button border border-gothic-gold bg-gothic-panel hover:bg-stone-800 text-gothic-gold font-display tracking-widest text-xs py-3 px-10 transition-all hover:shadow-[0_0_20px_rgba(217,119,6,0.3)]"
           >
             捜査を開始する →
           </button>

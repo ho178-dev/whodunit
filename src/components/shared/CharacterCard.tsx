@@ -3,6 +3,7 @@ import { cn } from '../../utils/cn'
 import { useCharacterAsset } from '../../hooks/useAsset'
 import { assetUrl } from '../../utils/assetUrl'
 import type { Suspect } from '../../types/scenario'
+import { audioManager } from '../../services/audioManager'
 import { PixelImageWithFallback } from './PixelImage'
 import { PIXEL_ART_CONFIG } from '../../constants/pixelArtConfig'
 
@@ -25,7 +26,10 @@ export function CharacterCard({ suspect, selected, onClick, portrait }: Characte
       // hover:scale-105 を削除し、代わりに額縁にゴールド発光エフェクトを適用する
       <div
         className={cn('flex flex-col items-center cursor-pointer transition-all duration-200')}
-        onClick={onClick}
+        onClick={() => {
+          audioManager.playSe('click')
+          onClick?.()
+        }}
       >
         {/* 額縁風キャラクター画像 */}
         <div

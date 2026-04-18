@@ -1,5 +1,5 @@
 // タイトル画面。シナリオ選択・続きから・遊び方への起動経路を提供するコンポーネント
-import { useState } from 'react'
+import { useState, useRef } from 'react'
 import { useGameStore } from '../../stores/gameStore'
 import { getAllSlots, deleteSlot } from '../../utils/saveLoad'
 import { SaveSlotList } from '../shared/SaveSlotList'
@@ -26,6 +26,8 @@ export function TitleScreen() {
   const { setPhase, loadSaveSlot, startScenario } = useGameStore()
   const [showContinue, setShowContinue] = useState(false)
   const [slots, setSlots] = useState<SaveSlot[]>(() => getAllSlots())
+  const [menuHeight, setMenuHeight] = useState<number | undefined>()
+  const menuRef = useRef<HTMLDivElement>(null)
 
   // useState の初期化関数で1度だけランダムIDを決定し、以降は変化させない
   const [randomMansionSrc] = useState<string>(() => {
@@ -79,10 +81,11 @@ export function TitleScreen() {
 
         {/* 続きから（セーブデータがある場合のみ表示） */}
         {!showContinue ? (
-          <div className="space-y-4">
+          <div ref={menuRef} className="space-y-4">
             {hasSave && (
               <button
                 onClick={() => {
+                  setMenuHeight(menuRef.current?.offsetHeight)
                   setSlots(getAllSlots())
                   setShowContinue(true)
                 }}
@@ -127,14 +130,16 @@ export function TitleScreen() {
             )}
           </div>
         ) : (
-          <div>
-            <p className="text-gothic-muted font-serif text-xs tracking-widest mb-4">
-              ― セーブデータを選んでください ―
-            </p>
-            <SaveSlotList slots={slots} onSelect={handleSelectSlot} onDelete={handleDeleteSlot} />
+          <div
+            style={menuHeight !== undefined ? { height: menuHeight } : undefined}
+            className="flex flex-col gap-2 overflow-hidden"
+          >
+            <div className="flex-1 overflow-y-auto game-scrollbar min-h-0">
+              <SaveSlotList slots={slots} onSelect={handleSelectSlot} onDelete={handleDeleteSlot} />
+            </div>
             <button
               onClick={() => setShowContinue(false)}
-              className="game-button w-full mt-4 border border-gothic-border bg-gothic-panel/80 text-gothic-muted font-serif text-xs py-2 px-8 transition-all duration-200 hover:border-gothic-accent"
+              className="game-button shrink-0 w-full border border-gothic-border bg-gothic-panel/80 text-gothic-muted font-serif text-xs py-2 px-8 transition-all duration-200 hover:border-gothic-accent"
             >
               戻る
             </button>

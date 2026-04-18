@@ -14,12 +14,12 @@ interface PanelButtonProps {
 
 const variantClass: Record<Variant, string> = {
   primary:
-    'border-gothic-accent bg-gothic-panel hover:bg-stone-800 hover:border-gothic-gold text-gothic-text shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-2px_0_rgba(0,0,0,0.35)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-2px_0_rgba(0,0,0,0.35),0_0_10px_rgba(217,119,6,0.25)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.55)]',
+    'border-gothic-border bg-gothic-panel hover:bg-stone-800 hover:border-gothic-gold text-gothic-text shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-2px_0_rgba(0,0,0,0.35)] hover:shadow-[inset_0_1px_0_rgba(255,255,255,0.12),inset_0_-2px_0_rgba(0,0,0,0.35),0_0_10px_rgba(217,119,6,0.25)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.55)]',
   secondary:
-    'border-gothic-border bg-gothic-panel hover:border-gothic-accent hover:bg-stone-800/60 text-gothic-muted hover:text-gothic-text shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-2px_0_rgba(0,0,0,0.3)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]',
+    'border-gothic-border bg-gothic-panel hover:border-gothic-accent hover:bg-stone-800 text-gothic-muted hover:text-gothic-text shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-2px_0_rgba(0,0,0,0.3)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]',
   danger:
     'border-red-800 bg-gothic-panel hover:bg-red-950/30 hover:border-red-600 text-red-400 shadow-[inset_0_1px_0_rgba(255,255,255,0.06),inset_0_-2px_0_rgba(0,0,0,0.3)] active:shadow-[inset_0_2px_4px_rgba(0,0,0,0.5)]',
-  glow: 'border-gothic-gold bg-gothic-panel text-gothic-gold animate-glow-pulse shadow-[0_0_8px_rgba(217,119,6,0.3)]',
+  glow: 'border-gothic-gold bg-gothic-panel text-gothic-gold animate-glow-pulse shadow-[0_0_8px_rgba(217,119,6,0.3)] hover:bg-stone-800 hover:shadow-[0_0_20px_rgba(217,119,6,0.5)]',
   dimmed: 'border-gothic-border/30 bg-gothic-panel text-gothic-muted/40 hover:text-gothic-muted/60',
 }
 

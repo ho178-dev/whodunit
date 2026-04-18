@@ -4,7 +4,7 @@ import { cn } from '../../utils/cn'
 import type { Suspect } from '../../types/scenario'
 
 const arrowClass =
-  'shrink-0 border border-gothic-border/60 bg-gothic-panel/80 backdrop-blur-sm hover:border-gothic-accent text-gothic-muted hover:text-gothic-gold w-8 h-8 flex items-center justify-center transition-all'
+  'game-button shrink-0 border border-gothic-border bg-gothic-panel hover:border-gothic-accent text-gothic-muted hover:text-gothic-gold w-8 h-8 flex items-center justify-center transition-all'
 
 interface CharacterSliderProps {
   suspects: Suspect[]
