@@ -14,7 +14,7 @@ describe('固定シナリオ論理整合性チェック', () => {
     expect(() => validateScenario(FIXED_SCENARIO_2)).not.toThrow()
   })
 
-  it('fixedScenario3 (月夜の惨劇) が validateScenario を通過する', () => {
+  it('fixedScenario3 (月光の審判) が validateScenario を通過する', () => {
     expect(() => validateScenario(FIXED_SCENARIO_3)).not.toThrow()
   })
 })
