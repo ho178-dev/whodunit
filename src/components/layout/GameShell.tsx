@@ -165,7 +165,7 @@ export function GameShell() {
               {phase === 'title' && !isTrialMode() && (
                 <button
                   onClick={() => setPhase('api_key_input')}
-                  className="flex-1 border border-gothic-gold/60 bg-gothic-bg/80 text-gothic-gold font-serif text-xs px-2 py-1.5 hover:border-gothic-gold hover:bg-stone-900 transition-all duration-200"
+                  className="game-button flex-1 border border-gothic-gold/60 bg-gothic-panel text-gothic-gold font-serif text-xs px-2 py-1.5 hover:border-gothic-gold hover:bg-stone-900 transition-all duration-200"
                 >
                   AI生成
                 </button>
@@ -173,7 +173,7 @@ export function GameShell() {
               {/* 設定ボタン: 全フェーズで表示（セーブ可否はSettingsModal内で制御） */}
               <button
                 onClick={() => setShowSaveModal(true)}
-                className="border border-gothic-border bg-gothic-bg/80 text-gothic-muted font-serif text-xs px-2.5 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200 ml-auto"
+                className="game-button border border-gothic-border bg-gothic-panel text-gothic-muted font-serif text-xs px-2.5 py-1.5 hover:border-gothic-gold hover:text-gothic-gold transition-all duration-200 ml-auto"
                 title="設定"
               >
                 ⚙

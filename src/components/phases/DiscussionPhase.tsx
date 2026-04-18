@@ -21,6 +21,7 @@ import { PanelButton } from '../layout/PanelButton'
 import { NotesIcon } from '../shared/Icons'
 import { resolveMansionAsset } from '../../services/assetResolver'
 import { DISCUSSION_CONFRONT_ACTIONS } from '../../constants/gameConfig'
+import { audioManager } from '../../services/audioManager'
 import type { BystanderReaction } from '../../types/scenario'
 
 // 議論フェーズのメインコンポーネント
@@ -443,6 +444,7 @@ export function DiscussionPhase() {
                 <button
                   onClick={(e) => {
                     e.stopPropagation()
+                    audioManager.playSe('click')
                     handleAskPursuit(nextPursuitQuestion.questionId)
                   }}
                   className="absolute bottom-2 right-3 text-gothic-muted text-xs font-serif hover:text-gothic-gold transition-colors"
